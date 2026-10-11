@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -7,7 +7,15 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/dist", "!**/node_modules", "!**/.claude", "!**/.agents"]
+		"includes": [
+			"**",
+			"!**/dist",
+			"!**/node_modules",
+			"!**/.claude",
+			"!**/.agents",
+			"!**/.turbo",
+			"!**/.wrangler"
+		]
 	},
 	"formatter": {
 		"enabled": true,
@@ -73,7 +81,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/**"],
+			"includes": ["apps/*/src/**", "packages/*/src/**"],
 			"linter": {
 				"rules": {
 					"style": {
@@ -90,7 +98,7 @@
 			}
 		},
 		{
-			"includes": ["scripts/**"],
+			"includes": ["**/scripts/**"],
 			"linter": {
 				"rules": {
 					"suspicious": {

@@ -1,0 +1,13 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"useDefineForClassFields": true,
+		"jsx": "react-jsx",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["src"]
+}

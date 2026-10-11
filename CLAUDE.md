@@ -7,9 +7,9 @@ agent does most of the typing. Two ideas drive every choice here:
    reimplemented per project" concern (forms, validation, toasts, date
    formatting, class merging, HTTP, server-state caching, accessible
    dialogs/dropdowns) has a library already installed — see
-   [`LIBRARIES.md`](LIBRARIES.md) before writing a new utility.
+   [`LIBRARIES.md`](apps/web/LIBRARIES.md) before writing a new utility.
 2. **Convention is enforced mechanically, not by memory.** Folder structure
-   (Feature-Sliced Design, see [`ARCHITECTURE.md`](ARCHITECTURE.md)) and
+   (Feature-Sliced Design, see [`ARCHITECTURE.md`](apps/web/ARCHITECTURE.md)) and
    code style (Biome) are checked by a `pre-commit` hook (`lefthook`) that
    **blocks the commit** on violation. You don't need to remember the
    rules — if you get them wrong, the commit simply won't go through and
@@ -37,9 +37,9 @@ pass.
 
 ## More docs
 
-- [`ARCHITECTURE.md`](ARCHITECTURE.md) — Feature-Sliced Design layers, import
+- [`ARCHITECTURE.md`](apps/web/ARCHITECTURE.md) — Feature-Sliced Design layers, import
   rules, and the scaffolding generator
-- [`LIBRARIES.md`](LIBRARIES.md) — what's already installed vs. add-when-needed
+- [`LIBRARIES.md`](apps/web/LIBRARIES.md) — what's already installed vs. add-when-needed
 - [`AI_SKILLS.md`](AI_SKILLS.md) — official agent skills wired into this repo
   (shadcn, es-toolkit, TanStack) and what's deliberately *not* configured (MCP)
 
@@ -60,5 +60,5 @@ If a hook fails, fix the reported issue and recommit — don't bypass with
 - `src/**` uses **named exports only** (`noDefaultExport`) and **kebab-case
   file names** (`useFilenamingConvention`).
 - `knip` fails on unused files and dependencies; unused exports are warnings.
-  `src/shared/ui/**` (the shadcn kit) is exempt from export checks, and
-  `zustand`/`usehooks-ts` are kept installed on purpose (see `LIBRARIES.md`).
+  `apps/web/src/shared/ui/**` (the shadcn kit) is exempt from export checks, and
+  `zustand`/`usehooks-ts` are kept installed on purpose (see `apps/web/LIBRARIES.md`).
