@@ -10,6 +10,14 @@
 			"entry": ["steiger.config.js"],
 			"project": ["src/**/*.{ts,tsx,css}", "scripts/**/*.ts"],
 			"ignoreDependencies": ["usehooks-ts", "zustand"]
+		},
+		"apps/api": {
+			"entry": ["test/**/*.ts"],
+			"project": ["src/**/*.ts", "test/**/*.ts"],
+			"ignoreDependencies": ["cloudflare"]
+		},
+		"packages/contract": {
+			"project": ["src/**/*.ts"]
 		}
 	},
 	"ignoreIssues": {

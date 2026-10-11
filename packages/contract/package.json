@@ -1,0 +1,18 @@
+{
+	"name": "@app/contract",
+	"type": "module",
+	"private": true,
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@orpc/contract": "^1.15.5",
+		"zod": "^4.6.5"
+	},
+	"devDependencies": {
+		"typescript": "^7.0.2"
+	}
+}

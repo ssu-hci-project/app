@@ -1,0 +1,35 @@
+{
+	"name": "@app/api",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "wrangler d1 migrations apply DB --local && wrangler dev --port 8787",
+		"build": "wrangler deploy --dry-run --outdir dist",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"cf-typegen": "wrangler types",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "wrangler d1 migrations apply DB --local",
+		"db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+		"db:seed": "wrangler d1 execute DB --local --file seed.sql",
+		"db:studio": "drizzle-kit studio"
+	},
+	"dependencies": {
+		"@app/contract": "workspace:*",
+		"@orpc/openapi": "^1.15.5",
+		"@orpc/server": "^1.15.5",
+		"@orpc/zod": "^1.15.5",
+		"drizzle-orm": "^0.45.4",
+		"hono": "^4.13.13",
+		"zod": "^4.6.5"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-plugin": "^1.4.0",
+		"@orpc/client": "^1.15.5",
+		"@orpc/contract": "^1.15.5",
+		"drizzle-kit": "^0.31.11",
+		"typescript": "^7.0.2",
+		"vitest": "^5.0.3",
+		"wrangler": "^4.149.0"
+	}
+}

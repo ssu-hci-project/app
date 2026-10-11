@@ -14,7 +14,9 @@
 			"!**/.claude",
 			"!**/.agents",
 			"!**/.turbo",
-			"!**/.wrangler"
+			"!**/.wrangler",
+			"!**/worker-configuration.d.ts",
+			"!**/migrations"
 		]
 	},
 	"formatter": {
@@ -93,6 +95,16 @@
 								"requireAscii": true
 							}
 						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["apps/api/src/index.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noDefaultExport": "off"
 					}
 				}
 			}

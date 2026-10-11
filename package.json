@@ -16,9 +16,13 @@
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
 		"knip": "knip",
-		"check": "bun run lint && turbo run typecheck arch:lint && bun run knip",
+		"check": "bun run lint && turbo run typecheck arch:lint test && bun run knip",
 		"new:slice": "bun run --filter @app/web new:slice",
-		"prepare": "lefthook install"
+		"prepare": "lefthook install",
+		"test": "turbo run test",
+		"db:generate": "bun run --filter @app/api db:generate",
+		"db:migrate": "bun run --filter @app/api db:migrate",
+		"db:seed": "bun run --filter @app/api db:seed"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",

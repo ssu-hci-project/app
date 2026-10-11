@@ -1,0 +1,17 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "app",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-01",
+	"observability": {
+		"enabled": true
+	},
+	"d1_databases": [
+		{
+			// No database_id: wrangler creates the D1 database on first deploy.
+			"binding": "DB",
+			"database_name": "app-db",
+			"migrations_dir": "migrations"
+		}
+	]
+}
