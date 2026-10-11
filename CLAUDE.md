@@ -23,7 +23,7 @@ mind.
 | Durable — keep unless deliberately changed | Placeholder — expected to be replaced |
 | --- | --- |
 | The tooling (Bun, Turborepo, Biome, Steiger, knip, lefthook, Vitest) | The sample `todo` domain, end to end (contract, router, table, test, web slices) |
-| Contract-first API (`packages/contract` → `apps/api` → `apps/web`) | Names: Worker `app`, D1 `app-db`, page title `App`, the home screen and its about dialog |
+| Contract-first API (`packages/contract` → `apps/api` → `apps/web`) | The page title `App`, the home screen and its about dialog |
 | FSD layering and the lint rules that enforce it | `apps/api/seed.sql` rows and the sample migration |
 | One Worker serving the SPA and `/api` | Anything listed as "currently" or "e.g." in a doc |
 

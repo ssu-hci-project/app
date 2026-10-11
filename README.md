@@ -16,11 +16,11 @@ Deploy to Cloudflare (one Worker serves both the app and the API):
 
 ```bash
 bunx wrangler login   # once
-bun run deploy
+bun run deploy        # Worker `hci`, D1 `hci-db` (apps/api/wrangler.jsonc)
 ```
 
-This is an **initial template**: the `todo` feature, the names (`app`,
-`app-db`) and the home screen are placeholders meant to be replaced. See
+This is an **initial template**: the `todo` feature, the page title and the
+home screen are placeholders meant to be replaced. See
 [Starting the real project](CLAUDE.md#starting-the-real-project) in
 [`CLAUDE.md`](CLAUDE.md), which also covers the layout, commands and
 conventions.

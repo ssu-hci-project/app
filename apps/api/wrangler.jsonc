@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "app",
+	"name": "hci",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-10-01",
 	// apps/web's build output, served by this same Worker. Unknown paths fall
@@ -17,7 +17,7 @@
 		{
 			// No database_id: wrangler creates the D1 database on first deploy.
 			"binding": "DB",
-			"database_name": "app-db",
+			"database_name": "hci-db",
 			"migrations_dir": "migrations"
 		}
 	]
