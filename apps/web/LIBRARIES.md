@@ -1,33 +1,32 @@
-# Reach for a library before writing a helper
+# 헬퍼를 쓰기 전에 라이브러리부터
 
-| Need                                     | Use                                                    |
-| ----------------------------------------- | -------------------------------------------------------- |
-| forms + validation                        | `react-hook-form` + `zod` (`@hookform/resolvers/zod`)   |
-| server state (fetch/cache/mutate)         | `@tanstack/react-query` — never `useEffect` + `useState` for a fetch |
-| client/UI state                           | `zustand`                                                |
-| API calls                                 | `orpc` from `shared/api` (`orpc.<ns>.<proc>.queryOptions()` etc.) — typed from `@app/contract`; never a hand-written `fetch` |
-| toasts                                    | `sonner`'s `toast(...)` — `<Toaster />` is already mounted in `app/providers` |
-| dates                                     | `dayjs`, imported from `shared/lib` (plugins and locale configured in `shared/lib/dayjs.ts`) |
-| conditional/merged Tailwind classes       | `cn()` (`shared/lib/cn.ts` — clsx + tailwind-merge)      |
-| Tailwind style variants (button size/variant, etc.) | `class-variance-authority`                    |
-| debounce/throttle, groupBy/pick/omit, etc. | `es-toolkit`. Find the function with the `recommend` skill; check its signature in `node_modules/es-toolkit/dist/<category>/<fn>.d.ts` (JSDoc + examples, matches the installed version) |
-| common hooks (useLocalStorage, useDebounce, useMediaQuery, useClickOutside) | `usehooks-ts`                     |
-| accessible dialog/dropdown/tooltip/select/etc.        | `bunx shadcn@latest add <component>` — generates into `shared/ui`, built on Base UI. Never hand-roll a focus-trapped modal or a custom dropdown |
-| icons                                     | `lucide-react` (already shadcn's own default)            |
-| env vars                                  | none needed today; if you add a `VITE_*` var, create `shared/config/env.ts` with a zod schema and read it only from there |
+| 필요한 것 | 사용할 것 |
+| --- | --- |
+| 폼 + 검증 | `react-hook-form` + `zod` (`@hookform/resolvers/zod`) |
+| 서버 상태 (조회/캐시/변경) | `@tanstack/react-query`. 조회에 `useEffect` + `useState`를 쓰지 않음 |
+| 클라이언트/UI 상태 | `zustand` |
+| API 호출 | `shared/api`의 `orpc` (`orpc.<ns>.<proc>.queryOptions()` 등). 타입은 `@app/contract`에서. 직접 쓴 `fetch` 금지 |
+| 토스트 | `sonner`의 `toast(...)`. `<Toaster />`는 이미 `app/providers`에 마운트됨 |
+| 날짜 | `shared/lib`에서 import한 `dayjs` (플러그인과 로케일은 `shared/lib/dayjs.ts`에서 설정) |
+| 조건부/병합 Tailwind 클래스 | `cn()` (`shared/lib/cn.ts`, clsx + tailwind-merge) |
+| Tailwind 스타일 변형 (버튼 size/variant 등) | `class-variance-authority` |
+| debounce/throttle, groupBy/pick/omit 등 | `es-toolkit`. 함수는 `recommend` 스킬로 찾고, 시그니처는 `node_modules/es-toolkit/dist/<category>/<fn>.d.ts`에서 확인 (JSDoc + 예제, 설치된 버전과 일치) |
+| 공용 훅 (useLocalStorage, useDebounce, useMediaQuery, useClickOutside) | `usehooks-ts` |
+| 접근성 있는 dialog/dropdown/tooltip/select 등 | `bunx shadcn@latest add <component>`. Base UI 기반으로 `shared/ui`에 생성. 포커스 트랩 모달이나 커스텀 드롭다운을 직접 만들지 않음 |
+| 아이콘 | `lucide-react` (shadcn의 기본값) |
+| 환경 변수 | 현재는 없음. `VITE_*` 변수를 추가하면 zod 스키마로 `shared/config/env.ts`를 만들고 그곳에서만 읽음 |
 
-If you're about to write a `debounce`, a manual fetch-loading-error
-`useState` trio, a custom toast component, a hand-rolled classname
-concatenation, or your own accessible modal/dropdown — stop, one of the
-above already does it.
+`debounce`, 직접 짠 fetch-loading-error `useState` 3종 세트, 커스텀 토스트
+컴포넌트, 손으로 이어 붙인 className, 직접 만든 접근성 모달/드롭다운을 쓰려는
+참이라면 멈추세요. 위 라이브러리가 이미 해줍니다.
 
-## Add when actually needed (not installed by default)
+## 실제로 필요할 때 추가 (기본 설치 안 됨)
 
-| Need                       | Use                    | Notes |
-|----------------------------| ------------------------ | ------- |
-| animation/transitions      | `motion` (ex-framer-motion) | heavier than a prototype usually needs — reach for it only when a feature genuinely needs layout/gesture animation ||
-| date picker UI             | `react-day-picker` v9   | pair with `react-hook-form` via `Controller`; pulls in `date-fns` alongside our `dayjs`, that's fine |
-| drag-and-drop reordering   | `@dnd-kit/react`        | accessible by default |
-| data table                 | `@tanstack/react-table` | fits the existing TanStack ecosystem |
-| long list virtualization   | `@tanstack/react-virtual` | only once a list is actually long |
-| command palette (⌘K)       | `cmdk`                  | still the dominant choice as of 2026 |
+| 필요한 것 | 사용할 것 | 비고 |
+| --- | --- | --- |
+| 애니메이션/전환 | `motion` (구 framer-motion) | 프로토타입에는 보통 과함. 레이아웃/제스처 애니메이션이 정말 필요할 때만 |
+| 날짜 선택 UI | `react-day-picker` v9 | `react-hook-form`과 `Controller`로 연결. `dayjs`와 별도로 `date-fns`가 따라오지만 괜찮음 |
+| 드래그 앤 드롭 정렬 | `@dnd-kit/react` | 기본적으로 접근성 지원 |
+| 데이터 테이블 | `@tanstack/react-table` | 기존 TanStack 생태계와 맞음 |
+| 긴 목록 가상화 | `@tanstack/react-virtual` | 목록이 실제로 길어졌을 때만 |
+| 커맨드 팔레트 (⌘K) | `cmdk` | |

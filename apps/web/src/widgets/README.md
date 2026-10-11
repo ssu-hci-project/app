@@ -1,12 +1,12 @@
 # widgets
 
-Large, self-contained blocks that combine several `features`/`entities` into
-one section (a navbar, a dashboard panel, the sample `todo-board`). The point
-is the **isolation boundary**, not reuse count — a widget used on one page is
-still worth it if it bundles enough moving parts.
+여러 `features`/`entities`를 하나의 영역으로 묶은 크고 독립적인 블록입니다
+(내비게이션 바, 대시보드 패널, 샘플 `todo-board`). 핵심은 재사용 횟수가 아니라
+**격리 경계**입니다. 한 페이지에서만 쓰여도 움직이는 부분이 충분히 많으면
+위젯으로 분리할 가치가 있습니다.
 
-## Segments
+## 세그먼트
 
-- `ui/` — the composed component.
-- `model/` — only to coordinate state across what it renders (e.g. a filter
-  shared by a list and a form). Most widgets don't need it.
+- `ui/`: 조합된 컴포넌트.
+- `model/`: 렌더링하는 것들 사이의 상태를 조율할 때만(예: 목록과 폼이 공유하는
+  필터). 대부분의 위젯에는 필요 없습니다.
