@@ -20,7 +20,7 @@ bun run deploy        # Worker `hci`, D1 `hci-db` (apps/api/wrangler.jsonc)
 ```
 
 This is an **initial template**: the `todo` feature, the page title and the
-home screen are placeholders meant to be replaced. See
-[Starting the real project](CLAUDE.md#starting-the-real-project) in
-[`CLAUDE.md`](CLAUDE.md), which also covers the layout, commands and
-conventions.
+home screen are placeholders meant to be replaced — see
+[`.claude/skills/start-project/SKILL.md`](.claude/skills/start-project/SKILL.md)
+(`/start-project` in Claude Code). Layout, commands and conventions are in
+[`AGENTS.md`](AGENTS.md).

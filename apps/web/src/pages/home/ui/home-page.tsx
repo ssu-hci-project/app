@@ -47,7 +47,7 @@ export const HomePage: ActivityComponentType<"HomePage"> = () => {
 								))}
 							</dl>
 							<p className="text-xs text-muted-foreground">
-								API 문서는 /api/docs, 작업 규칙은 저장소의 CLAUDE.md를 참고하세요.
+								API 문서는 /api/docs, 작업 규칙은 저장소의 AGENTS.md를 참고하세요.
 							</p>
 						</DialogContent>
 					</Dialog>

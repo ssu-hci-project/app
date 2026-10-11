@@ -7,7 +7,7 @@
 | client/UI state                           | `zustand`                                                |
 | API calls                                 | `orpc` from `shared/api` (`orpc.<ns>.<proc>.queryOptions()` etc.) — typed from `@app/contract`; never a hand-written `fetch` |
 | toasts                                    | `sonner`'s `toast(...)` — `<Toaster />` is already mounted in `app/providers` |
-| dates                                     | `dayjs` (`shared/lib/dayjs.ts`, `relativeTime` + `ko` locale already configured) |
+| dates                                     | `dayjs`, imported from `shared/lib` (plugins and locale configured in `shared/lib/dayjs.ts`) |
 | conditional/merged Tailwind classes       | `cn()` (`shared/lib/cn.ts` — clsx + tailwind-merge)      |
 | Tailwind style variants (button size/variant, etc.) | `class-variance-authority`                    |
 | debounce/throttle, groupBy/pick/omit, etc. | `es-toolkit`. Find the function with the `recommend` skill; check its signature in `node_modules/es-toolkit/dist/<category>/<fn>.d.ts` (JSDoc + examples, matches the installed version) |

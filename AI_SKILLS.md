@@ -10,20 +10,20 @@ same help, not just one session's:
 - **es-toolkit `recommend`**, installed at `.claude/skills/recommend` (via
   `skills.sh`, `toss/es-toolkit`). It finds the right es-toolkit function for a
   need ("is there already a helper for this?"), which serves the repo's
-  "don't hand-roll it" rule. For exact signatures, read the installed typings
-  in `apps/web/node_modules/es-toolkit/dist/<category>/<fn>.d.ts`. They carry
-  JSDoc and `@example`s and always match the installed version.
-- **TanStack Query** is wired via `AGENTS.md`'s `intent-skills` block
-  (`@tanstack/intent`), which `CLAUDE.md` imports. Run
-  `bunx @tanstack/intent@latest list` to see the available skills and
-  `bunx @tanstack/intent@latest load <package>#<skill>` to pull one in before
-  touching data-fetching code. The content is versioned against the installed
-  package.
+  "don't hand-roll it" rule. Exact signatures: see the es-toolkit row in
+  [`apps/web/LIBRARIES.md`](apps/web/LIBRARIES.md).
+- **TanStack Query** skills are available on demand via `@tanstack/intent`
+  (not auto-loaded): `bunx @tanstack/intent@latest list`, then
+  `bunx @tanstack/intent@latest load <package>#<skill>`. The content is
+  versioned against the installed package.
+- **start-project**, at `.claude/skills/start-project`: the one-time steps
+  for turning the template into the real project.
 
 Stackflow, oRPC, Hono and Drizzle ship no agent skill in this repo. Their
 docs are at https://stackflow.so, https://orpc.dev, https://hono.dev and
-https://orm.drizzle.team. Turborepo writes its own guidance block into
-`AGENTS.md` (bundled docs matching the installed version).
+https://orm.drizzle.team. Turborepo's auto-written `AGENTS.md` block is
+disabled (`agentGuidance: false` in `turbo.json`); its version-matched docs
+are under `node_modules/turbo/docs/`.
 
 ## About the es-toolkit skill
 

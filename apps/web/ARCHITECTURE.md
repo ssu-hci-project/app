@@ -1,36 +1,28 @@
 # Architecture: Feature-Sliced Design
 
-```
-src/
-  app/       bootstrap: Stackflow, providers, global styles — no business logic
-  pages/     one slice per route, composes widgets+features+entities
-  widgets/   large composed UI blocks (multiple features/entities combined)
-  features/  one user action per slice, verb-named (todo/add, like-post)
-  entities/  domain data + CRUD (todo, user) — no interaction logic
-  shared/    generic, business-agnostic primitives (ui kit, API client, cn)
-```
+| Layer | Holds | May import | Slice naming |
+| --- | --- | --- | --- |
+| `app/` | bootstrap: Stackflow, providers, global styles — no business logic | everything below | — (segments only) |
+| `pages/` | one slice per screen; composes the layers below | widgets, features, entities, shared | screen name: `home`, `todo-detail` |
+| `widgets/` | large composed UI blocks (several features/entities together) | features, entities, shared | what it is, not where it lives: `todo-board` |
+| `features/` | one user action per slice | entities, shared | verb: `like-post`, or grouped by entity: `todo/add` |
+| `entities/` | domain data: types, read queries, one-instance UI | shared | singular noun: `todo`, `user-profile` |
+| `shared/` | business-agnostic primitives (ui kit, API client, `cn`) | its own segments | — (segments only) |
 
-**Every directory has its own `README.md` — read it before adding a file to
-that layer.** It covers that layer's segments, import rules, and naming
-convention in more depth than this file does. Start here:
-[`src/app/README.md`](src/app/README.md) ·
-[`src/pages/README.md`](src/pages/README.md) ·
-[`src/widgets/README.md`](src/widgets/README.md) ·
-[`src/features/README.md`](src/features/README.md) ·
-[`src/entities/README.md`](src/entities/README.md) ·
-[`src/shared/README.md`](src/shared/README.md)
+- Layers only import **downward**, and slices in the same layer never import
+  each other. Shared logic moves down a layer (`entities` if data-shaped,
+  `shared` if generic).
+- Import a slice only through its `index.ts` public API.
+- Names are kebab-case. When several features act on the same entity, group
+  them (`todo/add`, `todo/delete`): Steiger's `fsd/repetitive-naming` rejects
+  `add-todo` + `delete-todo` side by side.
 
-The short version of the import rule: layers only import **downward**
-(`app → pages → widgets → features → entities → shared`), and slices
-within the same layer never import each other. This is not just a
-convention — `bun run arch:lint` (Steiger) checks it and fails the commit
-if it's violated. The template's sample `todo` stack (`src/entities/todo/`,
-`src/features/todo/`, `src/widgets/todo-board/`, `src/pages/home/`) shows the
-whole stack wired together — copy that pattern for a new slice, and delete the
-sample once real features exist.
+`bun run arch:lint` (Steiger) enforces these rules and fails the commit on
+a violation. Each layer's `README.md` covers only its segments and
+layer-specific conventions.
 
-**Always scaffold new slices with the generator, don't hand-create
-folders:**
+Scaffold slices with the generator instead of creating folders by hand:
+
 ```bash
 bun run new:slice -- --layer=features --name=todo/archive
 ```
