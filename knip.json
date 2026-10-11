@@ -9,7 +9,7 @@
 		"apps/web": {
 			"entry": ["steiger.config.js"],
 			"project": ["src/**/*.{ts,tsx,css}", "scripts/**/*.ts"],
-			"ignoreDependencies": ["usehooks-ts", "zustand"]
+			"ignoreDependencies": ["usehooks-ts", "zustand", "es-toolkit"]
 		},
 		"apps/api": {
 			"entry": ["test/**/*.ts"],

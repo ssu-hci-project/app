@@ -12,5 +12,9 @@ export default defineConfig({
 	},
 	server: {
 		port: 3000,
+		// apps/api runs on wrangler dev (8787); same-origin /api in dev and prod.
+		proxy: {
+			"/api": "http://localhost:8787",
+		},
 	},
 });

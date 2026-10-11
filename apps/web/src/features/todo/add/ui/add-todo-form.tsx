@@ -19,7 +19,7 @@ export function AddTodoForm() {
 	} = useForm<FormValues>({ resolver: zodResolver(formSchema) });
 
 	const onSubmit = handleSubmit(({ title }) => {
-		mutate(title, { onSuccess: () => reset() });
+		mutate({ title }, { onSuccess: () => reset() });
 	});
 
 	return (

@@ -8,6 +8,7 @@
 		"packages/*"
 	],
 	"scripts": {
+		"setup": "bun install && bun run db:migrate && bun run db:seed",
 		"dev": "turbo run dev",
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
