@@ -9,11 +9,16 @@ before writing a helper.
   `src/app/stackflow/config.ts` + `stack.tsx`, build them as `pages` slices
   (see `src/pages/README.md`). Navigate with `useFlow().push(...)`.
 - **Data** comes from the API through `orpc` in `src/shared/api`:
-  `useQuery(orpc.todo.list.queryOptions())`,
-  `useMutation(orpc.todo.create.mutationOptions(...))`, and invalidate with
-  `queryClient.invalidateQueries({ queryKey: orpc.todo.key() })`. Types come
+  `useQuery(orpc.<ns>.<proc>.queryOptions())`,
+  `useMutation(orpc.<ns>.<proc>.mutationOptions(...))`, and invalidate with
+  `queryClient.invalidateQueries({ queryKey: orpc.<ns>.key() })`. Types come
   from `@app/contract`. Never `fetch` the API by hand.
 - **UI** primitives live in `src/shared/ui` (shadcn on Base UI). Add more
   with `bunx shadcn@latest add <component>` from this directory.
 - `/api` is proxied to the API during `bun run dev`, and served by the same
   Worker in production, so there is no API base URL to configure.
+
+The template ships a sample `todo` stack (`entities/todo`, `features/todo/*`,
+`widgets/todo-board`, used by `pages/home`) as a working example of every
+layer. Copy its shape for real features, then delete it; the layer READMEs
+cite it only as an example.

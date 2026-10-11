@@ -9,12 +9,19 @@
 		"apps/web": {
 			"entry": ["steiger.config.js"],
 			"project": ["src/**/*.{ts,tsx,css}", "scripts/**/*.ts"],
-			"ignoreDependencies": ["usehooks-ts", "zustand", "es-toolkit"]
+			"ignoreDependencies": [
+				"zustand",
+				"usehooks-ts",
+				"es-toolkit",
+				"react-hook-form",
+				"@hookform/resolvers",
+				"zod"
+			]
 		},
 		"apps/api": {
 			"entry": ["test/**/*.ts"],
 			"project": ["src/**/*.ts", "test/**/*.ts"],
-			"ignoreDependencies": ["cloudflare"]
+			"ignoreDependencies": ["cloudflare", "@orpc/client"]
 		},
 		"packages/contract": {
 			"project": ["src/**/*.ts"]

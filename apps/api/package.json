@@ -6,7 +6,7 @@
 		"dev": "bun run ensure-assets && wrangler d1 migrations apply DB --local && wrangler dev --port 8787",
 		"build": "wrangler deploy --dry-run --outdir dist",
 		"typecheck": "tsc --noEmit",
-		"test": "bun run ensure-assets && vitest run",
+		"test": "bun run ensure-assets && vitest run --passWithNoTests",
 		"cf-typegen": "wrangler types",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "wrangler d1 migrations apply DB --local",

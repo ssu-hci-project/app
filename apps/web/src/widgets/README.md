@@ -2,7 +2,7 @@
 
 Large, self-contained, composite UI blocks that combine multiple
 `features`/`entities` into one reusable section (a full navbar, a dashboard
-panel, the `todo-board` in this template). The point of pulling something
+panel, or the template's sample `todo-board`). The point of pulling something
 out as a widget is the **isolation boundary**, not raw reuse count — a
 widget used on a single page today is still worth it if it bundles enough
 moving parts to deserve its own name and folder.

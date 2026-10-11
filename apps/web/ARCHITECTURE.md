@@ -24,9 +24,10 @@ The short version of the import rule: layers only import **downward**
 (`app → pages → widgets → features → entities → shared`), and slices
 within the same layer never import each other. This is not just a
 convention — `bun run arch:lint` (Steiger) checks it and fails the commit
-if it's violated. See `src/entities/todo/`, `src/features/todo/`,
-`src/widgets/todo-board/`, `src/pages/home/` for a working example of the
-whole stack wired together correctly — copy that pattern for a new slice.
+if it's violated. The template's sample `todo` stack (`src/entities/todo/`,
+`src/features/todo/`, `src/widgets/todo-board/`, `src/pages/home/`) shows the
+whole stack wired together — copy that pattern for a new slice, and delete the
+sample once real features exist.
 
 **Always scaffold new slices with the generator, don't hand-create
 folders:**

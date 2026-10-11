@@ -10,7 +10,7 @@ cache invalidation).
 
 - `ui/` — the interactive component (usually a form or a button).
 - `model/` — the hook orchestrating the mutation/query + side effects
-  (see `todo/add/model/use-create-todo.ts` for the pattern: mutate →
+  (see the sample `todo/add/model/use-create-todo.ts` for the pattern: mutate →
   invalidate the entity's query key → toast).
 - `api/` — only if this feature needs a request the entity doesn't already
   expose. Default to reusing the entity's `api/`; don't duplicate a fetch

@@ -5,7 +5,7 @@
 | forms + validation                        | `react-hook-form` + `zod` (`@hookform/resolvers/zod`)   |
 | server state (fetch/cache/mutate)         | `@tanstack/react-query` — never `useEffect` + `useState` for a fetch |
 | client/UI state                           | `zustand`                                                |
-| API calls                                 | `orpc` from `shared/api` (`orpc.todo.list.queryOptions()` etc.) — typed from `@app/contract`; never a hand-written `fetch` |
+| API calls                                 | `orpc` from `shared/api` (`orpc.<ns>.<proc>.queryOptions()` etc.) — typed from `@app/contract`; never a hand-written `fetch` |
 | toasts                                    | `sonner`'s `toast(...)` — `<Toaster />` is already mounted in `app/providers` |
 | dates                                     | `dayjs` (`shared/lib/dayjs.ts`, `relativeTime` + `ko` locale already configured) |
 | conditional/merged Tailwind classes       | `cn()` (`shared/lib/cn.ts` — clsx + tailwind-merge)      |
@@ -25,7 +25,7 @@ above already does it.
 
 | Need                       | Use                    | Notes |
 |----------------------------| ------------------------ | ------- |
-| animation/transitions      | `motion` (ex-framer-motion) | heavier than a hackathon usually needs — reach for it only when a feature genuinely needs layout/gesture animation ||
+| animation/transitions      | `motion` (ex-framer-motion) | heavier than a prototype usually needs — reach for it only when a feature genuinely needs layout/gesture animation ||
 | date picker UI             | `react-day-picker` v9   | pair with `react-hook-form` via `Controller`; pulls in `date-fns` alongside our `dayjs`, that's fine |
 | drag-and-drop reordering   | `@dnd-kit/react`        | accessible by default |
 | data table                 | `@tanstack/react-table` | fits the existing TanStack ecosystem |
