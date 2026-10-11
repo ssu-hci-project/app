@@ -1,0 +1,25 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,jsx,ts,tsx,json,css}"
+      run: bunx biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+    architecture:
+      glob: "src/**/*.{ts,tsx}"
+      run: bun run arch:lint
+    knip:
+      glob: "*.{ts,tsx,css,json}"
+      run: bun run knip
+
+commit-msg:
+  commands:
+    conventional:
+      run: |
+        head -1 "{1}" | grep -qE '^[a-z]+(\([^)]*\))?!?: .+' || {
+          echo "커밋 메시지는 'type: 설명' 형식이어야 합니다 (예: feat: 로그인 화면 추가)"
+          exit 1
+        }

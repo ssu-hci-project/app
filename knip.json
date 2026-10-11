@@ -1,0 +1,13 @@
+{
+	"$schema": "https://unpkg.com/knip@6/schema.json",
+	"entry": ["steiger.config.js"],
+	"project": ["src/**/*.{ts,tsx,css}", "scripts/**/*.ts"],
+	"ignoreDependencies": ["usehooks-ts", "zustand"],
+	"rules": {
+		"exports": "warn",
+		"types": "warn"
+	},
+	"ignoreIssues": {
+		"src/shared/ui/**": ["exports", "types"]
+	}
+}

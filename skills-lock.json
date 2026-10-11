@@ -1,0 +1,29 @@
+{
+	"version": 1,
+	"skills": {
+		"guide": {
+			"source": "toss/es-toolkit",
+			"sourceType": "github",
+			"skillPath": "es-toolkit-plugin/skills/guide/SKILL.md",
+			"computedHash": "9cb4c59272025b49681344b6c624eb445dcecc70cb3e792749d4df68332324c6"
+		},
+		"migrate": {
+			"source": "toss/es-toolkit",
+			"sourceType": "github",
+			"skillPath": "es-toolkit-plugin/skills/migrate/SKILL.md",
+			"computedHash": "a96e1c90b5648192f21403467d76dfd2eef7a4664c8dd54ff8e501776a99f2d8"
+		},
+		"recommend": {
+			"source": "toss/es-toolkit",
+			"sourceType": "github",
+			"skillPath": "es-toolkit-plugin/skills/recommend/SKILL.md",
+			"computedHash": "635cf892797a95fb765fbb9c015b815e8704de5395401393938f54e60cc572fe"
+		},
+		"shadcn": {
+			"source": "shadcn-ui/ui",
+			"sourceType": "github",
+			"skillPath": "skills/shadcn/SKILL.md",
+			"computedHash": "c1a68ee06a668aced9ab2b5fbdea5f989864123794eb2e056b339a072dbb7f10"
+		}
+	}
+}
