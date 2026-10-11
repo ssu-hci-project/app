@@ -15,6 +15,7 @@ export const client: ContractRouterClient<Contract> = createORPCClient(link);
  * TanStack Query helpers for every procedure:
  * `useQuery(orpc.todo.list.queryOptions())`,
  * `useMutation(orpc.todo.create.mutationOptions())`,
- * `queryClient.invalidateQueries({ queryKey: orpc.todo.key() })`.
+ * `queryClient.setQueryData(orpc.todo.list.queryKey(), …)` for optimistic updates.
+ * Invalidation after mutations is global (see `query-client.ts`).
  */
 export const orpc = createTanstackQueryUtils(client);

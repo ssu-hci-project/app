@@ -3,7 +3,8 @@ import { z } from "zod";
 
 export const todoSchema = z.object({
 	id: z.string(),
-	title: z.string().trim().min(1).max(200),
+	// Messages are user-facing: web forms reuse this schema as their resolver.
+	title: z.string().trim().min(1, "할 일을 입력해주세요").max(200, "200자 이내로 입력해주세요"),
 	completed: z.boolean(),
 	createdAt: z.iso.datetime(),
 });

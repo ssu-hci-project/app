@@ -41,12 +41,12 @@ export const HomePage: ActivityComponentType<"HomePage"> = () => {
 							<dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
 								{STACK.map(({ label, value }) => (
 									<Fragment key={label}>
-										<dt className="font-medium text-slate-500">{label}</dt>
+										<dt className="font-medium text-muted-foreground">{label}</dt>
 										<dd>{value}</dd>
 									</Fragment>
 								))}
 							</dl>
-							<p className="text-xs text-slate-400">
+							<p className="text-xs text-muted-foreground">
 								API 문서는 /api/docs, 작업 규칙은 저장소의 CLAUDE.md를 참고하세요.
 							</p>
 						</DialogContent>

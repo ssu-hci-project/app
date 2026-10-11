@@ -12,13 +12,13 @@ type TodoItemProps = {
 
 export function TodoItem({ todo, leading, actions }: TodoItemProps) {
 	return (
-		<li className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-2">
+		<li className="flex items-center gap-3 rounded-md border px-3 py-2">
 			{leading}
 			<div className="flex min-w-0 flex-1 flex-col">
-				<span className={cn("truncate", todo.completed && "text-slate-400 line-through")}>
+				<span className={cn("truncate", todo.completed && "text-muted-foreground line-through")}>
 					{todo.title}
 				</span>
-				<span className="text-xs text-slate-400">{dayjs(todo.createdAt).fromNow()}</span>
+				<span className="text-xs text-muted-foreground">{dayjs(todo.createdAt).fromNow()}</span>
 			</div>
 			{actions}
 		</li>

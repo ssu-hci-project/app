@@ -64,7 +64,8 @@ procedure there and both `apps/api` (implementation) and `apps/web`
 
 Bun workspaces · Turborepo · React 19 · Vite · Stackflow · TanStack Query ·
 oRPC · Hono · Cloudflare Workers + D1 · Drizzle ORM · Zustand · Tailwind CSS
-v4 · Base UI + shadcn · Biome · Steiger · Knip · Vitest · Lefthook
+v4 · Base UI + shadcn · Biome · Steiger · Knip · Vitest (API tests; web has
+none yet) · Lefthook
 
 ## Commands (run from the repo root)
 
@@ -81,7 +82,8 @@ bun run db:seed      # (re)insert demo rows into the local D1
 bun run new:slice -- --layer=<entities|features|widgets|pages> --name=<kebab-case | group/name>
 ```
 
-`bun run check` mirrors what the pre-commit hook runs. Run it after any
+`bun run check` runs the same checks as the pre-commit hook, over the whole
+repo instead of staged files. Run it after any
 non-trivial change instead of guessing whether it'll pass. Open
 `http://localhost:3000/api/docs` during `bun run dev` for interactive API docs.
 
@@ -126,7 +128,7 @@ Do this once, when the actual app's direction is decided:
 `lefthook` runs on every commit:
 
 - `pre-commit` (parallel): `biome check --write` on staged files (fixes are
-  re-staged automatically), typecheck, `steiger`, and `knip`.
+  re-staged automatically), typecheck, `steiger`, `knip`, and tests.
 - `commit-msg`: the first line must be `type: 설명` (Conventional Commits,
   e.g. `feat: 로그인 화면 추가`).
 
@@ -143,5 +145,7 @@ If a hook fails, fix the reported issue and recommit — don't bypass with
   the template's pre-installed toolkit (`zustand`, `usehooks-ts`, `es-toolkit`,
   `react-hook-form` + `@hookform/resolvers` + `zod` in web; `@orpc/client`
   for api tests) is listed in `knip.json`'s `ignoreDependencies` so deleting
-  the sample doesn't block commits. Prune that list once you know what the
-  real app uses.
+  the sample doesn't block commits. While the sample still uses some of them,
+  knip prints "Remove from ignoreDependencies" configuration hints — that's
+  expected, not a failure. Prune that list once you know what the real app
+  uses.

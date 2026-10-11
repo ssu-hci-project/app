@@ -10,9 +10,17 @@ before writing a helper.
   (see `src/pages/README.md`). Navigate with `useFlow().push(...)`.
 - **Data** comes from the API through `orpc` in `src/shared/api`:
   `useQuery(orpc.<ns>.<proc>.queryOptions())`,
-  `useMutation(orpc.<ns>.<proc>.mutationOptions(...))`, and invalidate with
-  `queryClient.invalidateQueries({ queryKey: orpc.<ns>.key() })`. Types come
-  from `@app/contract`. Never `fetch` the API by hand.
+  `useMutation(orpc.<ns>.<proc>.mutationOptions(...))`. Don't invalidate in
+  mutation hooks: the `MutationCache` in `shared/api/query-client.ts` refetches
+  all active queries after every mutation. For instant feedback use an
+  optimistic update (see `features/todo/toggle/model/use-toggle-todo.ts`).
+  Types come from `@app/contract`. Never `fetch` the API by hand.
+- **Forms** validate with the contract's schema (`todoSchema.pick(...)`), not
+  a hand-copied zod schema, so the form and the API can't disagree. Put
+  user-facing messages on the contract schema.
+- **Colors** use theme tokens (`text-muted-foreground`, `text-destructive`,
+  `border-input`, `bg-primary`…), never raw palette classes like
+  `text-slate-400`, so light/dark themes stay correct.
 - **UI** primitives live in `src/shared/ui` (shadcn on Base UI). Add more
   with `bunx shadcn@latest add <component>` from this directory.
 - `/api` is proxied to the API during `bun run dev`, and served by the same

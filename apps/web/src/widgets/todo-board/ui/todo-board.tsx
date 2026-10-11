@@ -9,9 +9,9 @@ export function TodoBoard() {
 	return (
 		<section className="mx-auto flex w-full max-w-md flex-col gap-4">
 			<AddTodoForm />
-			{isLoading && <p className="text-sm text-slate-400">불러오는 중...</p>}
+			{isLoading && <p className="text-sm text-muted-foreground">불러오는 중...</p>}
 			{isError && (
-				<p className="text-sm text-red-500">
+				<p className="text-sm text-destructive">
 					목록을 불러오지 못했어요. API 서버가 켜져 있는지 확인하세요 (루트에서 bun dev).
 				</p>
 			)}

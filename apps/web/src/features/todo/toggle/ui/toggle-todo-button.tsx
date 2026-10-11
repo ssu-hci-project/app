@@ -17,7 +17,7 @@ export function ToggleTodoButton({ todo }: { todo: Todo }) {
 				"flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors",
 				todo.completed
 					? "border-primary bg-primary text-primary-foreground"
-					: "border-slate-300 hover:border-slate-400",
+					: "border-input hover:border-muted-foreground",
 			)}
 		>
 			{todo.completed && <Check className="size-4" />}
