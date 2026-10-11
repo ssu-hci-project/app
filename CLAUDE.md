@@ -1,5 +1,7 @@
 # app
 
+@AGENTS.md
+
 A full-stack monorepo starter for building fast (an HCI class project) while
 an AI agent does most of the typing. Two ideas drive every choice here:
 

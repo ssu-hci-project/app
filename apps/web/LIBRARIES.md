@@ -10,7 +10,7 @@
 | dates                                     | `dayjs` (`shared/lib/dayjs.ts`, `relativeTime` + `ko` locale already configured) |
 | conditional/merged Tailwind classes       | `cn()` (`shared/lib/cn.ts` — clsx + tailwind-merge)      |
 | Tailwind style variants (button size/variant, etc.) | `class-variance-authority`                    |
-| debounce/throttle, groupBy/pick/omit, etc. | `es-toolkit`                                            |
+| debounce/throttle, groupBy/pick/omit, etc. | `es-toolkit`. Find the function with the `recommend` skill; check its signature in `node_modules/es-toolkit/dist/<category>/<fn>.d.ts` (JSDoc + examples, matches the installed version) |
 | common hooks (useLocalStorage, useDebounce, useMediaQuery, useClickOutside) | `usehooks-ts`                     |
 | accessible dialog/dropdown/tooltip/select/etc.        | `bunx shadcn@latest add <component>` — generates into `shared/ui`, built on Base UI. Never hand-roll a focus-trapped modal or a custom dropdown |
 | icons                                     | `lucide-react` (already shadcn's own default)            |

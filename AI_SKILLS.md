@@ -1,55 +1,43 @@
 # AI skills wired into this project
 
-Three libraries in this stack ship official, actively-maintained agent skills
-— all are installed project-locally so any teammate cloning the repo gets
-the same guidance, not just this session:
+Agent guidance that ships with the repo, so every teammate's agent gets the
+same help, not just one session's:
 
-- **shadcn** — installed at `.claude/skills/shadcn` (via `skills.sh`,
-  `shadcn-ui/ui/skills/shadcn`). Covers correct component APIs, composition
-  patterns, theming, and the CLI workflow. Loads automatically when working
-  with `components.json` / shadcn components.
-- **es-toolkit** — installed at `.claude/skills/{guide,migrate,recommend}`
-  (via `skills.sh`, `toss/es-toolkit`). Covers API usage/import patterns, Lodash
-  migration, and function recommendations. Official LLM documentation is also
-  available at `https://es-toolkit.dev/llms-full.txt`.
-- **TanStack Query** — wired via `AGENTS.md`'s `intent-skills` block
-  (`@tanstack/intent`). Run `bunx @tanstack/intent@latest list` to see
-  available skills and `bunx @tanstack/intent@latest load <package>#<skill>`
-  to pull one in before touching data-fetching code — the content is
-  versioned against the installed package, so it won't go stale like
-  memorized API knowledge.
+- **shadcn**, installed at `.claude/skills/shadcn` (via `skills.sh`,
+  `shadcn-ui/ui/skills/shadcn`). It covers component APIs, composition
+  patterns, theming and the CLI workflow, and loads automatically when working
+  with `components.json` or shadcn components.
+- **es-toolkit `recommend`**, installed at `.claude/skills/recommend` (via
+  `skills.sh`, `toss/es-toolkit`). It finds the right es-toolkit function for a
+  need ("is there already a helper for this?"), which serves the repo's
+  "don't hand-roll it" rule. For exact signatures, read the installed typings
+  in `apps/web/node_modules/es-toolkit/dist/<category>/<fn>.d.ts`. They carry
+  JSDoc and `@example`s and always match the installed version.
+- **TanStack Query** is wired via `AGENTS.md`'s `intent-skills` block
+  (`@tanstack/intent`), which `CLAUDE.md` imports. Run
+  `bunx @tanstack/intent@latest list` to see the available skills and
+  `bunx @tanstack/intent@latest load <package>#<skill>` to pull one in before
+  touching data-fetching code. The content is versioned against the installed
+  package.
 
-Stackflow, oRPC, Hono and Drizzle ship no agent skill in this repo; their
+Stackflow, oRPC, Hono and Drizzle ship no agent skill in this repo. Their
 docs are at https://stackflow.so, https://orpc.dev, https://hono.dev and
 https://orm.drizzle.team. Turborepo writes its own guidance block into
 `AGENTS.md` (bundled docs matching the installed version).
 
-No other library in this stack publishes an official skill as of this writing
-— don't assume one exists just because it shows up as available in a given
-session; that may just be a skill built into the coding agent itself, not
-something this repo ships.
+## About the es-toolkit skill
 
-## es-toolkit skills: pruned `docs/`
-
-`skills.sh --copy` vendors each es-toolkit skill's *entire* upstream
-VitePress docs site (multi-locale pages, `.vitepress` build config, images,
-etc.) — as installed, `guide`/`migrate`/`recommend` were ~13MB each and
-100% identical to one another. Each `SKILL.md` only actually reads a
-handful of files, so `docs/` in each of the three has been pruned down to
-just that (see each `SKILL.md`'s `Workflow`/`Search local docs` section for
-the current list — e.g. `usage.md`, `intro.md`, `bundle-size.md`,
-`performance.md`, `reference/**`), bringing the three skills to ~1MB each.
-
-Two things to know if you touch these again:
-
-- **`bunx skills update` will re-bloat.** It re-copies the full upstream
-  `docs/` tree, wiping this pruning. Re-run the prune (keep only the files
-  each `SKILL.md` actually references) after any update.
-- **A few `SKILL.md` references are already dead upstream**, independent of
-  this pruning: `benchmarks/`, `src/{category}/*.ts` (strict) and
-  `src/compat/{category}/*.ts` (compat), and `docs/compatibility.md` (the
-  real file is `docs/compat/intro.md`, but `migrate/SKILL.md` names the
-  wrong path). Not fixed here — restoring them would mean vendoring the
-  library's full source tree, which reintroduces the bloat this cleanup
-  removes. The skills still work without them; those steps just silently
-  find nothing.
+- **Only `recommend` is kept.** es-toolkit also publishes `guide`
+  (install/import setup, already done here) and `migrate` (lodash migration,
+  and this repo has no lodash). They were removed because their `docs/` trees
+  were identical copies of `recommend`'s.
+- **`docs/` is pruned.** `skills.sh --copy` vendors the whole upstream
+  VitePress site (~13MB). Only `docs/reference/**` and the few top-level pages
+  `SKILL.md` reads are kept. `bunx skills update` re-copies everything, so
+  prune again after an update.
+- **Step 2 of its workflow is dead here.** It greps `src/{category}/*.ts`,
+  es-toolkit's source tree, which isn't vendored. The skill falls back to
+  `docs/reference/` (step 4), and the installed `.d.ts` files above are the
+  authoritative signature source.
+- **Its mentions of `/es-toolkit:migrate` point nowhere.** That skill was
+  removed. Lodash isn't used here, so ignore them.
