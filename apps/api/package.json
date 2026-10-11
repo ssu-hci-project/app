@@ -3,16 +3,18 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "wrangler d1 migrations apply DB --local && wrangler dev --port 8787",
+		"dev": "bun run ensure-assets && wrangler d1 migrations apply DB --local && wrangler dev --port 8787",
 		"build": "wrangler deploy --dry-run --outdir dist",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run",
+		"test": "bun run ensure-assets && vitest run",
 		"cf-typegen": "wrangler types",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "wrangler d1 migrations apply DB --local",
 		"db:migrate:remote": "wrangler d1 migrations apply DB --remote",
 		"db:seed": "wrangler d1 execute DB --local --file seed.sql",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"ensure-assets": "mkdir -p ../web/dist",
+		"deploy": "wrangler deploy && wrangler d1 migrations apply DB --remote"
 	},
 	"dependencies": {
 		"@app/contract": "workspace:*",

@@ -23,7 +23,8 @@
 		"test": "turbo run test",
 		"db:generate": "bun run --filter @app/api db:generate",
 		"db:migrate": "bun run --filter @app/api db:migrate",
-		"db:seed": "bun run --filter @app/api db:seed"
+		"db:seed": "bun run --filter @app/api db:seed",
+		"deploy": "turbo run deploy"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",

@@ -17,6 +17,14 @@
 		"arch:lint": {},
 		"test": {
 			"dependsOn": ["^build"]
+		},
+		"@app/api#build": {
+			"dependsOn": ["^build", "@app/web#build"],
+			"outputs": ["dist/**"]
+		},
+		"deploy": {
+			"dependsOn": ["build"],
+			"cache": false
 		}
 	}
 }
