@@ -19,7 +19,10 @@ the same guidance, not just this session:
   versioned against the installed package, so it won't go stale like
   memorized API knowledge.
 
-Stackflow ships no agent skill; its docs are at https://stackflow.so.
+Stackflow, oRPC, Hono and Drizzle ship no agent skill in this repo; their
+docs are at https://stackflow.so, https://orpc.dev, https://hono.dev and
+https://orm.drizzle.team. Turborepo writes its own guidance block into
+`AGENTS.md` (bundled docs matching the installed version).
 
 No other library in this stack publishes an official skill as of this writing
 — don't assume one exists just because it shows up as available in a given

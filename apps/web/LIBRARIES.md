@@ -5,7 +5,7 @@
 | forms + validation                        | `react-hook-form` + `zod` (`@hookform/resolvers/zod`)   |
 | server state (fetch/cache/mutate)         | `@tanstack/react-query` — never `useEffect` + `useState` for a fetch |
 | client/UI state                           | `zustand`                                                |
-| HTTP                                      | `axios` via `shared/api`'s `apiClient` — never a new `axios.create()` per feature |
+| API calls                                 | `orpc` from `shared/api` (`orpc.todo.list.queryOptions()` etc.) — typed from `@app/contract`; never a hand-written `fetch` |
 | toasts                                    | `sonner`'s `toast(...)` — `<Toaster />` is already mounted in `app/providers` |
 | dates                                     | `dayjs` (`shared/lib/dayjs.ts`, `relativeTime` + `ko` locale already configured) |
 | conditional/merged Tailwind classes       | `cn()` (`shared/lib/cn.ts` — clsx + tailwind-merge)      |
@@ -14,7 +14,7 @@
 | common hooks (useLocalStorage, useDebounce, useMediaQuery, useClickOutside) | `usehooks-ts`                     |
 | accessible dialog/dropdown/tooltip/select/etc.        | `bunx shadcn@latest add <component>` — generates into `shared/ui`, built on Base UI. Never hand-roll a focus-trapped modal or a custom dropdown |
 | icons                                     | `lucide-react` (already shadcn's own default)            |
-| env vars                                  | `shared/config/env.ts` — add to the zod schema before reading a new `VITE_*` var anywhere |
+| env vars                                  | none needed today; if you add a `VITE_*` var, create `shared/config/env.ts` with a zod schema and read it only from there |
 
 If you're about to write a `debounce`, a manual fetch-loading-error
 `useState` trio, a custom toast component, a hand-rolled classname

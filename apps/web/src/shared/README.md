@@ -7,7 +7,7 @@ what a "Todo" or a "User" is, it has leaked out of `shared` and belongs in
 `entities` or `features`.
 
 `shared` has no slices — only segments. Segments may freely import each
-other (`api/client.ts` reading `config/env.ts` is fine and expected).
+other freely.
 Nothing above may be imported *into* `shared`; it sits at the bottom of the
 stack.
 
@@ -23,14 +23,13 @@ stack.
   point at `shared/ui`/`shared/lib`, so it lands in the right place with the
   right imports. Base UI components compose via a `render` prop, not Radix's
   `asChild` — e.g. `<DialogTrigger render={<Button variant="ghost" />}>...`.
-- `api/` — the single `apiClient` (axios instance) and the single
-  `queryClient` (TanStack Query). Every entity's `api/` segment imports
-  `apiClient` from here — never creates its own axios instance.
+- `api/` — the typed oRPC `client`, its TanStack Query helpers `orpc`, and
+  the single `queryClient`. Every slice talks to the backend through `orpc`
+  from here (types come from `@app/contract`) — never a hand-written `fetch`.
 - `lib/` — small pure utility wrappers: `cn` (clsx + tailwind-merge),
   `dayjs` (pre-configured with the `relativeTime` plugin + `ko` locale).
-- `config/` — `env.ts`, the zod-validated `import.meta.env`. Add a new env
-  var to the schema here before reading it anywhere else — an unvalidated
-  `import.meta.env.VITE_X` access elsewhere is a bug waiting to happen.
+- `config/` — not present yet. If you ever need a `VITE_*` env var, create
+  `config/env.ts` with a zod schema and read it only from there.
 - `hooks/` — reusable hooks that don't fit `usehooks-ts`'s generic set
   (this is also where the shadcn CLI drops any hook a generated component
   needs, e.g. `use-mobile`). Empty until something actually needs it —

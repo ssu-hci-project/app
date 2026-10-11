@@ -5,6 +5,7 @@
  * the same boilerplate per slice.
  *
  * Usage: bun run new:slice -- --layer=features --name=delete-todo
+ *        bun run new:slice -- --layer=features --name=todo/delete   (slice group)
  */
 import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
@@ -33,8 +34,8 @@ function parseArgs() {
 		console.error(`--layer must be one of: ${LAYERS.join(", ")}`);
 		process.exit(1);
 	}
-	if (!name || !/^[a-z][a-z0-9-]*$/.test(name)) {
-		console.error("--name must be kebab-case, e.g. add-todo");
+	if (!name || !/^[a-z][a-z0-9-]*(\/[a-z][a-z0-9-]*)?$/.test(name)) {
+		console.error("--name must be kebab-case, optionally in a group: add-todo, todo/delete");
 		process.exit(1);
 	}
 	return { layer, name };
@@ -57,12 +58,14 @@ async function main() {
 	}
 
 	if (segments.includes("ui")) {
-		const pascalName = toPascalCase(name);
+		// "todo/delete" → file todo-delete.tsx, component TodoDelete
+		const fileName = name.replace("/", "-");
+		const pascalName = toPascalCase(fileName);
 		await writeFile(
-			path.join(root, "ui", `${name}.tsx`),
+			path.join(root, "ui", `${fileName}.tsx`),
 			`export function ${pascalName}() {\n\treturn <div>${pascalName}</div>;\n}\n`,
 		);
-		exportLines.push(`export { ${pascalName} } from "./ui/${name}";`);
+		exportLines.push(`export { ${pascalName} } from "./ui/${fileName}";`);
 	}
 
 	await writeFile(path.join(root, "index.ts"), `${exportLines.join("\n")}\n`);

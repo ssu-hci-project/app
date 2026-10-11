@@ -1,16 +1,22 @@
 # app
 
-Frontend hackathon starter: Bun · Vite · React 19 · Stackflow · TanStack Query ·
-Tailwind v4 · Feature-Sliced Design, with Biome + Steiger enforced via a
-pre-commit hook.
+Full-stack monorepo: React 19 + Stackflow SPA (`apps/web`), Hono + oRPC API
+on Cloudflare Workers with D1 (`apps/api`), and a shared typed contract
+(`packages/contract`). Bun workspaces + Turborepo, with Biome, Steiger, knip
+and tests enforced by a pre-commit hook.
 
 ## Quick start
 
 ```bash
-bun install
-cp .env.example .env
-bun run dev
+bun run setup   # install, create the local D1, seed demo data
+bun run dev     # http://localhost:3000  (API docs: /api/docs)
 ```
 
-See [`CLAUDE.md`](CLAUDE.md) for the architecture, conventions, and the
-library-first philosophy this template is built around.
+Deploy to Cloudflare (one Worker serves both the app and the API):
+
+```bash
+bunx wrangler login   # once
+bun run deploy
+```
+
+See [`CLAUDE.md`](CLAUDE.md) for the layout, commands and conventions.

@@ -1,7 +1,7 @@
 # features
 
 One user-facing **action** per slice — a verb, not a noun
-(`add-todo`, `like-post`, `auth-by-email`). A feature wraps an entity's data
+(`todo/add`, `like-post`, `auth-by-email`). A feature wraps an entity's data
 operation with everything needed to actually perform it from the UI: the
 form/button, the mutation hook, and the side effects (toast, redirect,
 cache invalidation).
@@ -10,7 +10,7 @@ cache invalidation).
 
 - `ui/` — the interactive component (usually a form or a button).
 - `model/` — the hook orchestrating the mutation/query + side effects
-  (see `add-todo/model/use-create-todo.ts` for the pattern: mutate →
+  (see `todo/add/model/use-create-todo.ts` for the pattern: mutate →
   invalidate the entity's query key → toast).
 - `api/` — only if this feature needs a request the entity doesn't already
   expose. Default to reusing the entity's `api/`; don't duplicate a fetch
@@ -30,12 +30,15 @@ Enforced by `steiger` (`fsd/no-cross-imports`, `fsd/no-higher-level-imports`)
 
 ## Naming
 
-`<verb>-<noun>` kebab-case: `add-todo`, `delete-todo`, `toggle-completed`.
+`<verb>-<noun>` kebab-case (`like-post`). When several features act on the
+same entity, group them in a folder named after it instead of repeating the
+noun — `todo/add`, `todo/toggle`, `todo/delete` — because Steiger's
+`fsd/repetitive-naming` rule rejects `add-todo` + `delete-todo` side by side.
 
 ## Scaffolding
 
 ```bash
-bun run new:slice -- --layer=features --name=delete-todo
+bun run new:slice -- --layer=features --name=todo/archive
 ```
 generates the segment folders + `index.ts` for you — don't hand-type the
 boilerplate.

@@ -8,13 +8,12 @@ An entity answers "what is a Todo and how do I fetch/create one," never
 
 ## Segments
 
-- `model/` — the zod schema + inferred TS type. The schema is the single
-  source of truth for the shape; don't hand-write a duplicate `interface`
-  next to it.
-- `api/` — raw `axios` calls through `shared/api`'s `apiClient`, plus the
-  TanStack Query hooks and the query-key factory (see `todo/api/queries.ts`
-  for the `todoKeys` pattern — always centralize keys here, never inline a
-  query key at the call site).
+- `model/` — the entity's types, re-exported from `@app/contract` (the
+  contract's zod schema is the single source of truth for the shape; don't
+  hand-write a duplicate `interface`). Client-only derived types go here too.
+- `api/` — TanStack Query read hooks built on `orpc` from `shared/api`, e.g.
+  `useQuery(orpc.todo.list.queryOptions())` (see `todo/api/queries.ts`).
+  Query keys come from `orpc` (`orpc.todo.key()`), so never hand-write one.
 - `ui/` — small presentational components that render **one instance** of
   the entity (a card/row, like `todo/ui/todo-item.tsx`). No mutations, no
   forms — purely "given a Todo, render it."
@@ -30,16 +29,10 @@ inside the entity itself.
 Enforced by `steiger` (`fsd/no-cross-imports`, `fsd/no-higher-level-imports`)
 — violations fail `bun run arch:lint` and block the commit.
 
-## Mocking before the backend exists
+## Data before the UI exists
 
-Set `VITE_USE_MOCK=true` in `.env` to serve an entity from an in-memory
-mock instead of a real request — useful before the backend is ready, or as
-a demo-day fallback if it goes down. See `todo/api/mock.ts` +
-the `if (env.VITE_USE_MOCK)` branch in `todo/api/todo-api.ts` for the
-pattern: keep the mock in its own `mock.ts` next to the real calls, gate
-each function on the flag, return data shaped exactly like the real
-response. Copy this file-for-file into a new entity rather than inventing
-a different mocking approach per entity.
+There is no mock layer: the API runs locally with seed data
+(`apps/api/seed.sql`). Add demo rows there, then `bun run db:seed`.
 
 ## Naming
 
