@@ -8,14 +8,13 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 // (one Worker serves the app and the API), so no base URL to configure.
 const link = new RPCLink({ url: `${window.location.origin}/api/rpc` });
 
-/** Typed API client — call procedures directly: `await client.todo.list()`. */
+/** Typed API client — call procedures directly when needed. */
 export const client: ContractRouterClient<Contract> = createORPCClient(link);
 
 /**
  * TanStack Query helpers for every procedure:
- * `useQuery(orpc.todo.list.queryOptions())`,
- * `useMutation(orpc.todo.create.mutationOptions())`,
- * `queryClient.setQueryData(orpc.todo.list.queryKey(), …)` for optimistic updates.
+ * `useQuery(orpc.reading.listBooks.queryOptions())` and the corresponding
+ * mutation options provide typed access and query keys.
  * Invalidation after mutations is global (see `query-client.ts`).
  */
 export const orpc = createTanstackQueryUtils(client);

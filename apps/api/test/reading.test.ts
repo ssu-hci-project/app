@@ -21,6 +21,11 @@ const clientWithoutKey: ContractRouterClient<Contract> = createORPCClient(
 );
 
 describe("reading API", () => {
+	it("serves the health endpoint and API documentation", async () => {
+		const health = await app.request("/api/health", {}, env);
+		expect(await health.json()).toEqual({ status: "ok" });
+		expect((await app.request("/api/docs", {}, env)).status).toBe(200);
+	});
 	it("uses the built-in questions when no Gemini key is configured", async () => {
 		const book = await client.reading.createBook({ title: "책", author: "저자", pageCount: 10 });
 		const result = await clientWithoutKey.reading.generateQuestions({

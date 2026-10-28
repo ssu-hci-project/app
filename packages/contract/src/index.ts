@@ -1,7 +1,6 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
 import { readingContract } from "./reading";
-import { todoContract } from "./todo";
 
 /**
  * The single source of truth for the API: every procedure's path, input and
@@ -12,9 +11,7 @@ export const contract = {
 	health: oc
 		.route({ method: "GET", path: "/health", summary: "Health check", tags: ["system"] })
 		.output(z.object({ status: z.literal("ok") })),
-	todo: todoContract,
 	reading: readingContract,
 };
 
 export type Contract = typeof contract;
-export { type Todo, todoSchema } from "./todo";

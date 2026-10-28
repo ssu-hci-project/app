@@ -10,8 +10,7 @@ Cloudflare Workers 위의 Hono입니다. 모든 엔드포인트는 `@app/contrac
 ## 구조
 
 파일 목록이 아니라 역할입니다. `routers/`와 `test/` 아래 파일은 도메인에 따라
-바뀝니다(템플릿에는 복사용 샘플 `todo` 네임스페이스가 들어 있고, 이후
-삭제합니다).
+바뀝니다.
 
 ```
 src/index.ts         Hono 앱 + RPC/OpenAPI 핸들러 (Workers용 default export)
@@ -42,7 +41,7 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
 - **바인딩:** `wrangler.jsonc`를 바꾼 뒤에는 `bun run cf-typegen`으로
   `worker-configuration.d.ts`(전역 `Env` 타입)를 다시 생성합니다. 이 파일은
   직접 수정하지 마세요.
-- **테스트:** 새 프로시저마다 `test/`에 테스트를 추가하고, 샘플 테스트처럼
+- **테스트:** 새 프로시저마다 `test/`에 테스트를 추가하고, 기존 테스트처럼
   타입이 있는 oRPC 클라이언트로 호출합니다. 실행마다 모든 마이그레이션이
   적용된 새 D1을 받습니다.
 - 로컬 D1 상태는 `.wrangler/`(gitignore 대상)에 있습니다. 초기화하려면 삭제한
