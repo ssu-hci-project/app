@@ -1,0 +1,8 @@
+{
+	"mcpServers": {
+		"seed-docs": {
+			"command": "npx",
+			"args": ["-y", "@seed-design/docs-mcp"]
+		}
+	}
+}
