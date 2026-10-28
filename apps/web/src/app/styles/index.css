@@ -41,6 +41,7 @@
 	--color-card: var(--card);
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
+	--color-bookmark: var(--bookmark);
 	--radius-sm: calc(var(--radius) * 0.6);
 	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
@@ -51,24 +52,25 @@
 }
 
 :root {
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
+	--background: var(--seed-color-bg-layer-basement);
+	--foreground: var(--seed-color-fg-neutral);
+	--card: var(--seed-color-bg-layer-default);
+	--card-foreground: var(--seed-color-fg-neutral);
+	--popover: var(--seed-color-bg-layer-floating);
+	--popover-foreground: var(--seed-color-fg-neutral);
+	--primary: var(--seed-color-bg-brand-solid);
+	--primary-foreground: var(--seed-color-fg-on-brand-solid);
+	--secondary: var(--seed-color-bg-brand-weak);
+	--secondary-foreground: var(--seed-color-fg-brand-contrast);
+	--muted: var(--seed-color-bg-neutral-weak);
+	--muted-foreground: var(--seed-color-fg-neutral-muted);
+	--accent: var(--seed-color-bg-brand-weak);
+	--accent-foreground: var(--seed-color-fg-brand-contrast);
+	--destructive: var(--seed-color-fg-critical);
+	--border: var(--seed-color-stroke-neutral-weak);
+	--input: var(--seed-color-stroke-neutral-weak);
+	--ring: var(--seed-color-stroke-focus-ring);
+	--bookmark: #a84e35;
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
@@ -83,6 +85,28 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
+}
+
+/* SEED semantic roles are shared with the existing shadcn theme above. */
+:root[data-seed-color-mode="light-only"] {
+	--seed-color-bg-layer-basement: #faf8f3;
+	--seed-color-bg-layer-default: #fff;
+	--seed-color-bg-layer-floating: #fff;
+	--seed-color-bg-brand-solid: #285c48;
+	--seed-color-bg-brand-solid-pressed: #1d4938;
+	--seed-color-bg-brand-weak: #e4eee7;
+	--seed-color-bg-brand-weak-pressed: #d2e3d7;
+	--seed-color-bg-neutral-weak: #f0eee8;
+	--seed-color-fg-neutral: #262b28;
+	--seed-color-fg-neutral-muted: #59635d;
+	--seed-color-fg-brand: #285c48;
+	--seed-color-fg-brand-contrast: #285c48;
+	--seed-color-fg-on-brand-solid: #fff;
+	--seed-color-fg-critical: #b42318;
+	--seed-color-stroke-brand-solid: #285c48;
+	--seed-color-stroke-brand-weak: #b8d1bf;
+	--seed-color-stroke-focus-ring: #285c48;
+	--seed-color-stroke-neutral-weak: #dedcd4;
 }
 
 .dark {

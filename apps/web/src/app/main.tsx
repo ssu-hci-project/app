@@ -1,4 +1,5 @@
 import "@stackflow/plugin-basic-ui/index.css";
+import "@seed-design/css/base.css";
 import "@/app/styles/index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

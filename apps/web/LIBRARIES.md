@@ -2,6 +2,7 @@
 
 | 필요한 것 | 사용할 것 |
 | --- | --- |
+| SEED Design | `@seed-design/react`와 `@seed-design/css`, Vite 플러그인으로 컴포넌트 스타일과 라이트 색상 모드 적용 |
 | 폼 + 검증 | `react-hook-form` + `zod` (`@hookform/resolvers/zod`) |
 | 서버 상태 (조회/캐시/변경) | `@tanstack/react-query`. 조회에 `useEffect` + `useState`를 쓰지 않음 |
 | 클라이언트/UI 상태 | `zustand` |
