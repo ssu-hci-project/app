@@ -1,8 +1,9 @@
 import { todoSchema } from "@app/contract";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ActionButton } from "@seed-design/react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
-import { Button, Input } from "@/shared/ui";
+import { Input } from "@/shared/ui";
 import { useCreateTodo } from "../model/use-create-todo";
 
 // Validate with the contract's own schema so the form can never accept input
@@ -31,9 +32,9 @@ export function AddTodoForm() {
 					aria-invalid={!!errors.title}
 					{...register("title")}
 				/>
-				<Button type="submit" disabled={isPending}>
+				<ActionButton type="submit" disabled={isPending}>
 					추가
-				</Button>
+				</ActionButton>
 			</div>
 			{errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
 		</form>
