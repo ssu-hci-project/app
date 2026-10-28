@@ -16,6 +16,11 @@
   버전에 맞춰져 있습니다.
 - **start-project**: `.claude/skills/start-project`. 템플릿을 실제 프로젝트로
   바꾸는 일회성 절차입니다.
+- **SEED Design**: `.claude/skills/seed-design`에 설치한 당근 공식 스킬입니다.
+  Claude Code에서 `/seed-design`으로 실행하며, SEED 컴포넌트와 디자인 토큰,
+  React 설치 및 진단 시 공식 문서를 확인합니다. 공식 문서 MCP `seed-docs`는
+  저장소의 `.mcp.json`에 설정되어 있으며, Claude Code에서 프로젝트 MCP 사용을
+  승인하면 사용할 수 있습니다.
 
 Stackflow, oRPC, Hono, Drizzle은 이 저장소에 에이전트 스킬이 없습니다. 문서는
 https://stackflow.so, https://orpc.dev, https://hono.dev,
