@@ -4,6 +4,7 @@ import type { Db } from "./db";
 
 export type Context = {
 	db: Db;
+	geminiApiKey?: string;
 };
 
 /** Contract-bound procedure builder. Every router implements a slice of it. */

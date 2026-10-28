@@ -45,8 +45,4 @@ bunx wrangler login   # 최초 1회
 bun run deploy        # Worker `hci`, D1 `hci-db` (apps/api/wrangler.jsonc)
 ```
 
-이 저장소는 **초기 템플릿**입니다. `todo` 기능, 페이지 제목, 홈 화면은 교체될
-플레이스홀더입니다. 전환 절차는
-[`.claude/skills/start-project/SKILL.md`](.claude/skills/start-project/SKILL.md)
-(Claude Code에서는 `/start-project`)를 참고하세요. 구조, 명령어, 컨벤션은
-[`AGENTS.md`](AGENTS.md)에 있습니다.
+구조, 명령어, 컨벤션은 [`AGENTS.md`](AGENTS.md)에 있습니다.

@@ -8,6 +8,34 @@
       "when": 1791720090190,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793182733186,
+      "tag": "0001_perfect_eddie_brock",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793182846629,
+      "tag": "0002_quiet_shatterstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793182998991,
+      "tag": "0003_wealthy_donald_blake",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1793183513840,
+      "tag": "0004_real_darkhawk",
+      "breakpoints": true
     }
   ]
 }

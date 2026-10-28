@@ -14,10 +14,7 @@ AI 에이전트가 코드 대부분을 작성하는 환경에서 빠르게 만�
    (`lefthook`)이 검사하고, 위반하면 **커밋이 막힙니다**.
 
 **지금 무엇이 있는지는 문서보다 코드를 믿으세요.** 문서의 파일 목록은
-예시입니다. 샘플 `todo` 도메인이 아직 남아 있다면 따라 할 패턴일 뿐 유지할
-대상이 아닙니다. 템플릿을 실제 프로젝트로 바꿀 때는
-[`.claude/skills/start-project/SKILL.md`](.claude/skills/start-project/SKILL.md)
-(Claude Code에서는 `/start-project`)를 따르세요.
+예시입니다.
 
 **문서는 구조와 함께 갱신합니다.** 앱이나 패키지를 추가하거나, 라이브러리를
 바꾸거나, 컨벤션을 바꾸면 가장 가까운 `AGENTS.md`/`README.md`를 같은 커밋에서
