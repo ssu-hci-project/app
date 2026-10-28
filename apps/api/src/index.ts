@@ -38,7 +38,10 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("/api/rpc/*", async (c, next) => {
 	const { matched, response } = await rpcHandler.handle(c.req.raw, {
 		prefix: "/api/rpc",
-		context: { db: createDb(c.env.DB) },
+		context: {
+			db: createDb(c.env.DB),
+			geminiApiKey: (c.env as Env & { GEMINI_API_KEY?: string }).GEMINI_API_KEY,
+		},
 	});
 	if (matched) return c.newResponse(response.body, response);
 	await next();
@@ -47,7 +50,10 @@ app.use("/api/rpc/*", async (c, next) => {
 app.use("/api/*", async (c, next) => {
 	const { matched, response } = await openAPIHandler.handle(c.req.raw, {
 		prefix: "/api",
-		context: { db: createDb(c.env.DB) },
+		context: {
+			db: createDb(c.env.DB),
+			geminiApiKey: (c.env as Env & { GEMINI_API_KEY?: string }).GEMINI_API_KEY,
+		},
 	});
 	if (matched) return c.newResponse(response.body, response);
 	await next();

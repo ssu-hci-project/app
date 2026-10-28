@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
+import { readingContract } from "./reading";
 import { todoContract } from "./todo";
 
 /**
@@ -12,6 +13,7 @@ export const contract = {
 		.route({ method: "GET", path: "/health", summary: "Health check", tags: ["system"] })
 		.output(z.object({ status: z.literal("ok") })),
 	todo: todoContract,
+	reading: readingContract,
 };
 
 export type Contract = typeof contract;

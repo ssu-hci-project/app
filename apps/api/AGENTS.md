@@ -47,3 +47,6 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
   적용된 새 D1을 받습니다.
 - 로컬 D1 상태는 `.wrangler/`(gitignore 대상)에 있습니다. 초기화하려면 삭제한
   뒤 루트에서 `bun run db:migrate && bun run db:seed`를 실행하세요.
+- AI 질문 생성은 Gemini API를 사용합니다. 로컬 `apps/api/.dev.vars`에
+  `GEMINI_API_KEY`를 설정하고, 배포 시 Workers secret으로 등록하세요. 키가 없거나
+  생성이 실패하면 기본 질문을 반환합니다. 무료 티어에는 테스트용 데이터만 쓰세요.
