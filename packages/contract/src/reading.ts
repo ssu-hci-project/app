@@ -5,11 +5,18 @@ export const bookSchema = z.object({
 	id: z.string(),
 	title: z.string().trim().min(1, "책 제목을 입력해주세요").max(200),
 	author: z.string().trim().min(1, "저자를 입력해주세요").max(200),
+	edition: z.string(),
 	pageCount: z.number().int().positive().max(100000),
 	createdAt: z.iso.datetime(),
 });
 
 export const bookmarkSchema = z.object({
+	visibility: z.enum(["private", "group", "legacy"]),
+	groupId: z.string().nullable(),
+	quote: z.string().max(200, "구절은 200자 이내로 입력해주세요"),
+	updatedAt: z.iso.datetime(),
+	sharedVersion: z.number().int().nonnegative(),
+	isMine: z.boolean(),
 	id: z.string(),
 	bookId: z.string(),
 	page: z.number().int().positive(),
@@ -32,19 +39,46 @@ export const questionAnswerSchema = z.object({
 });
 
 const notFound = { NOT_FOUND: { message: "책을 찾을 수 없습니다" } };
+export type Book = z.infer<typeof bookSchema>;
+export type Bookmark = z.infer<typeof bookmarkSchema>;
 const invalidPage = { BAD_REQUEST: { message: "책의 페이지 범위를 벗어났습니다" } };
 
 export const readingContract = {
+	getBook: oc
+		.route({ method: "GET", path: "/books/{bookId}", tags: ["reading"] })
+		.errors(notFound)
+		.input(z.object({ bookId: z.string() }))
+		.output(
+			z.object({
+				book: bookSchema,
+				currentPage: z.number().int().positive(),
+				lastOpenedAt: z.iso.datetime().nullable(),
+				lastGroupId: z.string().nullable(),
+			}),
+		),
+	saveProgress: oc
+		.route({ method: "PUT", path: "/books/{bookId}/progress", tags: ["reading"] })
+		.errors({ ...notFound, ...invalidPage, FORBIDDEN: { message: "이 모임에 먼저 참여해주세요" } })
+		.input(
+			bookmarkSchema
+				.pick({ bookId: true, page: true })
+				.extend({ groupId: z.string().nullable().optional() }),
+		)
+		.output(z.object({ page: z.number().int().positive() })),
 	listBooks: oc
 		.route({ method: "GET", path: "/books", tags: ["reading"] })
 		.output(z.array(bookSchema)),
 	createBook: oc
 		.route({ method: "POST", path: "/books", tags: ["reading"] })
-		.input(bookSchema.pick({ title: true, author: true, pageCount: true }))
+		.input(
+			bookSchema
+				.pick({ title: true, author: true, pageCount: true })
+				.extend({ edition: z.string().trim().min(1).max(100).default("판본 미확인") }),
+		)
 		.output(bookSchema),
 	listBookmarks: oc
 		.route({ method: "GET", path: "/books/{bookId}/bookmarks", tags: ["reading"] })
-		.errors(notFound)
+		.errors({ ...notFound, ...invalidPage })
 		.input(bookmarkSchema.pick({ bookId: true, page: true }))
 		.output(z.array(bookmarkSchema)),
 	createBookmark: oc

@@ -7,12 +7,24 @@ import { defineConfig } from "@stackflow/config";
  */
 declare module "@stackflow/config" {
 	interface Register {
-		HomePage: Record<string, never>;
+		HomePage: { section?: string; tab?: string; filter?: string };
+		ReadingPage: { bookId: string; page?: string; groupId?: string };
+		NoteEditorPage: { bookId: string; page: string; noteId?: string; groupId?: string };
+		NotePage: { noteId: string };
+		GroupPage: { bookId: string; groupId?: string };
+		InvitePage: { code: string };
 	}
 }
 
 export const config = defineConfig({
-	activities: [{ name: "HomePage", route: "/" }],
+	activities: [
+		{ name: "HomePage", route: "/" },
+		{ name: "ReadingPage", route: "/books/:bookId" },
+		{ name: "NoteEditorPage", route: "/books/:bookId/write" },
+		{ name: "NotePage", route: "/notes/:noteId" },
+		{ name: "GroupPage", route: "/books/:bookId/groups" },
+		{ name: "InvitePage", route: "/invite/:code" },
+	],
 	initialActivity: () => "HomePage",
 	transitionDuration: 350,
 });

@@ -14,6 +14,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   `useFlow()`의 `push`와 `pop`으로 이동하며, `history-sync`를 통해 URL과
   브라우저 뒤로 가기가 스택과 동기화되도록 합니다. 독서 화면에서 다른 화면을
   거쳐 돌아올 때 독서 맥락을 유지할 수 있도록 흐름을 설계합니다.
+- 같은 화면의 하단 메뉴·책장 탭·필터·페이지·모임 선택 변경은 `useStepFlow(...).replaceStep()`으로 현재 파라미터와 URL만 갱신합니다. 이런 내부 상태 변경에 `useFlow().replace()`를 사용해 액티비티 전환 애니메이션을 발생시키지 않습니다.
 - **데이터**는 `src/shared/api`의 `orpc`로 API에서 가져옵니다:
   `useQuery(orpc.<ns>.<proc>.queryOptions())`,
   `useMutation(orpc.<ns>.<proc>.mutationOptions(...))`. mutation 훅에서
@@ -35,5 +36,9 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   디렉터리에서 `bunx shadcn@latest add <component>`로 추가하세요.
   `components.json`이 이미 `shared/ui`와 `shared/lib`를 가리킵니다.
 - **SEED Design** 컴포넌트는 `@seed-design/react`에서 사용하며, 스타일은 Vite 플러그인이 로드합니다. 기존 shadcn UI와 함께 점진적으로 적용합니다.
+- 화면 아이콘은 당근 공식 `@karrotmarket/react-monochrome-icon`을 사용합니다. 하단 내비게이션은 SEED 가이드에 따라 Fill 아이콘으로 통일하고 색상으로 선택 상태를 구분합니다.
+- 상단 내비게이션과 Page Banner는 SEED CLI의 공식 스니펫(`shared/ui`)을 사용합니다. `seed-design.json`이 생성 경로를 관리합니다.
+- Tailwind 4는 `@seed-design/tailwind4-theme`로 SEED 토큰을 사용합니다. CSS layer 순서는 HTML head와 스타일 진입점에서 선언하며, SEED base·직접 recipe import는 `.layered.css`를 사용합니다. Vite의 `seed-layered` condition으로 내부 스타일도 일치시킵니다.
+- 기록 작성은 별도 액티비티에서 개인 저장이 기본입니다. 공개 범위 선택은 공식 Field Button·Radio Select Box를 사용하고 확정 버튼 전에는 서버 상태를 바꾸지 않습니다. 알림은 공식 SEED Snackbar로 모바일 프레임 하단에 표시합니다.
 - `/api`는 `bun run dev` 중에는 API로 프록시되고, 프로덕션에서는 같은 Worker가
   제공하므로 API base URL을 설정할 필요가 없습니다.

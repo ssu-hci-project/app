@@ -1,0 +1,7 @@
+{
+	"rsc": false,
+	"tsx": true,
+	"framework": "react",
+	"path": "./src/shared",
+	"telemetry": false
+}
