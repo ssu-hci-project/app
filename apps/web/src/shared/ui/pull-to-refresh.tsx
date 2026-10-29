@@ -1,0 +1,34 @@
+/**
+ * @file ui:pull-to-refresh
+ * @requires @seed-design/react@^2.0.0 || ^3.0.0
+ **/
+
+import { PullToRefresh } from "@seed-design/react";
+import { forwardRef } from "react";
+import { ProgressCircle } from "./progress-circle";
+
+export interface PullToRefreshRootProps extends PullToRefresh.RootProps {}
+
+export const PullToRefreshRoot = PullToRefresh.Root;
+
+export interface PullToRefreshIndicatorProps
+	extends Omit<PullToRefresh.IndicatorProps, "children"> {}
+
+export const PullToRefreshIndicator = forwardRef<HTMLDivElement, PullToRefreshIndicatorProps>(
+	({ ...otherProps }, ref) => {
+		return (
+			<PullToRefresh.Indicator ref={ref} {...otherProps}>
+				{(props) => <ProgressCircle size="24" tone="neutral" {...props} />}
+			</PullToRefresh.Indicator>
+		);
+	},
+);
+
+export interface PullToRefreshContentProps extends PullToRefresh.ContentProps {}
+
+export const PullToRefreshContent = PullToRefresh.Content;
+
+/**
+ * This file is a snippet from SEED Design, helping you get started quickly with @seed-design/* packages.
+ * You can extend this snippet however you want.
+ */

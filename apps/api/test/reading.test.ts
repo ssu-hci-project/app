@@ -6,12 +6,22 @@ import type { ContractRouterClient } from "@orpc/contract";
 import { describe, expect, it } from "vitest";
 import app from "../src/index";
 
-const client: ContractRouterClient<Contract> = createORPCClient(
-	new RPCLink({
-		url: "http://test.local/api/rpc",
-		fetch: async (request) => app.fetch(request, env),
-	}),
-);
+function createReader(): ContractRouterClient<Contract> {
+	let cookie = "";
+	return createORPCClient(
+		new RPCLink({
+			url: "http://test.local/api/rpc",
+			fetch: async (request) => {
+				const next = new Request(request);
+				if (cookie) next.headers.set("cookie", cookie);
+				const response = await app.fetch(next, env);
+				cookie = response.headers.get("set-cookie")?.split(";")[0] ?? cookie;
+				return response;
+			},
+		}),
+	);
+}
+const client = createReader();
 
 const clientWithoutKey: ContractRouterClient<Contract> = createORPCClient(
 	new RPCLink({
@@ -21,6 +31,27 @@ const clientWithoutKey: ContractRouterClient<Contract> = createORPCClient(
 );
 
 describe("reading API", () => {
+	it("persists an anonymous reader's progress and identifies their own bookmarks without sharing state", async () => {
+		const alice = createReader();
+		const bob = createReader();
+		const book = await alice.reading.createBook({
+			title: "함께 읽는 책",
+			author: "저자",
+			pageCount: 20,
+		});
+		expect((await alice.reading.getBook({ bookId: book.id })).currentPage).toBe(1);
+		await alice.reading.saveProgress({ bookId: book.id, page: 7 });
+		expect((await alice.reading.getBook({ bookId: book.id })).currentPage).toBe(7);
+		expect((await bob.reading.getBook({ bookId: book.id })).currentPage).toBe(1);
+		await alice.reading.createBookmark({ bookId: book.id, page: 7, content: "나의 생각" });
+		expect((await alice.reading.listBookmarks({ bookId: book.id, page: 7 }))[0]?.isMine).toBe(true);
+		expect(await bob.reading.listBookmarks({ bookId: book.id, page: 7 })).toEqual([]);
+		const [invalid] = await safe(alice.reading.saveProgress({ bookId: book.id, page: 21 }));
+		expect(invalid).toMatchObject({ code: "BAD_REQUEST" });
+		expect((await alice.reading.getBook({ bookId: book.id })).currentPage).toBe(7);
+		const [missing] = await safe(alice.reading.getBook({ bookId: "missing" }));
+		expect(missing).toMatchObject({ code: "NOT_FOUND" });
+	});
 	it("serves the health endpoint and API documentation", async () => {
 		const health = await app.request("/api/health", {}, env);
 		expect(await health.json()).toEqual({ status: "ok" });

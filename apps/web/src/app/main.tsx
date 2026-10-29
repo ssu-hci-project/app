@@ -1,5 +1,3 @@
-import "@stackflow/plugin-basic-ui/index.css";
-import "@seed-design/css/base.css";
 import "@/app/styles/index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -13,8 +11,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
 	<StrictMode>
-		<AppProviders>
-			<Stack />
-		</AppProviders>
+		<div className="relative isolate mx-auto h-dvh w-full max-w-[430px] overflow-hidden bg-background [transform:translateZ(0)] sm:shadow-xl">
+			<AppProviders>
+				<Stack />
+			</AppProviders>
+		</div>
 	</StrictMode>,
 );

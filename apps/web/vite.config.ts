@@ -7,6 +7,7 @@ import { defineConfig } from "vite";
 export default defineConfig({
 	plugins: [react(), tailwindcss(), seedDesignPlugin({ colorMode: "light-only" })],
 	resolve: {
+		conditions: ["seed-layered", "module", "browser", "development|production"],
 		alias: {
 			"@": path.resolve(import.meta.dirname, "./src"),
 		},

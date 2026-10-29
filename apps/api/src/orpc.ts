@@ -4,6 +4,7 @@ import type { Db } from "./db";
 
 export type Context = {
 	db: Db;
+	userId: string;
 	geminiApiKey?: string;
 };
 

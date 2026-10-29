@@ -1,0 +1,1 @@
+ALTER TABLE `reading_progress` ADD `group_id` text REFERENCES reading_groups(id);
