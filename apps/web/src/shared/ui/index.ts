@@ -1,3 +1,4 @@
+export { AiGradientDefs, AiSparkleIcon } from "./ai-icon";
 export {
 	AlertDialogAction,
 	AlertDialogContent,

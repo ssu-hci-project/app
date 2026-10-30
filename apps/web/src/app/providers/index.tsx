@@ -2,7 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
 import { queryClient } from "@/shared/api";
-import { SnackbarProvider, TooltipProvider } from "@/shared/ui";
+import { AiGradientDefs, SnackbarProvider, TooltipProvider } from "@/shared/ui";
 
 /**
  * All app-wide context providers, composed in one place.
@@ -12,6 +12,7 @@ import { SnackbarProvider, TooltipProvider } from "@/shared/ui";
 export function AppProviders({ children }: { children: ReactNode }) {
 	return (
 		<QueryClientProvider client={queryClient}>
+			<AiGradientDefs />
 			<TooltipProvider>
 				<SnackbarProvider strategy="queued">{children}</SnackbarProvider>
 			</TooltipProvider>

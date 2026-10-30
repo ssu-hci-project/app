@@ -1,9 +1,9 @@
-import { IconSparkle2Fill } from "@karrotmarket/react-monochrome-icon";
 import { Text } from "@seed-design/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
 import {
+	AiSparkleIcon,
 	Callout,
 	RadioSelectBoxItem,
 	RadioSelectBoxRadiomark,
@@ -49,7 +49,7 @@ export function QuestionPicker({
 			{ai.length > 0 && (
 				<Callout
 					tone="magic"
-					prefixIcon={<IconSparkle2Fill />}
+					prefixIcon={<AiSparkleIcon />}
 					title="AI 질문"
 					description="반짝임이 붙은 질문은 이 쪽을 바탕으로 만들었어요. 정답은 없으니 마음 가는 것만 골라요."
 				/>
@@ -70,7 +70,7 @@ export function QuestionPicker({
 						key={question}
 						value={question}
 						// AI 질문은 Callout과 같은 반짝임 아이콘으로만 구분하고, 화면 낭독기에는 말로 알려요.
-						prefixIcon={aiQuestions.has(question) ? <IconSparkle2Fill /> : undefined}
+						prefixIcon={aiQuestions.has(question) ? <AiSparkleIcon /> : undefined}
 						label={
 							aiQuestions.has(question) ? (
 								<>
