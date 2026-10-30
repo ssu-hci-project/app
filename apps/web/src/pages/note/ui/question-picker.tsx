@@ -51,7 +51,7 @@ export function QuestionPicker({
 					tone="magic"
 					prefixIcon={<AiSparkleIcon />}
 					title="AI 질문"
-					description="반짝임이 붙은 질문은 이 쪽을 바탕으로 만들었어요. 정답은 없으니 마음 가는 것만 골라요."
+					description="이 쪽의 본문을 바탕으로 만든 질문이 있어요. 정답은 없으니 마음 가는 것만 골라요."
 				/>
 			)}
 			<RadioSelectBoxRoot
