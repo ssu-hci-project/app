@@ -66,7 +66,7 @@ export function QuestionPicker({
 					prefixIcon={<AiSparkleIcon />}
 					title="AI 질문"
 					// 제목과 본문이 한 줄로 이어 읽히니 본문을 "이"로 시작하지 않아요("AI 질문이 쪽의…").
-					description="지금 읽는 쪽의 본문을 바탕으로 만들었어요. 정답은 없으니 마음 가는 것만 골라요."
+					description="방금 읽은 장면에서 골라봤어요. 끌리는 게 있으면 답해보세요"
 				/>
 			)}
 			<RadioSelectBoxRoot label="생각을 여는 질문" value={selected} onValueChange={choose}>
