@@ -70,8 +70,18 @@ export function QuestionPicker({
 					<RadioSelectBoxItem
 						key={question}
 						value={question}
-						label={question}
-						description={aiQuestions.has(question) ? "AI가 이 쪽을 읽고 만든 질문" : undefined}
+						// AI 질문은 Callout과 같은 반짝임 아이콘으로만 구분하고, 화면 낭독기에는 말로 알려요.
+						prefixIcon={aiQuestions.has(question) ? <IconSparkle2Fill /> : undefined}
+						label={
+							aiQuestions.has(question) ? (
+								<>
+									<span className="sr-only">AI 질문: </span>
+									{question}
+								</>
+							) : (
+								question
+							)
+						}
 						suffix={<RadioSelectBoxRadiomark />}
 					/>
 				))}
