@@ -43,7 +43,8 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
 - 바텀시트와 메뉴 시트는 Activity가 아니므로 `shared/ui/overlay.tsx`가 모바일 프레임(`#app-frame`)으로 portal하고 다음 단계 z-index를 줍니다. 열림 상태는 `useStepOverlay()`로 `overlay` step 파라미터에 두어, 뒤로 가기가 시트를 먼저 닫습니다. 새 시트는 `overlay.bind("키")`로 연결하고 각 액티비티 파라미터에 `overlay?: string`이 등록돼 있어야 합니다. 앱 프레임은 `overflow: clip`이라 포커스 이동으로 스크롤되지 않습니다.
 - 작성 화면처럼 키보드와 함께 쓰는 CTA는 `MobileScreen`의 `footer` prop으로 하단에 고정합니다. 화면 안내·경고는 일반 텍스트가 아니라 SEED `Callout`(안내는 Informative, 데이터 유실 위험은 Warning)으로 화면당 하나만 둡니다.
 - 독서 화면은 앱 안 리더입니다. 본문은 `reading.getPage`로 한 쪽씩 받고(다음 쪽은 미리 받음), 쪽 이동은 `MobileScreen` footer의 `PageBar`(이전·다음·`WheelPicker` 시트)로 합니다. 본문에서 문장을 고르면 FAB 대신 `ContextualFloatingButton`을 띄워 그 구절로 기록을 엽니다(떠 있는 버튼은 한 번에 하나). 다른 독자의 기록은 "책갈피 N"으로 개수만 보이고 시트를 열 때만 불러옵니다. 새 생각은 숫자 없는 Neutral Weak Badge로만 알립니다.
-- 작성 화면의 "질문 받아보기"는 펼칠 때만 `reading.generateQuestions`를 호출합니다. 입력은 쪽과 고른 구절뿐이고, 본문 맥락은 서버가 만듭니다. 쓰던 생각을 AI에 보내지 마세요.
+- 작성 화면의 질문 목록은 열자마자 보이고, AI 질문은 화면을 열 때 한 번만 `reading.generateQuestions`로 요청합니다. 입력은 쪽과 고른 구절뿐이고, 본문 맥락은 서버가 만듭니다. 쓰던 생각을 AI에 보내지 마세요.
+- AI 기능 표시는 `AiSparkleIcon`(`shared/ui/ai-icon.tsx`)을 씁니다. SEED `$gradient.highlight-magic`을 SVG 채우기로 옮긴 것이고, 정의(`AiGradientDefs`)는 `AppProviders`에서 한 번 렌더링합니다. AI 결과가 있을 때만 Magic 톤 Callout으로 안내합니다.
 - 판본이 `판본 미확인`이거나 앱에서 읽는 작품(`sourceUrl` 있음)이면 판본을 노출하지 않습니다. 출처와 이용 조건은 리더의 "책 정보" 시트에서 보여줍니다. 책 메타 표기는 `@/entities/book`의 `bookByline`/`editionLabel`을 씁니다.
 - Tailwind 4는 `@seed-design/tailwind4-theme`로 SEED 토큰을 사용합니다. CSS layer 순서는 HTML head와 스타일 진입점에서 선언하며, SEED base·직접 recipe import는 `.layered.css`를 사용합니다. Vite의 `seed-layered` condition으로 내부 스타일도 일치시킵니다.
 - 기록 작성은 별도 액티비티에서 개인 저장이 기본입니다. 공개 범위 선택은 공식 Field Button·Radio Select Box를 사용하고 확정 버튼 전에는 서버 상태를 바꾸지 않습니다. 알림은 공식 SEED Snackbar로 모바일 프레임 하단에 표시합니다.

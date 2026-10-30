@@ -211,7 +211,9 @@ export const readingRouter = {
 					quote: input.quote,
 				}),
 			);
-		} catch {
+		} catch (error) {
+			// Readers still get the built-in questions; the log tells us why Gemini was skipped.
+			console.error("Gemini question generation failed", error);
 			return { source: "fallback" as const, questions: [...questionTemplates] };
 		}
 		const saved = await context.db
