@@ -45,15 +45,12 @@ export function QuestionPicker({
 	const questions = [...aiQuestions, ...(templates.data ?? []).map((item) => item.question)];
 	return (
 		<section className="flex flex-col gap-x3" aria-label="생각을 여는 질문">
+			{/* AI 질문이 도착해도 문구가 바뀌지 않도록 고정해요. AI 질문은 같은 아이콘으로 구분돼요. */}
 			<Callout
 				tone="magic"
 				prefixIcon={<IconSparkle2Fill />}
-				title={ai.length ? "AI 질문" : "질문은 고르지 않아도 돼요"}
-				description={
-					ai.length
-						? "이 쪽의 본문을 바탕으로 만든 질문이 있어요. 정답은 없으니 마음 가는 것만 골라요."
-						: "마음 가는 질문이 있으면 골라보세요."
-				}
+				title="질문은 고르지 않아도 돼요"
+				description="반짝임이 붙은 질문은 AI가 이 쪽을 바탕으로 만들었어요. 마음 가는 것만 골라요."
 			/>
 			{generated.isFetching && (
 				<Text textStyle="t3Regular" color="fg.neutralMuted" role="status">
