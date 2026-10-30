@@ -59,7 +59,8 @@ export function QuestionPicker({
 	};
 	return (
 		<section className="flex flex-col gap-x3" aria-label="생각을 여는 질문">
-			{ai.length > 0 && (
+			{/* 질문을 만드는 동안에도 같은 문구로 보여서, 도착해도 내용이 바뀌지 않아요. */}
+			{(generated.isFetching || ai.length > 0) && (
 				<Callout
 					tone="magic"
 					prefixIcon={<AiSparkleIcon />}
