@@ -1,4 +1,4 @@
-import { Text } from "@seed-design/react";
+import { Skeleton } from "@seed-design/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
@@ -54,17 +54,21 @@ export function QuestionPicker({
 					description="반짝임이 붙은 질문은 이 쪽을 바탕으로 만들었어요. 정답은 없으니 마음 가는 것만 골라요."
 				/>
 			)}
-			{generated.isFetching && (
-				<Text textStyle="t3Regular" color="fg.neutralMuted" role="status">
-					이 장면에 맞는 질문을 만들고 있어요
-				</Text>
-			)}
 			<RadioSelectBoxRoot
 				label="생각을 여는 질문"
 				value={value ?? ""}
 				onValueChange={(next) => onChange(next || null)}
 			>
 				<RadioSelectBoxItem value="" label="질문 없이 쓰기" suffix={<RadioSelectBoxRadiomark />} />
+				{/* AI 질문이 들어올 자리를 Magic 톤 스켈레톤으로 미리 보여줘요(SEED Loading 패턴). */}
+				{generated.isFetching && (
+					<div role="status" className="flex flex-col gap-x3">
+						{[0, 1, 2].map((row) => (
+							<Skeleton key={row} tone="magic" width="full" height="x14" radius="16" />
+						))}
+						<span className="sr-only">이 장면에 맞는 AI 질문을 만들고 있어요</span>
+					</div>
+				)}
 				{[...new Set(questions)].map((question) => (
 					<RadioSelectBoxItem
 						key={question}
