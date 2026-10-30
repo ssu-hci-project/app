@@ -2,6 +2,7 @@ import { ActionButton, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { bookByline } from "@/entities/book";
 import { orpc } from "@/shared/api";
 import { LoadState, MobileScreen, useNotice } from "@/shared/ui";
 
@@ -36,9 +37,12 @@ export const InvitePage: ActivityComponentType<"InvitePage"> = ({ params }) => {
 					<Text as="h1" textStyle="t8Bold">
 						{preview.data.name}
 					</Text>
-					<Text>
-						{preview.data.book.title} · {preview.data.book.edition}
-					</Text>
+					<div>
+						<Text as="p">{preview.data.book.title}</Text>
+						<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
+							{bookByline(preview.data.book)}
+						</Text>
+					</div>
 					<Text>
 						각자의 속도로 읽고 생각을 나누는 모임이에요. 참여하면 이전에 공유한 기록도 볼 수 있어요.
 						내 기록은 직접 공유하기 전까지 나만 볼 수 있어요.

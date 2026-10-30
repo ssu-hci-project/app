@@ -1,5 +1,11 @@
+import "@seed-design/css/recipes/bottom-sheet.layered.css";
 import type { Bookmark, ReadingGroup } from "@app/contract";
-import { ActionButton, Badge, Text } from "@seed-design/react";
+import {
+	IconDot3HorizontalLine,
+	IconPencilLine,
+	IconTrashcanLine,
+} from "@karrotmarket/react-monochrome-icon";
+import { ActionButton, ResponsivePair, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -13,6 +19,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogRoot,
 	AlertDialogTitle,
+	AppBarIconButton,
 	BottomSheetBody,
 	BottomSheetContent,
 	BottomSheetRoot,
@@ -23,7 +30,12 @@ import {
 	RadioSelectBoxItem,
 	RadioSelectBoxRadiomark,
 	RadioSelectBoxRoot,
+	SwipeableMenuSheetContent,
+	SwipeableMenuSheetGroup,
+	SwipeableMenuSheetItem,
+	SwipeableMenuSheetRoot,
 	useNotice,
+	useStepOverlay,
 } from "@/shared/ui";
 
 export const NotePage: ActivityComponentType<"NotePage"> = ({ params }) => {
@@ -32,14 +44,27 @@ export const NotePage: ActivityComponentType<"NotePage"> = ({ params }) => {
 	const groups = useQuery(orpc.groups.list.queryOptions());
 	const flow = useFlow();
 	const { isRoot } = useActivity();
+	const overlay = useStepOverlay();
 	return (
 		<MobileScreen
 			title="기록"
 			onBack={() =>
 				isRoot ? flow.replace("HomePage", { section: "books", tab: "notes" }) : flow.pop()
 			}
+			action={
+				note.data?.isMine && (
+					<AppBarIconButton aria-label="기록 메뉴" onClick={() => overlay.open("menu")}>
+						<IconDot3HorizontalLine />
+					</AppBarIconButton>
+				)
+			}
 		>
-			<LoadState pending={note.isPending} error={note.isError} retry={() => note.refetch()} />
+			<LoadState
+				shape="article"
+				pending={note.isPending}
+				error={note.isError}
+				retry={() => note.refetch()}
+			/>
 			{note.data && !note.isError && (
 				<>
 					<div>
@@ -51,15 +76,11 @@ export const NotePage: ActivityComponentType<"NotePage"> = ({ params }) => {
 							{new Date(note.data.createdAt).toLocaleString("ko-KR")}
 						</Text>
 					</div>
-					<Badge.Root tone="neutral" variant="weak" className="self-start">
-						<Badge.Label>
-							{note.data.visibility === "private"
-								? "나만 보기"
-								: note.data.visibility === "group"
-									? `${groups.data?.find((group) => group.id === note.data.groupId)?.name ?? "모임"}에 공유`
-									: "기존 공개"}
-						</Badge.Label>
-					</Badge.Root>
+					{note.data.prompt && (
+						<Text as="p" textStyle="t4Medium" color="fg.neutralMuted">
+							{note.data.prompt}
+						</Text>
+					)}
 					{note.data.quote && (
 						<blockquote className="border-l-2 border-stroke-neutral-weak pl-x4">
 							<Text textStyle="t5Medium">{note.data.quote}</Text>
@@ -106,7 +127,7 @@ function NoteActions({
 	groupsError: boolean;
 	retryGroups: () => void;
 }) {
-	const [open, setOpen] = useState(false);
+	const overlay = useStepOverlay();
 	const [removeOpen, setRemoveOpen] = useState(false);
 	const [selected, setSelected] = useState(note.groupId ?? "private");
 	const flow = useFlow();
@@ -115,7 +136,7 @@ function NoteActions({
 	const share = useMutation(
 		orpc.notes.setVisibility.mutationOptions({
 			onSuccess: () => {
-				setOpen(false);
+				overlay.close();
 				notify(selected === "private" ? "나만 보기로 변경했어요" : "모임에 공유했어요", "positive");
 			},
 			onError: () => notify("공개 범위를 바꾸지 못했어요. 다시 시도해주세요.", "critical"),
@@ -145,7 +166,7 @@ function NoteActions({
 				buttonProps={{
 					onClick: () => {
 						setSelected(note.groupId ?? "private");
-						setOpen(true);
+						overlay.open("visibility");
 					},
 					"aria-label": "공개 범위 변경",
 				}}
@@ -158,24 +179,34 @@ function NoteActions({
 							: (groups.find((group) => group.id === note.groupId)?.name ?? "모임 공유")}
 				</FieldButtonValue>
 			</FieldButton>
-			<div className="flex gap-x3">
-				<ActionButton
-					variant="neutralWeak"
-					onClick={() =>
-						flow.replace("NoteEditorPage", {
-							bookId: note.bookId,
-							page: String(note.page),
-							noteId: note.id,
-						})
-					}
-				>
-					내용 수정
-				</ActionButton>
-				<ActionButton variant="ghost" onClick={() => setRemoveOpen(true)}>
-					기록 삭제
-				</ActionButton>
-			</div>
-			<BottomSheetRoot open={open} onOpenChange={setOpen}>
+			<SwipeableMenuSheetRoot {...overlay.bind("menu")}>
+				<SwipeableMenuSheetContent title="기록 메뉴">
+					<SwipeableMenuSheetGroup>
+						<SwipeableMenuSheetItem
+							prefixIcon={<IconPencilLine />}
+							label="내용 수정"
+							onClick={() => {
+								overlay.close();
+								flow.replace("NoteEditorPage", {
+									bookId: note.bookId,
+									page: String(note.page),
+									noteId: note.id,
+								});
+							}}
+						/>
+						<SwipeableMenuSheetItem
+							prefixIcon={<IconTrashcanLine />}
+							tone="critical"
+							label="기록 삭제"
+							onClick={() => {
+								overlay.close();
+								setRemoveOpen(true);
+							}}
+						/>
+					</SwipeableMenuSheetGroup>
+				</SwipeableMenuSheetContent>
+			</SwipeableMenuSheetRoot>
+			<BottomSheetRoot {...overlay.bind("visibility")}>
 				<BottomSheetContent
 					title="누구와 나눌까요?"
 					description="이후 모임에 참여한 사람도 공유 기록을 볼 수 있어요."
@@ -237,7 +268,7 @@ function NoteActions({
 							<ActionButton
 								variant="ghost"
 								onClick={() => {
-									setOpen(false);
+									overlay.close();
 									flow.push("GroupPage", { bookId: note.bookId });
 								}}
 							>
@@ -256,17 +287,19 @@ function NoteActions({
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogAction variant="neutralWeak">취소</AlertDialogAction>
-						<AlertDialogAction
-							variant="criticalSolid"
-							loading={remove.isPending}
-							onClick={(event) => {
-								event.preventDefault();
-								remove.mutate({ noteId: note.id });
-							}}
-						>
-							기록 삭제
-						</AlertDialogAction>
+						<ResponsivePair gap="x2">
+							<AlertDialogAction variant="neutralWeak">취소</AlertDialogAction>
+							<AlertDialogAction
+								variant="criticalSolid"
+								loading={remove.isPending}
+								onClick={(event) => {
+									event.preventDefault();
+									remove.mutate({ noteId: note.id });
+								}}
+							>
+								기록 삭제
+							</AlertDialogAction>
+						</ResponsivePair>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialogRoot>

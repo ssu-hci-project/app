@@ -5,11 +5,14 @@ import { ActionButton, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useSessionStorage } from "usehooks-ts";
 import type { z } from "zod";
+import { editionLabel } from "@/entities/book";
 import { orpc } from "@/shared/api";
 import {
+	Callout,
 	LoadState,
 	MobileScreen,
 	TextField,
@@ -17,6 +20,7 @@ import {
 	TextFieldTextarea,
 	useNotice,
 } from "@/shared/ui";
+import { QuestionPicker } from "./question-picker";
 
 export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params }) => {
 	const flow = useFlow();
@@ -30,6 +34,8 @@ export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params
 	const book = useQuery(orpc.reading.getBook.queryOptions({ input: { bookId: params.bookId } }));
 	const pending = book.isPending || (!!params.noteId && note.isPending);
 	const error = book.isError || (!!params.noteId && note.isError);
+	const [busy, setBusy] = useState(false);
+	const editable = !pending && !error && !!book.data && (!params.noteId || !!note.data?.isMine);
 	return (
 		<MobileScreen
 			title={params.noteId ? "기록 수정" : "생각 남기기"}
@@ -44,8 +50,26 @@ export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params
 							})
 						: flow.pop()
 			}
+			footer={
+				editable && (
+					<ActionButton
+						type="submit"
+						form="note-form"
+						variant="neutralSolid"
+						size="large"
+						loading={busy}
+					>
+						{note.data?.visibility === "group"
+							? "공유 기록 수정"
+							: params.noteId
+								? "기록 수정"
+								: "내 기록에 저장"}
+					</ActionButton>
+				)
+			}
 		>
 			<LoadState
+				shape="article"
 				pending={pending}
 				error={error}
 				retry={() => {
@@ -53,15 +77,17 @@ export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params
 					if (params.noteId) note.refetch();
 				}}
 			/>
-			{!pending && !error && book.data && (!params.noteId || note.data?.isMine) && (
+			{editable && book.data && (
 				<NoteForm
-					key={params.noteId ?? `${params.bookId}:${params.page}`}
+					key={params.noteId ?? `${params.bookId}:${params.page}:${params.quote ?? ""}`}
 					bookId={params.bookId}
 					page={params.page}
 					pageCount={book.data.book.pageCount}
 					title={book.data.book.title}
-					edition={book.data.book.edition}
+					edition={editionLabel(book.data.book)}
 					note={note.data}
+					initialQuote={params.quote}
+					onBusyChange={setBusy}
 				/>
 			)}
 			{note.data && !note.data.isMine && <Text>내 기록만 수정할 수 있어요.</Text>}
@@ -76,24 +102,31 @@ function NoteForm({
 	edition,
 	pageCount,
 	note,
+	initialQuote,
+	onBusyChange,
 }: {
 	bookId: string;
 	page: string;
 	title: string;
-	edition: string;
+	edition: string | null;
 	pageCount: number;
 	note?: Bookmark;
+	/** 리더에서 고른 문장. 있으면 쓰던 구절보다 우선해요. */
+	initialQuote?: string;
+	onBusyChange: (busy: boolean) => void;
 }) {
 	const { replace } = useFlow();
 	const notify = useNotice();
 	const [draft, setDraft, clearDraft] = useSessionStorage(
 		`note-draft:${note?.id ?? `${bookId}:${page}`}`,
-		{ content: note?.content ?? "", quote: note?.quote ?? "" },
+		{ content: note?.content ?? "", quote: note?.quote ?? "", prompt: note?.prompt ?? null },
 	);
 	const form = useForm<z.infer<typeof noteInputSchema>>({
 		resolver: zodResolver(noteInputSchema),
-		defaultValues: draft,
+		defaultValues: { ...draft, quote: initialQuote ?? draft.quote },
 	});
+	const prompt = form.watch("prompt");
+	const quote = form.watch("quote");
 	const success = (saved: Bookmark) => {
 		clearDraft();
 		notify(note ? "기록을 수정했어요" : "내 기록에 저장했어요", "positive");
@@ -113,11 +146,14 @@ function NoteForm({
 	);
 	const busy = create.isPending || update.isPending;
 	const failed = create.isError || update.isError;
+	const [quoteOpen, setQuoteOpen] = useState(!!(initialQuote ?? draft.quote));
+	useEffect(() => onBusyChange(busy), [busy, onBusyChange]);
 	const pageNumber = note?.page ?? Number(page);
 	if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > pageCount)
 		return <Text color="fg.critical">책으로 돌아가 페이지를 확인해주세요.</Text>;
 	return (
 		<form
+			id="note-form"
 			className="flex flex-col gap-x6"
 			onSubmit={form.handleSubmit((values) =>
 				note
@@ -129,39 +165,36 @@ function NoteForm({
 				<Text as="h1" textStyle="t7Bold">
 					{title} · {pageNumber}쪽
 				</Text>
-				<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
-					{edition}
-				</Text>
+				{edition && (
+					<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
+						{edition}
+					</Text>
+				)}
 			</div>
-			<Text as="p" textStyle="t4Medium">
-				{note?.visibility === "group"
-					? "이 기록은 모임에 공유 중이에요. 수정한 내용도 함께 보여요."
-					: note?.visibility === "legacy"
-						? "기존 공개 기록이에요. 공개 범위는 기록 상세에서 바꿀 수 있어요."
-						: "먼저 나만 볼 수 있게 저장해요. 공유는 나중에 선택할 수 있어요."}
-			</Text>
+			<Callout
+				tone={note?.visibility === "group" ? "neutral" : "informative"}
+				description={
+					note?.visibility === "group"
+						? "모임에 공유 중인 기록이에요. 수정한 내용도 모임에 함께 보여요."
+						: note?.visibility === "legacy"
+							? "예전에 공개로 남긴 기록이에요. 공개 범위는 기록 화면에서 바꿀 수 있어요."
+							: "나만 볼 수 있게 저장해요. 공유는 저장한 뒤 원할 때 고를 수 있어요."
+				}
+			/>
 			<Controller
 				control={form.control}
-				name="quote"
+				name="prompt"
 				render={({ field }) => (
-					<TextField
-						label="기억할 구절 (선택)"
-						value={field.value}
-						onValueChange={({ value }) => {
-							field.onChange(value);
-							setDraft((previous) => ({ ...previous, quote: value }));
+					<QuestionPicker
+						bookId={note?.bookId ?? bookId}
+						page={pageNumber}
+						quote={quote}
+						value={field.value ?? null}
+						onChange={(next) => {
+							field.onChange(next);
+							setDraft((previous) => ({ ...previous, prompt: next }));
 						}}
-						invalid={!!form.formState.errors.quote}
-						errorMessage={form.formState.errors.quote?.message}
-						disabled={busy}
-					>
-						<TextFieldInput
-							name={field.name}
-							ref={field.ref}
-							onBlur={field.onBlur}
-							maxLength={200}
-						/>
-					</TextField>
+					/>
 				)}
 			/>
 			<Controller
@@ -169,7 +202,7 @@ function NoteForm({
 				name="content"
 				render={({ field }) => (
 					<TextField
-						label="내 생각"
+						label={prompt ?? "내 생각"}
 						value={field.value}
 						onValueChange={({ value }) => {
 							field.onChange(value);
@@ -178,7 +211,7 @@ function NoteForm({
 						invalid={!!form.formState.errors.content}
 						errorMessage={form.formState.errors.content?.message}
 						disabled={busy}
-						description="한 줄이어도 괜찮아요. 이 탭에서는 작성 중인 내용을 보관해요."
+						description="한 줄이어도 괜찮아요. 이 탭을 닫기 전까지 쓰던 내용이 남아 있어요."
 					>
 						<TextFieldTextarea
 							name={field.name}
@@ -186,18 +219,53 @@ function NoteForm({
 							onBlur={field.onBlur}
 							maxLength={500}
 							placeholder="이 장면에서 어떤 생각이 들었나요?"
+							className="min-h-[8.5rem]"
 						/>
 					</TextField>
 				)}
 			/>
+			{quoteOpen ? (
+				<Controller
+					control={form.control}
+					name="quote"
+					render={({ field }) => (
+						<TextField
+							label="기억할 구절"
+							value={field.value}
+							onValueChange={({ value }) => {
+								field.onChange(value);
+								setDraft((previous) => ({ ...previous, quote: value }));
+							}}
+							invalid={!!form.formState.errors.quote}
+							errorMessage={form.formState.errors.quote?.message}
+							disabled={busy}
+							description="선택 사항이에요. 책의 문장을 옮겨 적어두면 나중에 찾기 쉬워요."
+						>
+							<TextFieldInput
+								name={field.name}
+								ref={field.ref}
+								onBlur={field.onBlur}
+								maxLength={200}
+							/>
+						</TextField>
+					)}
+				/>
+			) : (
+				<ActionButton
+					type="button"
+					variant="ghost"
+					size="small"
+					className="self-start"
+					onClick={() => setQuoteOpen(true)}
+				>
+					기억할 구절 추가
+				</ActionButton>
+			)}
 			{failed && (
 				<Text as="p" role="alert" color="fg.critical">
 					저장하지 못했어요. 연결을 확인하고 아래 버튼으로 다시 저장해주세요.
 				</Text>
 			)}
-			<ActionButton variant="neutralSolid" loading={busy} type="submit">
-				{note?.visibility === "group" ? "공유 기록 수정" : note ? "기록 수정" : "내 기록에 저장"}
-			</ActionButton>
 		</form>
 	);
 }

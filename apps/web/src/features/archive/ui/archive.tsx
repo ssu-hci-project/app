@@ -1,17 +1,20 @@
-import { ActionButton, SegmentedControl, Text } from "@seed-design/react";
+import { ActionButton, SegmentedControl } from "@seed-design/react";
 import { useQuery } from "@tanstack/react-query";
 import { NoteList } from "@/entities/note";
 import { orpc } from "@/shared/api";
-import { LoadState, ResultSection } from "@/shared/ui";
+import { Callout, LoadState, ResultSection } from "@/shared/ui";
 
 export function Archive({
 	filter,
 	onFilter,
 	onSelect,
+	onBrowse,
 }: {
 	filter: string;
 	onFilter: (value: string) => void;
 	onSelect: (noteId: string) => void;
+	/** 빈 상태에서 기록을 강요하지 않고 책으로 돌아가게 합니다. */
+	onBrowse: () => void;
 }) {
 	const notes = useQuery(orpc.notes.listMine.queryOptions());
 	const books = useQuery(orpc.reading.listBooks.queryOptions());
@@ -66,14 +69,20 @@ export function Archive({
 					<ResultSection
 						size="medium"
 						title="아직 이곳에 기록이 없어요"
-						description="책을 읽으며 머문 생각을 한 줄 남겨보세요."
+						description="책을 읽다 머문 장면이 있으면 그 쪽에서 남길 수 있어요."
+						secondaryActionProps={{ children: "책장에서 책 열기", onClick: onBrowse }}
 					/>
 				))}
-			<Text textStyle="t3Regular" color="fg.neutralMuted">
-				이 브라우저의 익명 기록이에요. 쿠키가 만료되거나 삭제되면 다시 연결하기 어려워요. 중요한
-				기록은 파일로 보관해주세요.
-			</Text>
-			<ActionButton variant="neutralWeak" disabled={!notes.isSuccess} onClick={download}>
+			<Callout
+				tone="warning"
+				title="보관"
+				description="이 브라우저에만 연결된 기록이에요. 쿠키가 지워지면 다시 찾기 어려우니 중요한 기록은 파일로 보관해주세요."
+			/>
+			<ActionButton
+				variant="neutralWeak"
+				disabled={!notes.isSuccess || notes.data.length === 0}
+				onClick={download}
+			>
 				내 기록 파일로 보관
 			</ActionButton>
 		</div>
