@@ -1,7 +1,9 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
 import { bookmarkSchema } from "./reading";
-export const noteInputSchema = bookmarkSchema.pick({ content: true, quote: true });
+export const noteInputSchema = bookmarkSchema
+	.pick({ content: true, quote: true })
+	.extend({ prompt: bookmarkSchema.shape.prompt.optional() });
 const errors = {
 	NOT_FOUND: { message: "기록을 찾을 수 없습니다" },
 	FORBIDDEN: { message: "이 기록을 볼 수 있는 모임에 참여해주세요" },

@@ -49,11 +49,17 @@ export const notesRouter = {
 			return writeSharedNote(context.db, note.id, context.userId, {
 				content: input.content,
 				quote: input.quote,
+				prompt: input.prompt ?? null,
 			});
 		}
 		await context.db
 			.update(bookmarks)
-			.set({ content: input.content, quote: input.quote, updatedAt: new Date().toISOString() })
+			.set({
+				content: input.content,
+				quote: input.quote,
+				prompt: input.prompt ?? null,
+				updatedAt: new Date().toISOString(),
+			})
 			.where(and(eq(bookmarks.id, note.id), eq(bookmarks.userId, context.userId)));
 		return noteView(await ownedNote(context.db, note.id, context.userId), context.userId);
 	}),

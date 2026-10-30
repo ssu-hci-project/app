@@ -89,6 +89,11 @@ function VisibleNote({
 	return (
 		<article ref={ref} className="flex flex-col gap-x3 border-b border-stroke-neutral-weak pb-x5">
 			<Text textStyle="t4Medium">{note.isMine ? "내가 나눈 생각" : "함께 읽는 독자의 생각"}</Text>
+			{note.prompt && (
+				<Text textStyle="t3Regular" color="fg.neutralMuted">
+					{note.prompt}
+				</Text>
+			)}
 			{note.quote && (
 				<blockquote className="border-l-2 border-stroke-neutral-weak pl-x3">
 					<Text textStyle="t4Medium">{note.quote}</Text>

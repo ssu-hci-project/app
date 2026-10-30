@@ -11,7 +11,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
 	<StrictMode>
-		<div className="relative isolate mx-auto h-dvh w-full max-w-[430px] overflow-hidden bg-background [transform:translateZ(0)] sm:shadow-xl">
+		<div
+			id="app-frame"
+			className="relative isolate mx-auto h-dvh w-full max-w-[430px] overflow-clip bg-background [transform:translateZ(0)] sm:shadow-xl"
+		>
 			<AppProviders>
 				<Stack />
 			</AppProviders>

@@ -12,6 +12,7 @@
 		"db:migrate": "wrangler d1 migrations apply DB --local",
 		"db:migrate:remote": "wrangler d1 migrations apply DB --remote",
 		"db:seed": "wrangler d1 execute DB --local --file seed.sql",
+		"seed:build": "bun scripts/build-seed.ts",
 		"db:studio": "drizzle-kit studio",
 		"ensure-assets": "mkdir -p ../web/dist",
 		"deploy": "wrangler deploy && wrangler d1 migrations apply DB --remote"

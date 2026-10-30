@@ -170,3 +170,19 @@
 		@apply font-sans;
 	}
 }
+
+/* 사용자가 동작 줄이기를 켜면 화면 전환과 시트 애니메이션을 사실상 즉시 끝냅니다. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: 동작 줄이기는 모든 컴포넌트의 애니메이션보다 우선해야 해요 */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: 동작 줄이기는 모든 컴포넌트의 애니메이션보다 우선해야 해요 */
+		animation-iteration-count: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: 동작 줄이기는 모든 컴포넌트의 애니메이션보다 우선해야 해요 */
+		transition-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: 동작 줄이기는 모든 컴포넌트의 애니메이션보다 우선해야 해요 */
+		scroll-behavior: auto !important;
+	}
+}

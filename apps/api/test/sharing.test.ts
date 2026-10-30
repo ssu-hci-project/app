@@ -174,4 +174,58 @@ describe("private records and explicit group sharing", () => {
 			)[0],
 		).toMatchObject({ code: "NOT_FOUND" });
 	});
+	it("counts other readers' notes on a page without exposing them, and accepts short invite codes", async () => {
+		const alice = createReader();
+		const bob = createReader();
+		const book = await alice.reading.createBook({
+			title: "세어 보기",
+			author: "저자",
+			pageCount: 10,
+		});
+		const group = await alice.groups.create({ bookId: book.id, name: "짧은 코드" });
+		expect(group.inviteCode).toMatch(/^[A-HJKMNP-Z2-9]{8}$/);
+		await bob.groups.join({ code: ` ${group.inviteCode.toLowerCase()} ` });
+		const mine = await alice.notes.create({
+			bookId: book.id,
+			page: 4,
+			quote: "",
+			content: "내 생각",
+		});
+		await alice.notes.setVisibility({ noteId: mine.id, groupId: group.id });
+		const theirs = await bob.notes.create({
+			bookId: book.id,
+			page: 4,
+			quote: "",
+			content: "밥의 생각",
+		});
+		const input = { bookId: book.id, page: 4, groupId: group.id };
+		expect(await alice.reading.pageNoteCount(input)).toEqual({ count: 0 });
+		await bob.notes.setVisibility({ noteId: theirs.id, groupId: group.id });
+		expect(await alice.reading.pageNoteCount(input)).toEqual({ count: 1 });
+		expect(await bob.reading.pageNoteCount(input)).toEqual({ count: 1 });
+		expect(await alice.reading.pageNoteCount({ bookId: book.id, page: 4 })).toEqual({ count: 0 });
+		expect((await safe(createReader().reading.pageNoteCount(input)))[0]).toMatchObject({
+			code: "FORBIDDEN",
+		});
+		expect((await safe(alice.reading.pageNoteCount({ ...input, page: 11 })))[0]).toMatchObject({
+			code: "BAD_REQUEST",
+		});
+	});
+	it("lists recently opened books with the reader's own page and a group they still belong to", async () => {
+		const alice = createReader();
+		const first = await alice.reading.createBook({ title: "먼저", author: "저자", pageCount: 50 });
+		const second = await alice.reading.createBook({ title: "나중", author: "저자", pageCount: 50 });
+		expect(await alice.reading.listRecent()).toEqual([]);
+		await alice.reading.saveProgress({ bookId: first.id, page: 7 });
+		const group = await alice.groups.create({ bookId: second.id, name: "최근 모임" });
+		await alice.reading.saveProgress({ bookId: second.id, page: 12, groupId: group.id });
+		const recent = await alice.reading.listRecent();
+		expect(recent.map((item) => [item.book.id, item.currentPage, item.lastGroupId])).toEqual([
+			[second.id, 12, group.id],
+			[first.id, 7, null],
+		]);
+		expect(await createReader().reading.listRecent()).toEqual([]);
+		await alice.groups.leave({ groupId: group.id });
+		expect((await alice.reading.listRecent())[0]?.lastGroupId).toBeNull();
+	});
 });

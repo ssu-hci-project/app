@@ -1,7 +1,19 @@
-import { and, asc, eq, gt, ne, sql } from "drizzle-orm";
+import { and, asc, eq, gt, ne, or, sql } from "drizzle-orm";
 import { bookmarks, books, groups, memberships, seenNotes } from "../db/schema";
 import { os } from "../orpc";
 import { noteView, requireGroup } from "./reading-access";
+
+// 8 characters without look-alikes (0/O, 1/I/L) so a code can be read aloud.
+const inviteAlphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function createInviteCode() {
+	return Array.from(
+		crypto.getRandomValues(new Uint8Array(8)),
+		(byte) => inviteAlphabet[byte % inviteAlphabet.length],
+	).join("");
+}
+// Older invites are lowercase UUIDs; new codes are matched regardless of case.
+const inviteCodeIs = (code: string) =>
+	or(eq(groups.inviteCode, code.trim()), eq(groups.inviteCode, code.trim().toUpperCase()));
 
 export const groupsRouter = {
 	list: os.groups.list.handler(async ({ context }) => {
@@ -47,7 +59,7 @@ export const groupsRouter = {
 		const group = {
 			...input,
 			id: crypto.randomUUID(),
-			inviteCode: crypto.randomUUID(),
+			inviteCode: createInviteCode(),
 			createdAt: new Date().toISOString(),
 		};
 		await context.db.batch([
@@ -57,11 +69,7 @@ export const groupsRouter = {
 		return { ...group, unreadCount: 0, memberCount: 1, unreadPages: [] };
 	}),
 	previewInvite: os.groups.previewInvite.handler(async ({ context, input, errors }) => {
-		const group = await context.db
-			.select()
-			.from(groups)
-			.where(eq(groups.inviteCode, input.code))
-			.get();
+		const group = await context.db.select().from(groups).where(inviteCodeIs(input.code)).get();
 		if (!group) throw errors.NOT_FOUND();
 		const book = await context.db.select().from(books).where(eq(books.id, group.bookId)).get();
 		if (!book) throw errors.NOT_FOUND();
@@ -73,11 +81,7 @@ export const groupsRouter = {
 		return { groupId: group.id, name: group.name, book, joined: !!member };
 	}),
 	join: os.groups.join.handler(async ({ context, input, errors }) => {
-		const group = await context.db
-			.select()
-			.from(groups)
-			.where(eq(groups.inviteCode, input.code))
-			.get();
+		const group = await context.db.select().from(groups).where(inviteCodeIs(input.code)).get();
 		if (!group) throw errors.NOT_FOUND();
 		await context.db
 			.insert(memberships)

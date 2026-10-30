@@ -62,12 +62,12 @@ describe("reading API", () => {
 		const result = await clientWithoutKey.reading.generateQuestions({
 			bookId: book.id,
 			page: 1,
-			context: "한 사람이 길을 나섰다.",
+			quote: "한 사람이 길을 나섰다.",
 		});
 		expect(result.source).toBe("fallback");
 		expect(result.questions).toEqual(await client.reading.listQuestionTemplates());
 		const [invalid] = await safe(
-			client.reading.generateQuestions({ bookId: book.id, page: 11, context: "내용" }),
+			client.reading.generateQuestions({ bookId: book.id, page: 11, quote: "내용" }),
 		);
 		expect(invalid).toMatchObject({ code: "BAD_REQUEST" });
 	});

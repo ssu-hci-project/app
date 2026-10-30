@@ -8,6 +8,9 @@ export const sessions = sqliteTable("sessions", {
 
 export const books = sqliteTable("books", {
 	edition: text("edition").notNull().default("판본 미확인"),
+	/** Where the in-app text came from, and why it may be redistributed. */
+	sourceUrl: text("source_url"),
+	license: text("license"),
 	id: text("id")
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
@@ -25,6 +28,8 @@ export const bookmarks = sqliteTable("bookmarks", {
 		.default("legacy"),
 	groupId: text("group_id").references(() => groups.id),
 	quote: text("quote").notNull().default(""),
+	/** The question the reader chose to answer, if any. */
+	prompt: text("prompt"),
 	updatedAt: text("updated_at"),
 	sharedVersion: integer("shared_version").notNull().default(0),
 	userId: text("user_id"),
@@ -40,6 +45,19 @@ export const bookmarks = sqliteTable("bookmarks", {
 		.notNull()
 		.$defaultFn(() => new Date().toISOString()),
 });
+
+/** Fixed pages cut once at import, so every reader and group sees the same page numbers. */
+export const bookPages = sqliteTable(
+	"book_pages",
+	{
+		bookId: text("book_id")
+			.notNull()
+			.references(() => books.id, { onDelete: "cascade" }),
+		page: integer("page").notNull(),
+		text: text("text").notNull(),
+	},
+	(table) => [primaryKey({ columns: [table.bookId, table.page] })],
+);
 
 export const questionAnswers = sqliteTable("question_answers", {
 	userId: text("user_id"),
