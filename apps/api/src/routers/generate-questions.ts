@@ -35,7 +35,10 @@ export async function generateQuestions(
 			}),
 		},
 	);
-	if (!response.ok) throw new Error(`Gemini request failed: ${response.status}`);
+	if (!response.ok)
+		throw new Error(
+			`Gemini request failed: ${response.status} ${(await response.text()).slice(0, 300)}`,
+		);
 	const payload = z
 		.object({
 			candidates: z

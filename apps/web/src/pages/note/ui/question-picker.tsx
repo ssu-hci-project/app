@@ -1,5 +1,5 @@
-import { IconSparkle2Fill, IconSparkle2Line } from "@karrotmarket/react-monochrome-icon";
-import { ActionButton, PrefixIcon, Text } from "@seed-design/react";
+import { IconSparkle2Fill } from "@karrotmarket/react-monochrome-icon";
+import { Text } from "@seed-design/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
@@ -11,9 +11,9 @@ import {
 } from "@/shared/ui";
 
 /**
- * 생각을 여는 질문을 고르는 선택 영역입니다. 사용자가 펼칠 때만 AI 질문을 요청하고,
- * 그전에는 기본 질문만 보여줘요. AI에는 지금 쪽까지의 본문과 고른 구절만 가고, 쓰던 생각은
- * 보내지 않아요. 고르지 않아도 자유롭게 쓸 수 있어요.
+ * 생각을 여는 질문을 고르는 선택 영역입니다. 작성 화면을 열면 기본 질문을 바로 보여주고,
+ * AI 질문은 도착하는 대로 위에 더해요. AI에는 지금 쪽까지의 본문과 고른 구절만 가고, 쓰던
+ * 생각은 보내지 않아요. 고르지 않아도 자유롭게 쓸 수 있어요.
  */
 export function QuestionPicker({
 	bookId,
@@ -28,32 +28,18 @@ export function QuestionPicker({
 	value: string | null;
 	onChange: (prompt: string | null) => void;
 }) {
-	const [open, setOpen] = useState(!!value);
 	const templates = useQuery({
 		...orpc.reading.listQuestionTemplates.queryOptions(),
-		enabled: open,
 	});
+	// 화면을 열 때의 구절로 한 번만 요청해요. 구절을 고쳐 쓸 때마다 다시 만들지 않아요.
+	const [requestQuote] = useState(() => quote.trim() || undefined);
 	const generated = useQuery({
 		...orpc.reading.generateQuestions.queryOptions({
-			input: { bookId, page, quote: quote.trim() || undefined },
+			input: { bookId, page, quote: requestQuote },
 		}),
-		enabled: open,
 		staleTime: Number.POSITIVE_INFINITY,
 		retry: false,
 	});
-	if (!open)
-		return (
-			<ActionButton
-				type="button"
-				variant="ghost"
-				size="small"
-				className="self-start"
-				onClick={() => setOpen(true)}
-			>
-				<PrefixIcon svg={<IconSparkle2Line />} />
-				질문 받아보기
-			</ActionButton>
-		);
 	const ai = generated.data?.source === "ai" ? generated.data.questions : [];
 	const aiQuestions = new Set(ai.map((item) => item.question));
 	const questions = [...aiQuestions, ...(templates.data ?? []).map((item) => item.question)];
@@ -62,11 +48,11 @@ export function QuestionPicker({
 			<Callout
 				tone="magic"
 				prefixIcon={<IconSparkle2Fill />}
-				title={ai.length ? "AI 질문" : "질문"}
+				title={ai.length ? "AI 질문" : "질문은 고르지 않아도 돼요"}
 				description={
 					ai.length
 						? "이 쪽의 본문을 바탕으로 만든 질문이 있어요. 정답은 없으니 마음 가는 것만 골라요."
-						: "질문은 고르지 않아도 돼요. 마음 가는 질문이 있으면 골라보세요."
+						: "마음 가는 질문이 있으면 골라보세요."
 				}
 			/>
 			{generated.isFetching && (

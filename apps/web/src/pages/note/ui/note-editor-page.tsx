@@ -12,7 +12,6 @@ import type { z } from "zod";
 import { editionLabel } from "@/entities/book";
 import { orpc } from "@/shared/api";
 import {
-	Callout,
 	LoadState,
 	MobileScreen,
 	TextField,
@@ -171,16 +170,6 @@ function NoteForm({
 					</Text>
 				)}
 			</div>
-			<Callout
-				tone={note?.visibility === "group" ? "neutral" : "informative"}
-				description={
-					note?.visibility === "group"
-						? "모임에 공유 중인 기록이에요. 수정한 내용도 모임에 함께 보여요."
-						: note?.visibility === "legacy"
-							? "예전에 공개로 남긴 기록이에요. 공개 범위는 기록 화면에서 바꿀 수 있어요."
-							: "나만 볼 수 있게 저장해요. 공유는 저장한 뒤 원할 때 고를 수 있어요."
-				}
-			/>
 			<Controller
 				control={form.control}
 				name="prompt"
