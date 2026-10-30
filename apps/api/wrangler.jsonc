@@ -13,6 +13,11 @@
 	"observability": {
 		"enabled": true
 	},
+	// Gemini rejects calls from some regions ("User location is not supported"), and a Worker
+	// otherwise runs wherever the request lands. Pin it to Seoul, next to the D1 primary (ICN).
+	"placement": {
+		"region": "gcp:asia-northeast3"
+	},
 	"d1_databases": [
 		{
 			// No database_id: wrangler creates the D1 database on first deploy.

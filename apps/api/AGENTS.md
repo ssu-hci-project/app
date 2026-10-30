@@ -60,3 +60,4 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
 - 앱 안 본문은 `book_pages`에 고정 쪽으로 저장합니다. 쪽은 `src/lib/paginate.ts`(문단 우선, 약 600자)로 한 번만 나누고, 시드와 `reading.createBook({ text })`가 같은 함수를 씁니다. 쪽 나누기를 바꾸면 기존 기록의 쪽 번호가 어긋나므로, 이미 쓰인 작품은 다시 나누지 마세요.
 - 작품을 추가할 때는 저자 사망 후 보호기간이 끝난 원작만 넣고(번역본 제외), 출처 URL과 이용 조건을 `books/<id>.json`에 남깁니다.
 - `reading.generateQuestions`는 클라이언트가 보낸 맥락을 받지 않습니다. 서버가 `src/lib/question-context.ts`로 현재 쪽과 직전 쪽 끝부분, 고른 구절만 묶어 보냅니다. 다음 쪽 본문이나 개인 기록을 넣지 마세요.
+- Worker는 `wrangler.jsonc`의 `placement.region`으로 서울(`gcp:asia-northeast3`)에 고정합니다. Gemini가 일부 지역의 호출을 400 "User location is not supported"로 거절하기 때문이고, D1 기본 위치(ICN)와도 가깝습니다. 지우면 AI 질문이 간헐적으로 기본 질문으로 대체됩니다.
