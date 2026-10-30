@@ -111,7 +111,7 @@ export function QuestionPicker({
 					<TextFieldInput
 						name="custom-prompt"
 						maxLength={PROMPT_LIMIT}
-						placeholder="예: 김 첨지는 왜 집에 가기를 미뤘을까?"
+						placeholder="예: 이 인물은 왜 그렇게 말했을까?"
 						autoFocus
 					/>
 				</TextField>
