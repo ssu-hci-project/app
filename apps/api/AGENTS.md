@@ -46,6 +46,7 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
 - **테스트:** 새 프로시저마다 `test/`에 테스트를 추가하고, 기존 테스트처럼
   타입이 있는 oRPC 클라이언트로 호출합니다. 실행마다 모든 마이그레이션이
   적용된 새 D1을 받습니다.
+- 배포 계정은 `wrangler.jsonc`의 `account_id`(chili.tomat0@icloud.com 계정)와 D1 `database_id`로 고정합니다. 다른 계정으로 `wrangler login`하면 배포가 권한 오류로 멈추고 새 Worker나 빈 DB를 만들지 않습니다. 배포하려면 그 계정의 Cloudflare Members로 초대받으세요.
 - 로컬 D1 상태는 `.wrangler/`(gitignore 대상)에 있습니다. 초기화하려면 삭제한
   뒤 루트에서 `bun run db:migrate && bun run db:seed`를 실행하세요.
 - **교환독서 모델**(`profile`·`libraries`·`books`·`saved`·`progress`·`reads`·`traces`·`reactions`·`questions`):
