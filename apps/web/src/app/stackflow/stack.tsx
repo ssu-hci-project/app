@@ -1,20 +1,18 @@
 import { historySyncPlugin } from "@stackflow/plugin-history-sync";
 import { basicRendererPlugin } from "@stackflow/plugin-renderer-basic";
 import { stackflow } from "@stackflow/react";
-import { GroupPage, InvitePage } from "@/pages/group";
+import { BookPage } from "@/pages/book";
 import { HomePage } from "@/pages/home";
-import { NoteEditorPage, NotePage } from "@/pages/note";
-import { ReadingPage } from "@/pages/reading";
+import { InvitePage } from "@/pages/invite";
+import { ReaderPage } from "@/pages/reader";
 import { config } from "./config";
 
 export const { Stack } = stackflow({
 	config,
 	components: {
 		HomePage,
-		ReadingPage,
-		NotePage,
-		NoteEditorPage,
-		GroupPage,
+		BookPage,
+		ReaderPage,
 		InvitePage,
 	},
 	plugins: [

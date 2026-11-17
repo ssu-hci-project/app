@@ -26,18 +26,20 @@ export function BottomSheetContent({
 	title,
 	description,
 	children,
+	className,
 }: {
 	title: ReactNode;
 	description?: ReactNode;
 	children: ReactNode;
+	className?: string;
 }) {
 	return (
-		<DrawerContent>
+		<DrawerContent className={className}>
 			<DrawerHeader className="relative pr-14 text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
-				<DrawerTitle className="text-lg font-bold">{title}</DrawerTitle>
-				{description && <DrawerDescription>{description}</DrawerDescription>}
+				<DrawerTitle className="text-xl font-bold">{title}</DrawerTitle>
+				{description && <DrawerDescription className="break-keep">{description}</DrawerDescription>}
 				<DrawerClose
-					render={<Button variant="ghost" size="icon" className="absolute top-2 right-2" />}
+					render={<Button variant="ghost" size="icon" className="absolute top-2 right-2 size-11" />}
 					aria-label="닫기"
 				>
 					<XIcon />
@@ -51,6 +53,30 @@ export function BottomSheetContent({
 export function BottomSheetBody({
 	className,
 	children,
+	withFooter,
+}: {
+	className?: string;
+	children: ReactNode;
+	/** The sheet has a `BottomSheetFooter`, which takes care of the safe area. */
+	withFooter?: boolean;
+}) {
+	return (
+		<div
+			className={cn(
+				"min-h-0 flex-1 overflow-y-auto px-4 pt-4",
+				withFooter ? "pb-4" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	);
+}
+
+/** Buttons pinned under a sheet's scrolling body, e.g. [취소][남기기]. */
+export function BottomSheetFooter({
+	className,
+	children,
 }: {
 	className?: string;
 	children: ReactNode;
@@ -58,7 +84,7 @@ export function BottomSheetBody({
 	return (
 		<div
 			className={cn(
-				"min-h-0 overflow-y-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
+				"flex shrink-0 gap-2 border-t bg-popover px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] *:flex-1",
 				className,
 			)}
 		>

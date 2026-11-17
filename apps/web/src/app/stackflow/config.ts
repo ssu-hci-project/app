@@ -8,19 +8,18 @@ import { defineConfig } from "@stackflow/config";
  */
 declare module "@stackflow/config" {
 	interface Register {
-		HomePage: { section?: string; tab?: string; filter?: string; overlay?: string };
-		ReadingPage: { bookId: string; page?: string; groupId?: string; overlay?: string };
-		NoteEditorPage: {
+		/** `tab`: home | search | my, switched with `replaceStep`. */
+		HomePage: { tab?: string; overlay?: string };
+		BookPage: { bookId: string; overlay?: string };
+		/** Optional target passage (chapter, paragraph, range) to open at and select. */
+		ReaderPage: {
 			bookId: string;
-			page: string;
-			noteId?: string;
-			groupId?: string;
-			/** 리더에서 고른 문장. 작성 화면의 "기억할 구절"을 채웁니다. */
-			quote?: string;
+			ch?: string;
+			p?: string;
+			s?: string;
+			e?: string;
 			overlay?: string;
 		};
-		NotePage: { noteId: string; overlay?: string };
-		GroupPage: { bookId: string; groupId?: string; overlay?: string };
 		InvitePage: { code: string; overlay?: string };
 	}
 }
@@ -28,10 +27,8 @@ declare module "@stackflow/config" {
 export const config = defineConfig({
 	activities: [
 		{ name: "HomePage", route: "/" },
-		{ name: "ReadingPage", route: "/books/:bookId" },
-		{ name: "NoteEditorPage", route: "/books/:bookId/write" },
-		{ name: "NotePage", route: "/notes/:noteId" },
-		{ name: "GroupPage", route: "/books/:bookId/groups" },
+		{ name: "BookPage", route: "/books/:bookId" },
+		{ name: "ReaderPage", route: "/books/:bookId/read" },
 		{ name: "InvitePage", route: "/invite/:code" },
 	],
 	initialActivity: () => "HomePage",

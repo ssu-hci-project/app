@@ -44,6 +44,13 @@
 	--color-bookmark: var(--bookmark);
 	--color-warning: var(--warning);
 	--color-magic: var(--magic);
+	--color-paper: var(--paper);
+	--color-rule: var(--rule);
+	--color-reader-ink: var(--reader-ink);
+	--color-selection: var(--selection);
+	--color-toolbar: var(--foreground);
+	--font-serif: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", serif;
+	--font-hand: "Nanum Pen Script", cursive;
 	--radius-sm: calc(var(--radius) * 0.6);
 	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
@@ -75,6 +82,11 @@
 	--bookmark: #a84e35;
 	--warning: #b54708;
 	--magic: #b44fb0;
+	/* 리더: 종이 면, 구분선, 본문 글자, 고른 문장 배경 */
+	--paper: #f5f1e8;
+	--rule: #e4dccb;
+	--reader-ink: #2b2b28;
+	--selection: #d9d4c7;
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
@@ -177,4 +189,34 @@
 }
 .app-screen[data-covered] {
 	transform: translateX(-30%);
+}
+
+/* 리더 본문. 크기·줄 간격은 글자 설정이 --reader-size / --reader-leading으로 넘깁니다. */
+.reader-text {
+	font-size: var(--reader-size, 18px);
+	line-height: var(--reader-leading, 1.8);
+	color: var(--reader-ink);
+	word-break: keep-all;
+	overflow-wrap: anywhere;
+	letter-spacing: -0.2px;
+}
+.reader-text p {
+	margin: 0 0 calc(var(--reader-size, 18px) * var(--reader-leading, 1.8) * 0.6);
+}
+.reader-sentence {
+	cursor: pointer;
+	-webkit-box-decoration-break: clone;
+	box-decoration-break: clone;
+	/* 밑줄 밴드(6px)를 위해 늘 같은 여백을 둬서, 밑줄이 생겨도 줄이 움직이지 않아요. */
+	padding-bottom: 3px;
+	background-repeat: no-repeat;
+}
+@keyframes toolbar-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px) scale(0.98);
+	}
+}
+.toolbar-in {
+	animation: toolbar-in 160ms ease-out;
 }

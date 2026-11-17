@@ -8,6 +8,7 @@
 		"preview": "vite preview",
 		"typecheck": "tsc -b",
 		"arch:lint": "steiger ./src",
+		"test": "bun test",
 		"new:slice": "bun scripts/new-slice.ts"
 	},
 	"dependencies": {

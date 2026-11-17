@@ -31,6 +31,7 @@ export {
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
+	BottomSheetFooter,
 	MenuSheet,
 	MenuSheetContent,
 	MenuSheetItem,
@@ -81,8 +82,10 @@ export { Input } from "./input";
 export { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "./item";
 export { List, ListButton, ListHeader } from "./list";
 export { LoadState, MobileScreen } from "./mobile-screen";
-export { useStepOverlay } from "./overlay";
+export { appFrame, useStepOverlay } from "./overlay";
+export { Popover, PopoverContent, PopoverTrigger } from "./popover";
 export { ResultSection } from "./result-section";
+export { Segmented } from "./segmented";
 export {
 	Select,
 	SelectContent,
@@ -97,6 +100,7 @@ export {
 } from "./select";
 export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
+export { Slider } from "./slider";
 export { Toaster } from "./sonner";
 export { Spinner } from "./spinner";
 export { Tabs, TabsContent, TabsList, TabsTrigger, tabsListVariants } from "./tabs";
