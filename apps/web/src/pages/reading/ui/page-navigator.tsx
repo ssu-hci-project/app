@@ -1,4 +1,4 @@
-import type { Book } from "@app/contract";
+import type { LegacyBook as Book } from "@app/contract";
 import { useStepFlow } from "@stackflow/react";
 import { useMutation } from "@tanstack/react-query";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";

@@ -1,4 +1,4 @@
-import type { Book, Bookmark } from "@app/contract";
+import type { LegacyBook as Book, Bookmark } from "@app/contract";
 import { Badge, List, ListButton } from "@/shared/ui";
 
 export function NoteList({

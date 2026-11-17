@@ -1,4 +1,4 @@
-import type { Book, ReadingGroup } from "@app/contract";
+import type { LegacyBook as Book, ReadingGroup } from "@app/contract";
 import { groupInputSchema } from "@app/contract";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";

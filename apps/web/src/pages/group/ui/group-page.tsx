@@ -1,4 +1,4 @@
-import type { Book, ReadingGroup } from "@app/contract";
+import type { LegacyBook as Book, ReadingGroup } from "@app/contract";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow, useStepFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";

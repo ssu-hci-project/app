@@ -201,7 +201,7 @@ export const readingRouter = {
 			return { source: "fallback" as const, questions: [...questionTemplates] };
 		let questions: string[];
 		try {
-			questions = await generateQuestions(
+			const generated = await generateQuestions(
 				context.geminiApiKey,
 				questionContext({
 					title: book.title,
@@ -211,6 +211,7 @@ export const readingRouter = {
 					quote: input.quote,
 				}),
 			);
+			questions = generated.map((question) => question.q);
 		} catch (error) {
 			// Readers still get the built-in questions; the log tells us why Gemini was skipped.
 			console.error("Gemini question generation failed", error);

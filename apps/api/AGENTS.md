@@ -48,6 +48,21 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
   적용된 새 D1을 받습니다.
 - 로컬 D1 상태는 `.wrangler/`(gitignore 대상)에 있습니다. 초기화하려면 삭제한
   뒤 루트에서 `bun run db:migrate && bun run db:seed`를 실행하세요.
+- **교환독서 모델**(`profile`·`libraries`·`books`·`saved`·`progress`·`reads`·`traces`·`reactions`·`questions`):
+  흔적은 서재(`libraries`) 안에서만 보입니다. 서재 단위 프로시저는 `libraryId`를 받고
+  `routers/access.ts`의 `requireMember`/`requireBook`으로 멤버십과 책 공개 범위를 확인합니다.
+  `books.library_id`가 null이면 모든 서재가 함께 읽는 퍼블릭 도메인 책입니다.
+- 본문은 `book_chapters` + `book_paragraphs`(장·문단)에 저장합니다. 흔적은 (장, 문단, 글자 범위)로
+  위치를 가리키므로 이미 쓰인 책의 문단을 다시 나누지 마세요. 시드 문단은 `src/lib/paragraphs.ts`의
+  `splitParagraphs`로 만들고, 장 구분이 없는 작품은 책 제목을 단 1장입니다.
+- 전자책 올리기는 `books.uploadBegin` → `uploadChunk`(장 단위 문단 배열, 요청당 6만 자 이하) →
+  `uploadFinish`입니다. 끝나기 전 책은 `status = uploading`으로 숨깁니다. 파싱은 웹에서 합니다.
+- `libraries.list`가 처음 불릴 때 개인 서재 `나의 서재`를 만들고, 시드의 샘플 서재(`src/lib/sample.ts`)
+  흔적을 복사해 기본 책에 다른 독자의 흔적이 보이게 합니다. 샘플 서재에는 참여할 수 없습니다.
+- `questions.generate`는 장 제목, 고른 구절, 구절 앞뒤 장 본문(최대 3500자,
+  `passageContext`)만 Gemini에 보냅니다. 다른 독자의 흔적은 보내지 않고, 실패하면 기본 질문 6개 중 3개를 돌려줍니다.
+- 마이그레이션 `0009_exchange_reading`이 모임을 서재로(같은 id·초대 코드), 600자 쪽을 문단으로,
+  개인·모임 쪽 기록과 질문 답을 그 쪽 첫 문단 첫 문장의 메모/질문 흔적으로 옮깁니다. `legacy` 공개 기록은 옮기지 않습니다.
 - `/api/*`는 서버가 발급한 `reading_session` HttpOnly 쿠키로 익명 사용자를 식별합니다. 세션은 30일 만료이며 HTTPS에서는 Secure를 사용합니다. 클라이언트가 작성자 ID를 입력하지 않고 서버 Context의 `userId`로 책갈피·답변 작성자와 독서 상태를 저장합니다. 기존 작성자 없는 기록은 공용 이전 기록으로 유지합니다.
 - `reading.getBook`은 개인별 현재 페이지를 반환하고 `saveProgress`는 페이지와 마지막 열람 시점을 저장합니다. 세션 쿠키를 삭제하거나 다른 브라우저를 사용하면 새 사용자로 시작합니다.
 - `reading.listRecent`는 내가 연 책을 마지막 열람 순으로 현재 쪽·아직 참여 중인 마지막 모임과 함께 돌려줍니다. `reading.pageNoteCount`는 한 쪽에 남은 다른 독자의 기록 수만 돌려주고 본문은 보내지 않습니다(모임 지정 시 멤버십 확인).

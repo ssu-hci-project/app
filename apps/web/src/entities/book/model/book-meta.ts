@@ -1,4 +1,4 @@
-import type { Book } from "@app/contract";
+import type { LegacyBook as Book } from "@app/contract";
 
 /** The API's placeholder when nobody has confirmed the edition yet. */
 const UNKNOWN_EDITION = "판본 미확인";
