@@ -1,171 +1,35 @@
-/**
- * @file ui:radio-group
- * @requires @seed-design/react@^2.0.0 || ^3.0.0
- * @requires @seed-design/css@^2.0.0 || ^3.0.0
- **/
+import { Radio as RadioPrimitive } from "@base-ui/react/radio";
+import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
+import { cn } from "@/shared/lib/cn";
 
-import { IconExclamationmarkCircleFill } from "@karrotmarket/react-monochrome-icon";
-import { type RadioGroupVariantProps, radioGroup } from "@seed-design/css/recipes/radio-group";
-import {
-	PrefixIcon,
-	RadioGroup as SeedRadioGroup,
-	RadioGroupField as SeedRadioGroupField,
-	VisuallyHidden,
-} from "@seed-design/react";
-import * as React from "react";
-
-export interface RadioGroupProps
-	extends Omit<SeedRadioGroupField.RootProps, "asChild">,
-		RadioGroupVariantProps {
-	label?: React.ReactNode;
-	/**
-	 * @default "medium"
-	 */
-	labelWeight?: SeedRadioGroupField.LabelProps["weight"];
-	indicator?: React.ReactNode;
-	showRequiredIndicator?: boolean;
-
-	description?: React.ReactNode;
-	errorMessage?: React.ReactNode;
-}
-
-/**
- * @see https://seed-design.io/react/components/radio-group
- */
-export const RadioGroup = React.forwardRef<HTMLDivElement, RadioGroupProps>(
-	(
-		{
-			label,
-			labelWeight,
-			indicator,
-			showRequiredIndicator,
-
-			description,
-			errorMessage,
-
-			children,
-
-			...props
-		},
-		ref,
-	) => {
-		const [variantProps, restProps] = radioGroup.splitVariantProps(props);
-
-		if (
-			import.meta.env.DEV &&
-			!label &&
-			!restProps["aria-label"] &&
-			!restProps["aria-labelledby"]
-		) {
-			console.warn(
-				"RadioGroup component requires a `label`, `aria-label` or `aria-labelledby` attribute.",
-			);
-		}
-
-		const renderErrorMessage = errorMessage && restProps.invalid;
-		const renderFooter = description || renderErrorMessage;
-
-		return (
-			<SeedRadioGroupField.Root ref={ref} {...restProps}>
-				{(label || indicator) && (
-					<SeedRadioGroupField.Header>
-						<SeedRadioGroupField.Label weight={labelWeight}>
-							{label}
-							{showRequiredIndicator && <SeedRadioGroupField.RequiredIndicator />}
-							{indicator && (
-								<SeedRadioGroupField.IndicatorText>{indicator}</SeedRadioGroupField.IndicatorText>
-							)}
-						</SeedRadioGroupField.Label>
-					</SeedRadioGroupField.Header>
-				)}
-				<SeedRadioGroup.Root {...variantProps}>{children}</SeedRadioGroup.Root>
-				{renderFooter && (
-					<SeedRadioGroupField.Footer>
-						{description &&
-							(renderErrorMessage ? (
-								<VisuallyHidden asChild>
-									<SeedRadioGroupField.Description>{description}</SeedRadioGroupField.Description>
-								</VisuallyHidden>
-							) : (
-								<SeedRadioGroupField.Description>{description}</SeedRadioGroupField.Description>
-							))}
-						{renderErrorMessage && (
-							<SeedRadioGroupField.ErrorMessage>
-								<PrefixIcon svg={<IconExclamationmarkCircleFill />} />
-								{errorMessage}
-							</SeedRadioGroupField.ErrorMessage>
-						)}
-					</SeedRadioGroupField.Footer>
-				)}
-			</SeedRadioGroupField.Root>
-		);
-	},
-);
-RadioGroup.displayName = "RadioGroup";
-
-export interface RadioGroupItemProps
-	extends Omit<SeedRadioGroup.ItemProps, "children" | "asChild"> {
-	label?: React.ReactNode;
-
-	inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
-
-	rootRef?: React.Ref<HTMLLabelElement>;
-}
-
-/**
- * @see https://seed-design.io/react/components/radio-group
- */
-export const RadioGroupItem = React.forwardRef<HTMLInputElement, RadioGroupItemProps>(
-	({ label, inputProps, rootRef, ...otherProps }, ref) => {
-		return (
-			<SeedRadioGroup.Item ref={rootRef} {...otherProps}>
-				<SeedRadioGroup.ItemControl>
-					<SeedRadioGroup.ItemIndicator
-						checked={
-							<svg aria-hidden="true" viewBox="0 0 24 24">
-								<circle cx="12" cy="12" r="12" fill="currentColor" />
-							</svg>
-						}
-					/>
-				</SeedRadioGroup.ItemControl>
-				{label && <SeedRadioGroup.ItemLabel>{label}</SeedRadioGroup.ItemLabel>}
-				<SeedRadioGroup.ItemHiddenInput ref={ref} {...inputProps} />
-			</SeedRadioGroup.Item>
-		);
-	},
-);
-RadioGroupItem.displayName = "RadioGroupItem";
-
-export interface RadiomarkProps
-	extends Omit<SeedRadioGroup.ItemControlProps, "children" | "asChild"> {}
-
-/**
- * @see https://seed-design.io/react/components/radio-group
- */
-export const Radiomark = React.forwardRef<HTMLDivElement, RadiomarkProps>((props, ref) => {
+function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
 	return (
-		<SeedRadioGroup.ItemControl ref={ref} {...props}>
-			<SeedRadioGroup.ItemIndicator
-				checked={
-					<svg aria-hidden="true" viewBox="0 0 24 24">
-						<circle cx="12" cy="12" r="12" fill="currentColor" />
-					</svg>
-				}
-			/>
-		</SeedRadioGroup.ItemControl>
+		<RadioGroupPrimitive
+			data-slot="radio-group"
+			className={cn("grid w-full gap-2", className)}
+			{...props}
+		/>
 	);
-});
-Radiomark.displayName = "Radiomark";
+}
 
-/**
- * @deprecated Use `Radiomark` instead. Will be removed in @seed-design/react@2.0.0.
- */
+function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
+	return (
+		<RadioPrimitive.Root
+			data-slot="radio-group-item"
+			className={cn(
+				"group/radio-group-item peer relative flex aspect-square size-4 shrink-0 rounded-full border border-input outline-none group-has-[:focus-visible]/field-label:ring-0 group-has-[:focus-visible]/field-label:not-data-checked:border-input after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 aria-invalid:aria-checked:border-primary dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground group-has-[:focus-visible]/field-label:data-checked:border-primary dark:data-checked:bg-primary",
+				className,
+			)}
+			{...props}
+		>
+			<RadioPrimitive.Indicator
+				data-slot="radio-group-indicator"
+				className="flex size-4 items-center justify-center"
+			>
+				<span className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-foreground" />
+			</RadioPrimitive.Indicator>
+		</RadioPrimitive.Root>
+	);
+}
 
-/**
- * @deprecated Use `RadiomarkProps` instead. Will be removed in @seed-design/react@2.0.0.
- */
-
-/**
- * This file is a snippet from SEED Design, helping you get started quickly with @seed-design/* packages.
- * You can extend this snippet however you want.
- */
+export { RadioGroup, RadioGroupItem };

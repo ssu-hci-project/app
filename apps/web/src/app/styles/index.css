@@ -1,20 +1,4 @@
-@layer theme, base, seed-base, components, seed-components, utilities;
-@import "@seed-design/css/base.layered.css";
 @import "tailwindcss";
-@import "@seed-design/tailwind4-theme";
-@import "@seed-design/css/recipes/badge.layered.css";
-@import "@seed-design/css/recipes/tabs.layered.css";
-@import "@seed-design/css/recipes/segmented-control.layered.css";
-@import "@seed-design/css/recipes/select-box.layered.css";
-@import "@seed-design/css/recipes/select-box-group.layered.css";
-@import "@seed-design/css/recipes/radiomark.layered.css";
-@import "@seed-design/css/recipes/radio.layered.css";
-@import "@seed-design/css/recipes/radio-group.layered.css";
-@import "@seed-design/css/recipes/progress-circle.layered.css";
-@import "@seed-design/css/recipes/input-button.layered.css";
-@import "@seed-design/css/recipes/alert-dialog.layered.css";
-@import "@seed-design/css/recipes/content-placeholder.layered.css";
-@import "@seed-design/css/recipes/skeleton.layered.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
@@ -58,6 +42,8 @@
 	--color-foreground: var(--foreground);
 	--color-background: var(--background);
 	--color-bookmark: var(--bookmark);
+	--color-warning: var(--warning);
+	--color-magic: var(--magic);
 	--radius-sm: calc(var(--radius) * 0.6);
 	--radius-md: calc(var(--radius) * 0.8);
 	--radius-lg: var(--radius);
@@ -68,25 +54,27 @@
 }
 
 :root {
-	--background: var(--seed-color-bg-layer-basement);
-	--foreground: var(--seed-color-fg-neutral);
-	--card: var(--seed-color-bg-layer-default);
-	--card-foreground: var(--seed-color-fg-neutral);
-	--popover: var(--seed-color-bg-layer-floating);
-	--popover-foreground: var(--seed-color-fg-neutral);
-	--primary: var(--seed-color-bg-brand-solid);
-	--primary-foreground: var(--seed-color-fg-on-brand-solid);
-	--secondary: var(--seed-color-bg-brand-weak);
-	--secondary-foreground: var(--seed-color-fg-brand-contrast);
-	--muted: var(--seed-color-bg-neutral-weak);
-	--muted-foreground: var(--seed-color-fg-neutral-muted);
-	--accent: var(--seed-color-bg-brand-weak);
-	--accent-foreground: var(--seed-color-fg-brand-contrast);
-	--destructive: var(--seed-color-fg-critical);
-	--border: var(--seed-color-stroke-neutral-weak);
-	--input: var(--seed-color-stroke-neutral-weak);
-	--ring: var(--seed-color-stroke-focus-ring);
+	--background: #faf8f3;
+	--foreground: #262b28;
+	--card: #fff;
+	--card-foreground: #262b28;
+	--popover: #fff;
+	--popover-foreground: #262b28;
+	--primary: #285c48;
+	--primary-foreground: #fff;
+	--secondary: #e4eee7;
+	--secondary-foreground: #285c48;
+	--muted: #f0eee8;
+	--muted-foreground: #59635d;
+	--accent: #e4eee7;
+	--accent-foreground: #285c48;
+	--destructive: #b42318;
+	--border: #dedcd4;
+	--input: #dedcd4;
+	--ring: #285c48;
 	--bookmark: #a84e35;
+	--warning: #b54708;
+	--magic: #b44fb0;
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
@@ -101,28 +89,6 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
-}
-
-/* SEED semantic roles are shared with the existing shadcn theme above. */
-:root[data-seed-color-mode="light-only"] {
-	--seed-color-bg-layer-basement: #faf8f3;
-	--seed-color-bg-layer-default: #fff;
-	--seed-color-bg-layer-floating: #fff;
-	--seed-color-bg-brand-solid: #285c48;
-	--seed-color-bg-brand-solid-pressed: #1d4938;
-	--seed-color-bg-brand-weak: #e4eee7;
-	--seed-color-bg-brand-weak-pressed: #d2e3d7;
-	--seed-color-bg-neutral-weak: #f0eee8;
-	--seed-color-fg-neutral: #262b28;
-	--seed-color-fg-neutral-muted: #59635d;
-	--seed-color-fg-brand: #285c48;
-	--seed-color-fg-brand-contrast: #285c48;
-	--seed-color-fg-on-brand-solid: #fff;
-	--seed-color-fg-critical: #b42318;
-	--seed-color-stroke-brand-solid: #285c48;
-	--seed-color-stroke-brand-weak: #b8d1bf;
-	--seed-color-stroke-focus-ring: #285c48;
-	--seed-color-stroke-neutral-weak: #dedcd4;
 }
 
 .dark {
@@ -185,4 +151,30 @@
 		/* biome-ignore lint/complexity/noImportantStyles: 동작 줄이기는 모든 컴포넌트의 애니메이션보다 우선해야 해요 */
 		scroll-behavior: auto !important;
 	}
+}
+
+/* Stackflow screen transitions (AppScreen). 350ms matches transitionDuration in stackflow/config.ts. */
+@keyframes screen-enter {
+	from {
+		transform: translateX(100%);
+	}
+}
+@keyframes screen-exit {
+	to {
+		transform: translateX(100%);
+	}
+}
+.app-screen {
+	transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.app-screen[data-transition="enter-active"]:not([data-root]) {
+	animation: screen-enter 350ms cubic-bezier(0.22, 1, 0.36, 1);
+	box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
+}
+.app-screen[data-transition="exit-active"] {
+	animation: screen-exit 350ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	box-shadow: -8px 0 24px rgb(0 0 0 / 0.08);
+}
+.app-screen[data-covered] {
+	transform: translateX(-30%);
 }

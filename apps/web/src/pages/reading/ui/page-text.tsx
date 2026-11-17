@@ -1,5 +1,4 @@
 import { isDefinedError } from "@orpc/client";
-import { Text } from "@seed-design/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { orpc } from "@/shared/api";
@@ -68,13 +67,12 @@ export function PageText({
 	if (query.isError && isDefinedError(query.error) && query.error.code === "NOT_FOUND")
 		return (
 			<ResultSection
-				size="medium"
 				title="이 책은 아직 본문이 없어요"
 				description="저작권이 만료된 작품만 앱에서 읽을 수 있어요."
 			/>
 		);
 	return (
-		<div ref={textRef} className="scroll-mt-x16">
+		<div ref={textRef} className="scroll-mt-16">
 			<LoadState
 				shape="article"
 				pending={query.isPending}
@@ -82,18 +80,16 @@ export function PageText({
 				retry={() => query.refetch()}
 			/>
 			{query.data && (
-				<article aria-label={`${page}쪽 본문`} className="flex flex-col gap-x4">
+				<article aria-label={`${page}쪽 본문`} className="flex flex-col gap-4">
 					{query.data.text.split("\n\n").map((paragraph, index) => (
-						<Text
+						<p
 							// 같은 쪽 안에서 문단 순서는 바뀌지 않아요.
 							// biome-ignore lint/suspicious/noArrayIndexKey: fixed page text
 							key={index}
-							as="p"
-							textStyle="articleBody"
-							className="whitespace-pre-wrap break-keep"
+							className="whitespace-pre-wrap break-keep text-base leading-7"
 						>
 							{paragraph}
-						</Text>
+						</p>
 					))}
 				</article>
 			)}

@@ -1,13 +1,11 @@
 import path from "node:path";
-import { seedDesignPlugin } from "@seed-design/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-	plugins: [react(), tailwindcss(), seedDesignPlugin({ colorMode: "light-only" })],
+	plugins: [react(), tailwindcss()],
 	resolve: {
-		conditions: ["seed-layered", "module", "browser", "development|production"],
 		alias: {
 			"@": path.resolve(import.meta.dirname, "./src"),
 		},

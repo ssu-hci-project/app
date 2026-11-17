@@ -1,10 +1,9 @@
-import { ActionButton, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { bookByline } from "@/entities/book";
 import { orpc } from "@/shared/api";
-import { LoadState, MobileScreen, useNotice } from "@/shared/ui";
+import { Button, LoadState, MobileScreen, Spinner, useNotice } from "@/shared/ui";
 
 export const InvitePage: ActivityComponentType<"InvitePage"> = ({ params }) => {
 	const preview = useQuery(
@@ -34,27 +33,22 @@ export const InvitePage: ActivityComponentType<"InvitePage"> = ({ params }) => {
 			/>
 			{preview.data && (
 				<>
-					<Text as="h1" textStyle="t8Bold">
-						{preview.data.name}
-					</Text>
+					<h1 className="text-2xl font-bold">{preview.data.name}</h1>
 					<div>
-						<Text as="p">{preview.data.book.title}</Text>
-						<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
-							{bookByline(preview.data.book)}
-						</Text>
+						<p>{preview.data.book.title}</p>
+						<p className="text-sm text-muted-foreground">{bookByline(preview.data.book)}</p>
 					</div>
-					<Text>
+					<p>
 						각자의 속도로 읽고 생각을 나누는 모임이에요. 참여하면 이전에 공유한 기록도 볼 수 있어요.
 						내 기록은 직접 공유하기 전까지 나만 볼 수 있어요.
-					</Text>
+					</p>
 					{join.isError && (
-						<Text color="fg.critical" role="alert">
+						<p className="text-destructive" role="alert">
 							아직 모임에 참여하지 않았어요. 아래 버튼으로 다시 시도해주세요.
-						</Text>
+						</p>
 					)}
-					<ActionButton
-						variant="brandSolid"
-						loading={join.isPending}
+					<Button
+						disabled={join.isPending}
 						onClick={() =>
 							preview.data.joined
 								? flow.replace("GroupPage", {
@@ -64,8 +58,9 @@ export const InvitePage: ActivityComponentType<"InvitePage"> = ({ params }) => {
 								: join.mutate({ code: params.code })
 						}
 					>
+						{join.isPending && <Spinner data-icon="inline-start" />}
 						{preview.data.joined ? "참여 중인 모임 보기" : "이 모임에 참여"}
-					</ActionButton>
+					</Button>
 				</>
 			)}
 		</MobileScreen>

@@ -1,37 +1,27 @@
-/**
- * @file ui:floating-action-button
- * @requires @seed-design/react@^2.0.0 || ^3.0.0
- **/
+import type { ComponentProps, ReactNode } from "react";
+import { cn } from "@/shared/lib";
+import { Button } from "./button";
 
-import "@seed-design/css/recipes/floating-action-button.layered.css";
-
-import { FloatingActionButton as SeedFloatingActionButton } from "@seed-design/react";
-import * as React from "react";
-
-export interface FloatingActionButtonProps
-	extends Omit<SeedFloatingActionButton.RootProps, "children" | "asChild"> {
-	icon: React.ReactNode;
-
-	label: React.ReactNode;
-}
-
-/**
- * @see https://seed-design.io/react/components/floating-action-button
- */
-export const FloatingActionButton = React.forwardRef<
-	React.ElementRef<typeof SeedFloatingActionButton.Root>,
-	FloatingActionButtonProps
->(({ icon, label, ...otherProps }, ref) => {
+/** The screen's one floating action. Placed by `MobileScreen`'s `fab` prop. */
+export function FloatingActionButton({
+	icon,
+	label,
+	extended = true,
+	className,
+	...props
+}: { icon: ReactNode; label: string; extended?: boolean } & ComponentProps<typeof Button>) {
 	return (
-		<SeedFloatingActionButton.Root ref={ref} {...otherProps}>
-			<SeedFloatingActionButton.Icon svg={icon} />
-			<SeedFloatingActionButton.Label>{label}</SeedFloatingActionButton.Label>
-		</SeedFloatingActionButton.Root>
+		<Button
+			aria-label={extended ? undefined : label}
+			className={cn(
+				"h-14 rounded-full shadow-lg [&_svg:not([class*='size-'])]:size-6",
+				extended ? "px-5 text-base" : "w-14 px-0",
+				className,
+			)}
+			{...props}
+		>
+			{icon}
+			{extended && label}
+		</Button>
 	);
-});
-FloatingActionButton.displayName = "FloatingActionButton";
-
-/**
- * This file is a snippet from SEED Design, helping you get started quickly with @seed-design/* packages.
- * You can extend this snippet however you want.
- */
+}

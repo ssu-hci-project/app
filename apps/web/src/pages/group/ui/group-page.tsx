@@ -1,37 +1,37 @@
-import "@seed-design/css/recipes/bottom-sheet.layered.css";
-import "@seed-design/css/recipes/text-input.layered.css";
-import "@seed-design/css/recipes/field.layered.css";
-import "@seed-design/css/recipes/field-label.layered.css";
 import type { Book, ReadingGroup } from "@app/contract";
-import { IconDot3HorizontalLine, IconPlusLine } from "@karrotmarket/react-monochrome-icon";
-import { ActionButton, List, ListHeader, ResponsivePair, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow, useStepFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { EllipsisIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { bookByline } from "@/entities/book";
 import { GroupCreate } from "@/features/group/create";
 import { orpc } from "@/shared/api";
 import { cn } from "@/shared/lib";
 import {
+	AlertDialog,
 	AlertDialogAction,
+	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogRoot,
 	AlertDialogTitle,
 	AppBarIconButton,
+	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
-	BottomSheetRoot,
+	Button,
 	FloatingActionButton,
+	List,
+	ListButton,
+	ListHeader,
 	LoadState,
+	MenuSheet,
+	MenuSheetContent,
+	MenuSheetItem,
 	MobileScreen,
-	SwipeableMenuSheetContent,
-	SwipeableMenuSheetGroup,
-	SwipeableMenuSheetItem,
-	SwipeableMenuSheetRoot,
+	Spinner,
 	useNotice,
 	useStepOverlay,
 } from "@/shared/ui";
@@ -51,7 +51,7 @@ export const GroupPage: ActivityComponentType<"GroupPage"> = ({ params }) => {
 			action={
 				group && (
 					<AppBarIconButton aria-label="모임 메뉴" onClick={() => overlay.open("menu")}>
-						<IconDot3HorizontalLine />
+						<EllipsisIcon />
 					</AppBarIconButton>
 				)
 			}
@@ -59,8 +59,7 @@ export const GroupPage: ActivityComponentType<"GroupPage"> = ({ params }) => {
 				!params.groupId &&
 				book.data && (
 					<FloatingActionButton
-						extended
-						icon={<IconPlusLine />}
+						icon={<PlusIcon />}
 						label="모임 만들기"
 						onClick={() => overlay.open("create")}
 					/>
@@ -77,12 +76,8 @@ export const GroupPage: ActivityComponentType<"GroupPage"> = ({ params }) => {
 			/>
 			{book.data && (
 				<div>
-					<Text as="h1" textStyle="t7Bold">
-						{book.data.book.title}
-					</Text>
-					<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
-						{bookByline(book.data.book)}
-					</Text>
+					<h1 className="text-xl font-bold">{book.data.book.title}</h1>
+					<p className="text-sm text-muted-foreground">{bookByline(book.data.book)}</p>
 				</div>
 			)}
 			{group && book.data ? (
@@ -91,7 +86,7 @@ export const GroupPage: ActivityComponentType<"GroupPage"> = ({ params }) => {
 				<BookGroups book={book.data.book} groups={bookGroups} loaded={groups.isSuccess} />
 			) : (
 				params.groupId &&
-				groups.isSuccess && <Text>이 모임에 참여 중이지 않아요. 초대 링크로 참여해주세요.</Text>
+				groups.isSuccess && <p>이 모임에 참여 중이지 않아요. 초대 링크로 참여해주세요.</p>
 			)}
 		</MobileScreen>
 	);
@@ -135,81 +130,70 @@ function GroupDetail({ group, book }: { group: ReadingGroup; book: Book }) {
 	};
 	return (
 		<>
-			<Text>
+			<p>
 				{group.memberCount}명이 각자의 속도로 읽고 있어요. 기록 작성이나 완독은 필수가 아니에요.
-			</Text>
-			<ActionButton
-				variant="brandSolid"
+			</p>
+			<Button
+				size="lg"
 				onClick={() => flow.push("ReadingPage", { bookId: group.bookId, groupId: group.id })}
 			>
 				모임과 이어 읽기
-			</ActionButton>
+			</Button>
 			{group.unreadPages.length > 0 && (
-				<section>
-					<ListHeader as="h2">새로운 생각이 있는 쪽</ListHeader>
-					<List.Root as="div">
+				<section className="-mx-4">
+					<ListHeader>새로운 생각이 있는 쪽</ListHeader>
+					<List>
 						{group.unreadPages.map((page) => (
-							<List.Item key={page} asChild>
-								<button
-									type="button"
-									className="w-full text-left"
-									onClick={() =>
-										flow.push("ReadingPage", {
-											bookId: group.bookId,
-											groupId: group.id,
-											page: String(page),
-										})
-									}
-								>
-									<List.Content>
-										<List.Title>{page}쪽으로 이동</List.Title>
-										<List.Detail>내용은 직접 열어볼 때 보여요</List.Detail>
-									</List.Content>
-								</button>
-							</List.Item>
+							<ListButton
+								key={page}
+								title={`${page}쪽으로 이동`}
+								detail="내용은 직접 열어볼 때 보여요"
+								onClick={() =>
+									flow.push("ReadingPage", {
+										bookId: group.bookId,
+										groupId: group.id,
+										page: String(page),
+									})
+								}
+							/>
 						))}
-					</List.Root>
+					</List>
 				</section>
 			)}
-			<section className="flex flex-col gap-x3">
-				<Text as="h2" textStyle="t6Bold">
-					함께 읽을 사람 초대
-				</Text>
-				<Text textStyle="t4Regular" color="fg.neutralMuted">
+			<section className="flex flex-col gap-3">
+				<h2 className="text-lg font-bold">함께 읽을 사람 초대</h2>
+				<p className="text-sm text-muted-foreground">
 					초대받은 사람은 모임 정보를 확인한 뒤 직접 참여해요.
-				</Text>
-				<div className="flex flex-col gap-x1 rounded-r2 bg-bg-neutral-weak px-x4 py-x3">
-					<Text textStyle="t3Regular" color="fg.neutralMuted">
-						초대 코드
-					</Text>
-					<Text
-						as="p"
-						textStyle={shortCode ? "t8Bold" : "t3Regular"}
-						className={cn("select-all break-all tabular-nums", shortCode && "tracking-[0.18em]")}
+				</p>
+				<div className="flex flex-col gap-1 rounded-md bg-muted px-4 py-3">
+					<p className="text-sm text-muted-foreground">초대 코드</p>
+					<p
+						className={cn(
+							"select-all break-all tabular-nums",
+							shortCode ? "text-2xl font-bold tracking-[0.18em]" : "text-sm",
+						)}
 					>
 						{group.inviteCode}
-					</Text>
+					</p>
 				</div>
-				<ActionButton variant="neutralWeak" onClick={sendInvite}>
+				<Button variant="outline" onClick={sendInvite}>
 					초대 링크 보내기
-				</ActionButton>
+				</Button>
 			</section>
-			<SwipeableMenuSheetRoot {...overlay.bind("menu")}>
-				<SwipeableMenuSheetContent title="모임 메뉴">
-					<SwipeableMenuSheetGroup>
-						<SwipeableMenuSheetItem
-							tone="critical"
-							label="모임에서 나가기"
-							description="공유한 내 기록은 나만 보기로 바뀌어요"
-							onClick={() => {
-								overlay.close();
-								setLeaving(true);
-							}}
-						/>
-					</SwipeableMenuSheetGroup>
-				</SwipeableMenuSheetContent>
-			</SwipeableMenuSheetRoot>
-			<AlertDialogRoot open={leaving} onOpenChange={setLeaving}>
+			<MenuSheet {...overlay.bind("menu")}>
+				<MenuSheetContent title="모임 메뉴">
+					<MenuSheetItem
+						tone="critical"
+						label="모임에서 나가기"
+						description="공유한 내 기록은 나만 보기로 바뀌어요"
+						onClick={() => {
+							overlay.close();
+							setLeaving(true);
+						}}
+					/>
+				</MenuSheetContent>
+			</MenuSheet>
+			<AlertDialog open={leaving} onOpenChange={setLeaving}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>모임에서 나갈까요?</AlertDialogTitle>
@@ -218,22 +202,18 @@ function GroupDetail({ group, book }: { group: ReadingGroup; book: Book }) {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<ResponsivePair gap="x2">
-							<AlertDialogAction variant="neutralWeak">취소</AlertDialogAction>
-							<AlertDialogAction
-								variant="criticalSolid"
-								loading={leave.isPending}
-								onClick={(event) => {
-									event.preventDefault();
-									leave.mutate({ groupId: group.id });
-								}}
-							>
-								모임에서 나가기
-							</AlertDialogAction>
-						</ResponsivePair>
+						<AlertDialogCancel>취소</AlertDialogCancel>
+						<AlertDialogAction
+							variant="destructive"
+							disabled={leave.isPending}
+							onClick={() => leave.mutate({ groupId: group.id })}
+						>
+							{leave.isPending && <Spinner data-icon="inline-start" />}
+							모임에서 나가기
+						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
-			</AlertDialogRoot>
+			</AlertDialog>
 		</>
 	);
 }
@@ -251,34 +231,28 @@ function BookGroups({
 	const overlay = useStepOverlay();
 	return (
 		<>
-			<section>
-				<ListHeader as="h2">이 책으로 참여 중인 모임</ListHeader>
+			<section className="-mx-4">
+				<ListHeader>이 책으로 참여 중인 모임</ListHeader>
 				{groups.length > 0 ? (
-					<List.Root as="div">
+					<List>
 						{groups.map((item) => (
-							<List.Item key={item.id} asChild>
-								<button
-									type="button"
-									className="w-full text-left"
-									onClick={() => replaceStep({ bookId: book.id, groupId: item.id })}
-								>
-									<List.Content>
-										<List.Title>{item.name}</List.Title>
-										<List.Detail>{item.memberCount}명이 함께 읽고 있어요</List.Detail>
-									</List.Content>
-								</button>
-							</List.Item>
+							<ListButton
+								key={item.id}
+								title={item.name}
+								detail={`${item.memberCount}명이 함께 읽고 있어요`}
+								onClick={() => replaceStep({ bookId: book.id, groupId: item.id })}
+							/>
 						))}
-					</List.Root>
+					</List>
 				) : (
 					loaded && (
-						<Text color="fg.neutralMuted">
+						<p className="px-4 text-muted-foreground">
 							아직 참여 중인 모임이 없어요. 오른쪽 아래 버튼으로 만들 수 있어요.
-						</Text>
+						</p>
 					)
 				)}
 			</section>
-			<BottomSheetRoot {...overlay.bind("create")}>
+			<BottomSheet {...overlay.bind("create")}>
 				<BottomSheetContent title="새 함께 읽기 모임">
 					<BottomSheetBody>
 						<GroupCreate
@@ -291,7 +265,7 @@ function BookGroups({
 						/>
 					</BottomSheetBody>
 				</BottomSheetContent>
-			</BottomSheetRoot>
+			</BottomSheet>
 		</>
 	);
 }

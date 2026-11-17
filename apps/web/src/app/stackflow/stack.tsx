@@ -1,4 +1,3 @@
-import { seedPlugin } from "@seed-design/stackflow";
 import { historySyncPlugin } from "@stackflow/plugin-history-sync";
 import { basicRendererPlugin } from "@stackflow/plugin-renderer-basic";
 import { stackflow } from "@stackflow/react";
@@ -20,7 +19,6 @@ export const { Stack } = stackflow({
 	},
 	plugins: [
 		basicRendererPlugin(),
-		seedPlugin({ theme: "cupertino" }),
 		historySyncPlugin({
 			config,
 			fallbackActivity: () => "HomePage",

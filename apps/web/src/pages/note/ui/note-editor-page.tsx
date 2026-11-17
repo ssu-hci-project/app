@@ -1,7 +1,6 @@
 import type { Bookmark } from "@app/contract";
 import { noteInputSchema } from "@app/contract";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ActionButton, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -12,11 +11,12 @@ import type { z } from "zod";
 import { editionLabel } from "@/entities/book";
 import { orpc } from "@/shared/api";
 import {
+	Button,
 	LoadState,
 	MobileScreen,
+	Spinner,
+	TextAreaField,
 	TextField,
-	TextFieldInput,
-	TextFieldTextarea,
 	useNotice,
 } from "@/shared/ui";
 import { QuestionPicker } from "./question-picker";
@@ -51,19 +51,14 @@ export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params
 			}
 			footer={
 				editable && (
-					<ActionButton
-						type="submit"
-						form="note-form"
-						variant="neutralSolid"
-						size="large"
-						loading={busy}
-					>
+					<Button type="submit" form="note-form" size="lg" disabled={busy}>
+						{busy && <Spinner data-icon="inline-start" />}
 						{note.data?.visibility === "group"
 							? "공유 기록 수정"
 							: params.noteId
 								? "기록 수정"
 								: "내 기록에 저장"}
-					</ActionButton>
+					</Button>
 				)
 			}
 		>
@@ -89,7 +84,7 @@ export const NoteEditorPage: ActivityComponentType<"NoteEditorPage"> = ({ params
 					onBusyChange={setBusy}
 				/>
 			)}
-			{note.data && !note.data.isMine && <Text>내 기록만 수정할 수 있어요.</Text>}
+			{note.data && !note.data.isMine && <p>내 기록만 수정할 수 있어요.</p>}
 		</MobileScreen>
 	);
 };
@@ -149,11 +144,11 @@ function NoteForm({
 	useEffect(() => onBusyChange(busy), [busy, onBusyChange]);
 	const pageNumber = note?.page ?? Number(page);
 	if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > pageCount)
-		return <Text color="fg.critical">책으로 돌아가 페이지를 확인해주세요.</Text>;
+		return <p className="text-destructive">책으로 돌아가 페이지를 확인해주세요.</p>;
 	return (
 		<form
 			id="note-form"
-			className="flex flex-col gap-x6"
+			className="flex flex-col gap-6"
 			onSubmit={form.handleSubmit((values) =>
 				note
 					? update.mutate({ noteId: note.id, ...values })
@@ -161,14 +156,10 @@ function NoteForm({
 			)}
 		>
 			<div>
-				<Text as="h1" textStyle="t7Bold">
+				<h1 className="text-xl font-bold">
 					{title} · {pageNumber}쪽
-				</Text>
-				{edition && (
-					<Text as="p" color="fg.neutralMuted" textStyle="t3Regular">
-						{edition}
-					</Text>
-				)}
+				</h1>
+				{edition && <p className="text-sm text-muted-foreground">{edition}</p>}
 			</div>
 			<Controller
 				control={form.control}
@@ -190,27 +181,20 @@ function NoteForm({
 				control={form.control}
 				name="content"
 				render={({ field }) => (
-					<TextField
+					<TextAreaField
 						label={prompt ?? "내 생각"}
-						value={field.value}
-						onValueChange={({ value }) => {
-							field.onChange(value);
-							setDraft((previous) => ({ ...previous, content: value }));
+						{...field}
+						onChange={(event) => {
+							field.onChange(event.target.value);
+							setDraft((previous) => ({ ...previous, content: event.target.value }));
 						}}
-						invalid={!!form.formState.errors.content}
-						errorMessage={form.formState.errors.content?.message}
+						error={form.formState.errors.content?.message}
 						disabled={busy}
 						description="한 줄이어도 괜찮아요. 이 탭을 닫기 전까지 쓰던 내용이 남아 있어요."
-					>
-						<TextFieldTextarea
-							name={field.name}
-							ref={field.ref}
-							onBlur={field.onBlur}
-							maxLength={500}
-							placeholder="이 장면에서 어떤 생각이 들었나요?"
-							className="min-h-[8.5rem]"
-						/>
-					</TextField>
+						maxLength={500}
+						placeholder="이 장면에서 어떤 생각이 들었나요?"
+						className="min-h-[8.5rem]"
+					/>
 				)}
 			/>
 			{quoteOpen ? (
@@ -220,40 +204,33 @@ function NoteForm({
 					render={({ field }) => (
 						<TextField
 							label="기억할 구절"
-							value={field.value}
-							onValueChange={({ value }) => {
-								field.onChange(value);
-								setDraft((previous) => ({ ...previous, quote: value }));
+							{...field}
+							onChange={(event) => {
+								field.onChange(event.target.value);
+								setDraft((previous) => ({ ...previous, quote: event.target.value }));
 							}}
-							invalid={!!form.formState.errors.quote}
-							errorMessage={form.formState.errors.quote?.message}
+							error={form.formState.errors.quote?.message}
 							disabled={busy}
 							description="선택 사항이에요. 책의 문장을 옮겨 적어두면 나중에 찾기 쉬워요."
-						>
-							<TextFieldInput
-								name={field.name}
-								ref={field.ref}
-								onBlur={field.onBlur}
-								maxLength={200}
-							/>
-						</TextField>
+							maxLength={200}
+						/>
 					)}
 				/>
 			) : (
-				<ActionButton
+				<Button
 					type="button"
 					variant="ghost"
-					size="small"
+					size="sm"
 					className="self-start"
 					onClick={() => setQuoteOpen(true)}
 				>
 					기억할 구절 추가
-				</ActionButton>
+				</Button>
 			)}
 			{failed && (
-				<Text as="p" role="alert" color="fg.critical">
+				<p role="alert" className="text-destructive">
 					저장하지 못했어요. 연결을 확인하고 아래 버튼으로 다시 저장해주세요.
-				</Text>
+				</p>
 			)}
 		</form>
 	);

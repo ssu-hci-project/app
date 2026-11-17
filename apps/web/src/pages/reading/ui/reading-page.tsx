@@ -1,36 +1,31 @@
-import "@seed-design/css/recipes/bottom-sheet.layered.css";
-import "@seed-design/css/recipes/text-input.layered.css";
-import "@seed-design/css/recipes/field.layered.css";
-import "@seed-design/css/recipes/field-label.layered.css";
 import type { Book, ReadingGroup } from "@app/contract";
-import {
-	IconBookmarkLine,
-	IconChevronDownLine,
-	IconILowercaseSerifCircleLine,
-	IconPencilLine,
-	IconPerson2Line,
-	IconQuotationmark2LeftLine,
-} from "@karrotmarket/react-monochrome-icon";
-import { ActionButton, PrefixIcon, SuffixIcon, Text } from "@seed-design/react";
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow, useStepFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
+import {
+	BookmarkIcon,
+	ChevronDownIcon,
+	InfoIcon,
+	PencilIcon,
+	QuoteIcon,
+	UsersIcon,
+} from "lucide-react";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
 import {
+	Alert,
+	AlertAction,
+	AlertDescription,
 	AppBarIconButton,
+	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
-	BottomSheetRoot,
-	ContextualFloatingButton,
+	Button,
+	ChoiceGroup,
+	ChoiceItem,
 	FloatingActionButton,
 	LoadState,
 	MobileScreen,
-	PageBanner,
-	PageBannerButton,
-	RadioSelectBoxItem,
-	RadioSelectBoxRadiomark,
-	RadioSelectBoxRoot,
 	useStepOverlay,
 } from "@/shared/ui";
 import { OwnNotes } from "./own-notes";
@@ -70,13 +65,13 @@ export const ReadingPage: ActivityComponentType<"ReadingPage"> = ({ params }) =>
 				book.data && (
 					<>
 						<AppBarIconButton aria-label="책 정보" onClick={() => overlay.open("info")}>
-							<IconILowercaseSerifCircleLine />
+							<InfoIcon />
 						</AppBarIconButton>
 						<AppBarIconButton
 							aria-label="함께 읽기 모임"
 							onClick={() => flow.push("GroupPage", { bookId: params.bookId, groupId })}
 						>
-							<IconPerson2Line />
+							<UsersIcon />
 						</AppBarIconButton>
 					</>
 				)
@@ -88,7 +83,7 @@ export const ReadingPage: ActivityComponentType<"ReadingPage"> = ({ params }) =>
 					// 본문을 가리지 않도록 아이콘만 보여요. label은 스크린 리더용으로 남겨요.
 					<FloatingActionButton
 						extended={false}
-						icon={<IconPencilLine />}
+						icon={<PencilIcon />}
 						label="생각 남기기"
 						onClick={() => write()}
 					/>
@@ -97,9 +92,12 @@ export const ReadingPage: ActivityComponentType<"ReadingPage"> = ({ params }) =>
 			contextual={
 				canWrite &&
 				quote && (
-					<ContextualFloatingButton variant="solid" onClick={() => write(quote)}>
-						<PrefixIcon svg={<IconQuotationmark2LeftLine />} />이 문장으로 생각 남기기
-					</ContextualFloatingButton>
+					<Button
+						className="h-12 rounded-full bg-foreground px-5 text-background shadow-lg hover:bg-foreground/90"
+						onClick={() => write(quote)}
+					>
+						<QuoteIcon data-icon="inline-start" />이 문장으로 생각 남기기
+					</Button>
 				)
 			}
 			footer={
@@ -162,29 +160,31 @@ function ReadingContent({
 	return (
 		<>
 			{group && group.unreadCount > 0 && (
-				<PageBanner
-					tone="neutral"
-					variant="weak"
-					description="이 모임에 새로운 생각이 있어요"
-					suffix={
-						<PageBannerButton
+				<Alert className="bg-muted">
+					<AlertDescription className="text-foreground">
+						이 모임에 새로운 생각이 있어요
+					</AlertDescription>
+					<AlertAction>
+						<Button
+							size="sm"
+							variant="ghost"
 							onClick={() => flow.push("GroupPage", { bookId: book.id, groupId: group.id })}
 						>
 							쪽 보기
-						</PageBannerButton>
-					}
-				/>
+						</Button>
+					</AlertAction>
+				</Alert>
 			)}
-			<div className="flex items-center justify-between gap-x2">
-				<ActionButton
+			<div className="flex items-center justify-between gap-2">
+				<Button
 					variant="ghost"
-					size="small"
+					size="sm"
 					aria-label="함께 읽는 공간 선택"
 					onClick={() => overlay.open("space")}
 				>
 					{group?.name ?? "개인 독서"}
-					<SuffixIcon svg={<IconChevronDownLine />} />
-				</ActionButton>
+					<ChevronDownIcon data-icon="inline-end" />
+				</Button>
 				{validPage && member && (
 					<BookmarkButton
 						bookId={book.id}
@@ -195,38 +195,36 @@ function ReadingContent({
 				)}
 			</div>
 			{groupId && groupsLoaded && !group && (
-				<Text role="alert" color="fg.critical">
+				<p role="alert" className="text-destructive">
 					참여 중인 모임이 아니에요. 초대로 참여하거나 개인 독서를 선택해주세요.
-				</Text>
+				</p>
 			)}
 			{validPage ? (
 				<>
 					<PageText bookId={book.id} page={page} onSelectQuote={onSelectQuote} />
 					<OwnNotes bookId={book.id} page={page} />
-					<BottomSheetRoot {...overlay.bind("thoughts")}>
+					<BottomSheet {...overlay.bind("thoughts")}>
 						<BottomSheetContent
 							title={`${page}쪽의 책갈피`}
 							description={group?.name ?? "예전에 공용으로 남겨진 기록이에요."}
 						>
 							<BottomSheetBody>
-								<div className="max-h-[65dvh] overflow-y-auto pb-x6">
-									<PageBookmarks
-										bookId={book.id}
-										page={page}
-										enabled={overlay.current === "thoughts"}
-										groupId={group?.id}
-									/>
-								</div>
+								<PageBookmarks
+									bookId={book.id}
+									page={page}
+									enabled={overlay.current === "thoughts"}
+									groupId={group?.id}
+								/>
 							</BottomSheetBody>
 						</BottomSheetContent>
-					</BottomSheetRoot>
+					</BottomSheet>
 				</>
 			) : (
-				<Text role="alert" color="fg.critical">
+				<p role="alert" className="text-destructive">
 					1~{book.pageCount}쪽 사이로 골라주세요.
-				</Text>
+				</p>
 			)}
-			<BottomSheetRoot {...overlay.bind("space")}>
+			<BottomSheet {...overlay.bind("space")}>
 				<BottomSheetContent title="함께 읽는 공간">
 					<BottomSheetBody>
 						<GroupPicker
@@ -237,14 +235,14 @@ function ReadingContent({
 						<LoadState pending={!groupsLoaded} error={false} retry={() => undefined} />
 					</BottomSheetBody>
 				</BottomSheetContent>
-			</BottomSheetRoot>
-			<BottomSheetRoot {...overlay.bind("info")}>
+			</BottomSheet>
+			<BottomSheet {...overlay.bind("info")}>
 				<BottomSheetContent title={book.title} description={book.author}>
 					<BottomSheetBody>
 						<BookInfo book={book} />
 					</BottomSheetBody>
 				</BottomSheetContent>
-			</BottomSheetRoot>
+			</BottomSheet>
 		</>
 	);
 }
@@ -273,9 +271,9 @@ function BookmarkButton({
 			: "책갈피 없음"
 		: "책갈피";
 	return (
-		<ActionButton
+		<Button
 			variant="ghost"
-			size="small"
+			size="sm"
 			aria-label={
 				count.isSuccess
 					? `이 쪽의 다른 독자 책갈피 ${count.data.count}개 열기`
@@ -283,27 +281,21 @@ function BookmarkButton({
 			}
 			onClick={onOpen}
 		>
-			<PrefixIcon svg={<IconBookmarkLine />} />
+			<BookmarkIcon data-icon="inline-start" />
 			{label}
-		</ActionButton>
+		</Button>
 	);
 }
 
 function BookInfo({ book }: { book: Book }) {
 	return (
-		<dl className="grid grid-cols-[5rem_1fr] gap-x-x3 gap-y-x2 pb-x6">
-			<Text as="dt" color="fg.neutralMuted">
-				분량
-			</Text>
-			<Text as="dd">{book.pageCount}쪽</Text>
-			<Text as="dt" color="fg.neutralMuted">
-				이용 조건
-			</Text>
-			<Text as="dd">{book.license ?? "확인되지 않았어요"}</Text>
-			<Text as="dt" color="fg.neutralMuted">
-				원문 출처
-			</Text>
-			<Text as="dd" className="break-all">
+		<dl className="grid grid-cols-[5rem_1fr] gap-x-3 gap-y-2">
+			<dt className="text-muted-foreground">분량</dt>
+			<dd>{book.pageCount}쪽</dd>
+			<dt className="text-muted-foreground">이용 조건</dt>
+			<dd>{book.license ?? "확인되지 않았어요"}</dd>
+			<dt className="text-muted-foreground">원문 출처</dt>
+			<dd className="break-all">
 				{book.sourceUrl ? (
 					<a href={book.sourceUrl} target="_blank" rel="noreferrer" className="underline">
 						{decodeURI(book.sourceUrl)}
@@ -311,7 +303,7 @@ function BookInfo({ book }: { book: Book }) {
 				) : (
 					"확인되지 않았어요"
 				)}
-			</Text>
+			</dd>
 		</dl>
 	);
 }
@@ -327,27 +319,25 @@ function GroupPicker({
 }) {
 	const [value, setValue] = useState(current);
 	return (
-		<div className="flex max-h-[65dvh] flex-col gap-x4 overflow-y-auto pb-x6">
-			<RadioSelectBoxRoot label="독서 공간" value={value} onValueChange={setValue}>
-				<RadioSelectBoxItem
+		<div className="flex flex-col gap-4">
+			<ChoiceGroup label="독서 공간" value={value} onValueChange={setValue}>
+				<ChoiceItem
 					value="private"
 					label="개인 독서"
 					description="새 기록은 나만 보기로 저장돼요"
-					suffix={<RadioSelectBoxRadiomark />}
 				/>
 				{groups.map((group) => (
-					<RadioSelectBoxItem
+					<ChoiceItem
 						key={group.id}
 						value={group.id}
 						label={group.name}
 						description="이 모임에 공유한 생각을 함께 봐요"
-						suffix={<RadioSelectBoxRadiomark />}
 					/>
 				))}
-			</RadioSelectBoxRoot>
-			<ActionButton variant="neutralSolid" onClick={() => select(value)}>
+			</ChoiceGroup>
+			<Button size="lg" onClick={() => select(value)}>
 				이 공간에서 읽기
-			</ActionButton>
+			</Button>
 		</div>
 	);
 }
