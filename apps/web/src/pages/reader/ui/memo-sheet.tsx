@@ -113,7 +113,7 @@ function MemoForm({
 				)}
 			</BottomSheetBody>
 			<BottomSheetFooter>
-				<Button type="button" variant="secondary" size="lg" onClick={() => overlay.close()}>
+				<Button type="button" variant="weak" size="lg" onClick={() => overlay.close()}>
 					취소
 				</Button>
 				<Button type="submit" size="lg" disabled={!valid || create.isPending}>
