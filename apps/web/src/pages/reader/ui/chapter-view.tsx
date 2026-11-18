@@ -102,7 +102,7 @@ function Paragraph({
 							data-e={segment.e}
 							data-selected={segment.selected || undefined}
 							className={cn("reader-sentence", segment.selected && "bg-selection")}
-							style={markStyle(segment.marks)}
+							style={markStyle(segment.marks, p * 31 + segment.s)}
 						>
 							{text.slice(segment.s, segment.e)}
 						</span>

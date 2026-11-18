@@ -86,17 +86,32 @@ export function buildSegments({
 	return segments;
 }
 
+/** Hand-drawn pen strokes that start and end at the same height, so tiles and pieces join smoothly. */
+const PEN_STROKES: [{ width: number; d: string }, ...{ width: number; d: string }[]] = [
+	{ width: 96, d: "M0 2.2C8 2.2 20 1.4 34 1.9S60 3.1 74 2.5 89 2.2 96 2.2" },
+	{ width: 112, d: "M0 2.2C10 2.2 24 3 42 2.5S68 1.4 86 2 104 2.2 112 2.2" },
+	{ width: 84, d: "M0 2.2C8 2.2 18 2.9 30 2.6S52 1.5 64 2 78 2.2 84 2.2" },
+];
+
+function penStroke(color: string, variant: number) {
+	const stroke = PEN_STROKES[variant % PEN_STROKES.length] ?? PEN_STROKES[0];
+	const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${stroke.width}' height='4' viewBox='0 0 ${stroke.width} 4'><path d='${stroke.d}' fill='none' stroke='${color}' stroke-width='1.7' stroke-linecap='round'/></svg>`;
+	return { image: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, width: stroke.width };
+}
+
 /**
- * A fixed 6px band under the text: up to three 2px lines, solid for underlines and dotted for
- * memo/질문. The band never grows, so lines don't move when traces appear.
+ * A fixed band under the text: up to three lines, a hand-drawn pen stroke for underlines and
+ * dotted for memo/질문. The band never grows, so lines don't move when traces appear.
+ * `seed` picks the stroke shape, so each piece looks drawn by hand but stays the same on rerender.
  */
-export function markStyle(marks: Mark[]) {
+export function markStyle(marks: Mark[], seed = 0) {
 	if (!marks.length) return undefined;
 	const layers = marks.map((mark, index) => {
-		const image = mark.dotted
-			? `repeating-linear-gradient(90deg, ${mark.color} 0 3px, transparent 3px 6px)`
-			: `linear-gradient(${mark.color}, ${mark.color})`;
-		return `${image} 0 calc(100% - ${index * 2}px) / 100% 2px no-repeat`;
+		const y = `calc(100% - ${index * 2}px)`;
+		if (mark.dotted)
+			return `repeating-linear-gradient(90deg, ${mark.color} 0 3px, transparent 3px 6px) 0 ${y} / 100% 2px no-repeat`;
+		const pen = penStroke(mark.color, seed + index);
+		return `${pen.image} 0 ${y} / ${pen.width}px 4px repeat-x`;
 	});
 	return { background: layers.join(", ") };
 }

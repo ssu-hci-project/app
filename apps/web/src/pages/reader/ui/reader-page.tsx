@@ -23,6 +23,7 @@ import {
 	useNotice,
 	useStepOverlay,
 } from "@/shared/ui";
+import { animatePageTurn } from "../lib/page-turn";
 import { bookPercent, GAP, GUTTER, parseTarget, readLocalPosition } from "../lib/position";
 import { type Passage, useReaderStore } from "../model/reader-store";
 import { useReadingProgress } from "../model/use-reading-progress";
@@ -112,10 +113,11 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	const mainRef = useRef<HTMLDivElement>(null);
 	const pagesRef = useRef<HTMLDivElement>(null);
 	const colsRef = useRef<HTMLDivElement>(null);
+	const pageTurnLayer = useRef<HTMLDivElement>(null);
+	const stopPageTurn = useRef<(() => void) | undefined>(undefined);
 	const [size, setSize] = useState({ width: 0, height: 0 });
 	const [pages, setPages] = useState(1);
 	const [page, setPage] = useState(0);
-	const [animate, setAnimate] = useState(false);
 	const [anchors, setAnchors] = useState<Anchor[]>([]);
 	const [fontsReady, setFontsReady] = useState(0);
 	const position = useRef({ page: 0, pages: 1 });
@@ -123,11 +125,15 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	useLayoutEffect(() => {
 		const element = pagesRef.current;
 		if (!element) return;
-		const observer = new ResizeObserver(() =>
-			setSize({ width: element.clientWidth, height: element.clientHeight }),
-		);
+		const observer = new ResizeObserver(() => {
+			stopPageTurn.current?.();
+			setSize({ width: element.clientWidth, height: element.clientHeight });
+		});
 		observer.observe(element);
-		return () => observer.disconnect();
+		return () => {
+			observer.disconnect();
+			stopPageTurn.current?.();
+		};
 	}, []);
 	// Web fonts (the serif body, handwriting) reflow the text when they arrive; measure again.
 	useEffect(() => {
@@ -185,7 +191,6 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		}
 		pending.current = null;
 		setPages(count);
-		setAnimate(false);
 		setPage(Math.min(count - 1, Math.max(0, next)));
 		setAnchors(
 			measureAnchors(
@@ -212,13 +217,20 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		setEmojiOpen(false);
 	}, []);
 	const toggleControls = () => {
+		stopPageTurn.current?.();
 		clearSelection();
 		if (!menuHintSeen) setMenuHintSeen(true);
 		setControlsVisible((visible) => !visible);
 	};
 	const goPage = useCallback(
-		(next: number) => {
+		(next: number, foldOrigin?: number) => {
 			if (ch === null || loading) return;
+			if ((next < 0 && ch === 0) || (next >= pages && ch + 1 >= chapterCount)) return;
+			const layer = pageTurnLayer.current;
+			const columns = colsRef.current;
+			stopPageTurn.current?.();
+			if (layer && columns)
+				stopPageTurn.current = animatePageTurn(layer, columns, next > page, foldOrigin);
 			clearSelection();
 			if (next < 0) {
 				if (ch > 0) {
@@ -234,10 +246,9 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 				}
 				return;
 			}
-			setAnimate(true);
 			setPage(next);
 		},
-		[ch, pages, chapterCount, clearSelection, loading],
+		[ch, page, pages, chapterCount, clearSelection, loading],
 	);
 
 	// Keyboard ←/→.
@@ -247,8 +258,10 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 			const target = event.target;
 			if ((target instanceof Element && target.closest("input,textarea")) || overlay.current)
 				return;
-			if (event.key === "ArrowRight") goPage(page + 1);
-			if (event.key === "ArrowLeft") goPage(page - 1);
+			if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+				const direction = event.key === "ArrowRight" ? 1 : -1;
+				goPage(page + direction, 0.5 + Math.random() * 0.18);
+			}
 			if (event.key === "Escape") clearSelection();
 		};
 		window.addEventListener("keydown", onKey);
@@ -285,7 +298,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		const box = main.getBoundingClientRect();
 		let top = Number.POSITIVE_INFINITY;
 		let bottom = Number.NEGATIVE_INFINITY;
-		for (const span of main.querySelectorAll("[data-selected]"))
+		for (const span of colsRef.current?.querySelectorAll("[data-selected]") ?? [])
 			for (const rect of span.getClientRects()) {
 				if (rect.right < box.left || rect.left > box.right) continue;
 				top = Math.min(top, rect.top - box.top);
@@ -587,7 +600,6 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 									columnGap: GAP,
 									columnFill: "auto",
 									transform: `translateX(${-page * step}px)`,
-									transition: animate ? "transform 280ms cubic-bezier(.2,.7,.2,1)" : "none",
 									"--reader-size": `${settings.size}px`,
 									"--reader-leading": settings.leading,
 								} as React.CSSProperties
@@ -672,6 +684,16 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 					/>
 				)}
 			</main>
+			<div
+				ref={pageTurnLayer}
+				aria-hidden="true"
+				inert
+				className="pointer-events-none absolute inset-x-0 z-10 overflow-hidden"
+				style={{
+					top: showControls ? topControlsHeight : 0,
+					bottom: showControls ? bottomControlsHeight : 0,
+				}}
+			/>
 			<footer
 				id={`${controlsId}-bottom`}
 				inert={!showControls}
