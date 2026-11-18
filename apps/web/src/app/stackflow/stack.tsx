@@ -9,6 +9,9 @@ import {
 	useActivity,
 } from "@stackflow/react";
 import { useEffect } from "react";
+import { GroupBookPage } from "@/pages/group-book";
+import { GroupNewPage } from "@/pages/group-new";
+import { GroupReadyPage } from "@/pages/group-ready";
 import { HomePage } from "@/pages/home";
 import { InvitePage } from "@/pages/invite";
 import { AppScreen, LoadingSkeleton, ResultSection } from "@/shared/ui";
@@ -75,14 +78,10 @@ export const { Stack } = stackflow({
 			loading: loading<"ReaderPage">(ActivityLoading),
 			errorHandler: errorHandler<"ReaderPage">(ActivityError),
 		}),
-		ExportPage: structuredActivityComponent<"ExportPage">({
-			content: async () => ({
-				default: content<"ExportPage">((await import("@/pages/export")).ExportPage),
-			}),
-			loading: loading<"ExportPage">(ActivityLoading),
-			errorHandler: errorHandler<"ExportPage">(ActivityError),
-		}),
 		InvitePage,
+		GroupNewPage,
+		GroupReadyPage,
+		GroupBookPage,
 	},
 	plugins: [
 		basicRendererPlugin(),

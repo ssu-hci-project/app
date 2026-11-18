@@ -47,6 +47,14 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
 - AI 기능 표시는 `AiSparkleIcon`(`shared/ui/ai-icon.tsx`)을 씁니다. TDS twinkle 리소스를 메인/서브 테마 색으로 표시합니다. AI 결과가 있을 때만 `--magic` 톤 `Alert`로 안내합니다.
 - 판본이 `판본 미확인`이거나 앱에서 읽는 작품(`sourceUrl` 있음)이면 판본을 노출하지 않습니다. 출처와 이용 조건은 리더의 "책 정보" 시트에서 보여줍니다. 저자·판본 표기는 `@/entities/book`의 `bookByline`을, 사람 이름은 `@/entities/profile`의 `personName`을 씁니다.
 - 기록 작성은 별도 액티비티에서 개인 저장이 기본입니다. 공개 범위 선택은 `Field` 안의 버튼과 `ChoiceGroup`(카드형 라디오)을 사용하고 확정 버튼 전에는 서버 상태를 바꾸지 않습니다. 알림은 `useNotice()` 토스트로 모바일 프레임 하단에 표시합니다.
+- **내 서재와 모임은 구분합니다.** 홈 탭은 고른 곳을 따릅니다. 개인 서재는 "내 서재"(`libraryName`)로 표시하고,
+  모임 홈은 모임 서재(`listPage` `group`)만 보여줍니다. 하단 "내 서재" 탭은 고른 곳과 관계없이 모든 서재·모임에서
+  읽거나 담거나 올린 책을 보여주며, 책을 열 때 `bookLibrary`로 그 책을 함께 읽는 모임으로 전환합니다.
+- 모임 만들기는 책이 먼저입니다. `GroupNewPage`(같이 읽을 책 여러 권 고르기 → `step=name`, 첫 책 제목으로 이름을
+  미리 채움) → `GroupReadyPage`(초대 코드·"같이 읽자고 초대하기")입니다. 책 상세에서 "이 책으로 모임 만들기"는 이름 단계로
+  바로 열고, 모임에서는 "이 모임에서 같이 읽기"로 모임 서재에 담습니다. 모임 서재에 더 담기는 `GroupBookPage`(멤버 누구나),
+  책 고르기 목록은 `features/book-picker`입니다. 개인 서재는 초대를 보여주지 않고, 초대 링크로 참여하면 책이 한 권일 때 그
+  책 상세로, 아니면 모임 홈으로 갑니다. 초대 공유는 `@/entities/library`의 `shareInvite`를 탭 핸들러에서 바로 호출합니다.
 - `/api`는 `bun run dev` 중에는 API로 프록시되고, 프로덕션에서는 같은 Worker가
   제공하므로 API base URL을 설정할 필요가 없습니다.
 

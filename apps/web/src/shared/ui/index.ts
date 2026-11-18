@@ -148,6 +148,7 @@ export {
 	TdsIcon,
 	Trash2Icon,
 	UnderlineIcon,
+	UndoIcon,
 	XIcon,
 } from "./tds-icon";
 export { TextButton } from "./text-button";

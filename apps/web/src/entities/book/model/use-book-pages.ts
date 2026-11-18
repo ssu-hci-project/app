@@ -3,7 +3,7 @@ import { orpc } from "@/shared/api";
 
 export function useBookPages(
 	libraryId: string,
-	scope: "catalog" | "mine" | "saved" | "uploaded",
+	scope: "catalog" | "group" | "shared" | "mine" | "saved" | "uploaded",
 	enabled = true,
 ) {
 	return useInfiniteQuery(

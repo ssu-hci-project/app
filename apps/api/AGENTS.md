@@ -53,6 +53,13 @@ test/<ns>.test.ts    새 D1에 대해 workerd 안에서 실행되는 Vitest
   흔적은 서재(`libraries`) 안에서만 보입니다. 서재 단위 프로시저는 `libraryId`를 받고
   `routers/access.ts`의 `requireMember`/`requireBook`으로 멤버십과 책 공개 범위를 확인합니다.
   `books.library_id`가 null이면 모든 서재가 함께 읽는 퍼블릭 도메인 책입니다.
+- **모임(교환독서 모임)**은 개인 서재가 아닌 `libraries` 행이고, 모임 서재(같이 읽기로 고른 책)는 `library_books`에 둡니다.
+  `libraries.create`가 `bookIds`(퍼블릭 도메인 책)로 모임 서재를 채워 만들고, 이후 멤버 누구나 `libraries.addBooks`로
+  그 모임에서 읽을 수 있는 책을 더 담습니다. 모임에 올린 책은 `uploadFinish`에서 모임 서재에 자동으로 담깁니다.
+  `list`·`preview`는 모임 서재(`books`)를 함께 돌려줍니다.
+- 내 서재와 모임 서재는 다릅니다. `books.listPage`의 `mine`/`saved`/`uploaded`(내 서재)는 내가 속한 모든 서재의 책을
+  보여주고 흔적 수는 내 흔적입니다. `group`은 그 모임 서재, `catalog`는 그 서재에서 읽을 수 있는 모든 책, `shared`는
+  퍼블릭 도메인 책입니다. 모든 `Book`의 `readIn`은 그 책을 모임 서재에 둔 내 모임 목록입니다.
 - 본문은 `book_chapters` + `book_paragraphs`(장·문단)에 저장합니다. 흔적은 (장, 문단, 글자 범위)로
   위치를 가리키므로 이미 쓰인 책의 문단을 다시 나누지 마세요. 시드 문단은 `src/lib/paragraphs.ts`의
   `splitParagraphs`로 만들고, 장 구분이 없는 작품은 책 제목을 단 1장입니다.

@@ -1,8 +1,7 @@
-import { libraryNameSchema, textLimits } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { useCurrentLibrary } from "@/entities/library";
+import { libraryName, shareInvite, useCurrentLibrary } from "@/entities/library";
 import { orpc } from "@/shared/api";
 import { cn } from "@/shared/lib";
 import {
@@ -29,27 +28,14 @@ import {
 	useStepOverlay,
 } from "@/shared/ui";
 
-/** 서재 전환 · 초대 · 참여 · 만들기. Bound to the `library` overlay. */
+/** 서재·모임 전환 · 모임 초대 · 참여 · 모임 만들기. Bound to the `library` overlay. */
 export function LibrarySheet() {
 	const overlay = useStepOverlay();
 	const flow = useFlow();
 	const notify = useNotice();
 	const { libraries, library, select } = useCurrentLibrary();
 	const [code, setCode] = useState("");
-	const [name, setName] = useState("");
-	const [nameError, setNameError] = useState<string>();
 	const [leaving, setLeaving] = useState(false);
-	const create = useMutation(
-		orpc.libraries.create.mutationOptions({
-			onSuccess: (created) => {
-				select(created.id);
-				setName("");
-				overlay.close();
-				notify(`『${created.name}』을 만들었어요. 초대 코드를 보내보세요.`);
-			},
-			onError: () => setNameError("만들지 못했어요. 다시 시도해주세요."),
-		}),
-	);
 	const leave = useMutation(
 		orpc.libraries.leave.mutationOptions({
 			onSuccess: () => {
@@ -57,34 +43,31 @@ export function LibrarySheet() {
 				if (personal) select(personal.id);
 				setLeaving(false);
 				overlay.close();
-				notify("서재에서 나왔어요");
+				notify("나왔어요");
 			},
 			onError: () => notify("나오지 못했어요. 다시 시도해주세요.", "critical"),
 		}),
 	);
-	const link = library ? `${window.location.origin}/invite/${library.inviteCode}` : "";
+	const group = library && !library.personal ? library : undefined;
 	const share = async () => {
-		if (!library) return;
-		const text = `교환독서 『${library.name}』에 초대해요. 초대 코드 ${library.inviteCode}`;
-		try {
-			if (navigator.share) await navigator.share({ title: "교환독서 초대", text, url: link });
-			else {
-				await navigator.clipboard.writeText(link);
-				notify("초대 링크를 복사했어요");
-			}
-		} catch {
-			// The reader closed the share sheet.
-		}
+		if (!group) return;
+		const result = await shareInvite(group, group.books);
+		if (result === "copied") notify("초대 메시지와 링크를 복사했어요");
+		if (result === "failed") notify("공유하지 못했어요. 초대 코드를 직접 알려주세요.", "critical");
+	};
+	const open = (next: () => void) => {
+		overlay.close();
+		next();
 	};
 	return (
 		<BottomSheet {...overlay.bind("library")}>
 			<BottomSheetContent
-				title="서재"
-				description="흔적과 올린 책은 같은 서재 사람들에게만 보여요."
+				title="내 서재와 모임"
+				description="흔적은 같은 모임 사람들에게만 보여요."
 			>
 				<BottomSheetBody className="flex flex-col gap-7">
 					<fieldset className="m-0 flex min-w-0 flex-col gap-2 border-0 p-0">
-						<legend className="sr-only">내 서재 목록</legend>
+						<legend className="sr-only">내 서재와 모임 목록</legend>
 						{libraries.map((entry) => {
 							const current = entry.id === library?.id;
 							return (
@@ -101,9 +84,13 @@ export function LibrarySheet() {
 									)}
 								>
 									<span className="flex min-w-0 flex-1 flex-col">
-										<span className="truncate text-st8 font-semibold">{entry.name}</span>
-										<span className="text-t7 text-muted-foreground">
-											{entry.members.length}명이 함께 읽어요
+										<span className="truncate text-st8 font-semibold">{libraryName(entry)}</span>
+										<span className="truncate text-t7 text-muted-foreground">
+											{entry.personal
+												? entry.members.length > 1
+													? `${entry.members.length}명이 함께 읽어요`
+													: "나만 보는 흔적"
+												: `모임 · 책 ${entry.books.length}권 · ${entry.members.length}명`}
 										</span>
 									</span>
 									{current && <CheckIcon className="size-5 text-brand" aria-hidden="true" />}
@@ -112,13 +99,13 @@ export function LibrarySheet() {
 						})}
 					</fieldset>
 
-					{library && (
+					{group && (
 						<section className="flex flex-col gap-3">
-							<h3 className="text-t5 font-bold text-strong">이 서재에 초대하기</h3>
+							<h3 className="text-t5 font-bold text-strong">이 모임에 초대하기</h3>
 							<div className="flex flex-col items-center gap-1 rounded-xl bg-muted px-4 py-5">
 								<span className="text-t7 text-sub">초대 코드</span>
 								<span className="font-mono text-st2 font-bold tracking-[0.2em] text-strong">
-									{library.inviteCode}
+									{group.inviteCode}
 								</span>
 							</div>
 							<div className="grid grid-cols-2 gap-2">
@@ -127,7 +114,7 @@ export function LibrarySheet() {
 									size="lg"
 									onClick={async () => {
 										try {
-											await navigator.clipboard.writeText(library.inviteCode);
+											await navigator.clipboard.writeText(group.inviteCode);
 											notify("초대 코드를 복사했어요");
 										} catch {
 											notify("복사하지 못했어요. 코드를 직접 알려주세요.", "critical");
@@ -139,7 +126,7 @@ export function LibrarySheet() {
 								</Button>
 								<Button variant="weak" size="lg" onClick={share}>
 									<Share2Icon data-icon="inline-start" />
-									링크 보내기
+									같이 읽자고 보내기
 								</Button>
 							</div>
 						</section>
@@ -179,45 +166,13 @@ export function LibrarySheet() {
 						</div>
 					</form>
 
-					<form
-						className="flex flex-col gap-3"
-						autoComplete="off"
-						onSubmit={(event) => {
-							event.preventDefault();
-							const parsed = libraryNameSchema.safeParse({ name });
-							if (!parsed.success) return setNameError(parsed.error.issues[0]?.message);
-							setNameError(undefined);
-							create.mutate(parsed.data);
-						}}
+					<Button
+						variant="secondary"
+						size="lg"
+						onClick={() => open(() => flow.push("GroupNewPage", {}))}
 					>
-						<label htmlFor="library-name" className="text-st8 font-bold">
-							새 서재 만들기
-						</label>
-						<div className="flex gap-2">
-							<Input
-								id="library-name"
-								value={name}
-								onChange={(event) => setName(event.target.value)}
-								maxLength={textLimits.libraryName}
-								placeholder="예: 목요 독서회"
-								aria-invalid={!!nameError || undefined}
-								className="h-12 flex-1 text-st8"
-							/>
-							<Button
-								type="submit"
-								size="lg"
-								variant="secondary"
-								disabled={!name.trim() || create.isPending}
-							>
-								만들기
-							</Button>
-						</div>
-						{nameError && (
-							<p role="alert" className="text-st9 text-destructive">
-								{nameError}
-							</p>
-						)}
-					</form>
+						새 모임 만들기
+					</Button>
 
 					{library && !(library.personal && library.isOwner) && (
 						<Button
@@ -226,7 +181,8 @@ export function LibrarySheet() {
 							className="self-start text-destructive"
 							onClick={() => setLeaving(true)}
 						>
-							<LogOutIcon data-icon="inline-start" />이 서재에서 나가기
+							<LogOutIcon data-icon="inline-start" />
+							{library.personal ? "이 서재에서 나가기" : "이 모임에서 나가기"}
 						</Button>
 					)}
 				</BottomSheetBody>
@@ -236,7 +192,7 @@ export function LibrarySheet() {
 					<AlertDialogHeader>
 						<AlertDialogTitle>『{library?.name}』에서 나갈까요?</AlertDialogTitle>
 						<AlertDialogDescription>
-							이 서재의 흔적과 책을 더 볼 수 없어요. 초대 코드로 다시 참여할 수 있어요.
+							여기 남은 흔적과 책을 더 볼 수 없어요. 초대 코드로 다시 참여할 수 있어요.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>

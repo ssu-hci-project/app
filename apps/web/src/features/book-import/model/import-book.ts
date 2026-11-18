@@ -82,6 +82,8 @@ export function useBookImport(onImported: (bookId: string) => void) {
 				orpc.books.list.key(),
 				orpc.books.listPage.key(),
 				orpc.books.search.key(),
+				// A group's upload joins its shelf.
+				orpc.libraries.list.key(),
 				orpc.libraries.preview.key(),
 			],
 		},

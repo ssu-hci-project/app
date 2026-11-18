@@ -3,6 +3,7 @@ import {
 	DRAWING_LIMIT,
 	type Drawing,
 	type Stroke,
+	type tapePatterns,
 	textLimits,
 } from "@app/contract";
 import {
@@ -21,17 +22,53 @@ import {
 	tapes,
 } from "@/entities/trace";
 import { cn } from "@/shared/lib";
-import { Button, useNotice, XIcon } from "@/shared/ui";
+import { Button, UndoIcon, useNotice, XIcon } from "@/shared/ui";
 
-type Mode = "pen" | "note" | "tape" | "stk";
+type Mode = "pen" | "erase" | "note" | "tape" | "stk";
 type Item = Decoration & { text?: string };
+type Tape = (typeof tapePatterns)[number];
 const tips: Record<Mode, string> = {
 	pen: "구절 주변에 자유롭게 그려보세요",
+	erase: "지울 선이나 꾸미기를 문질러 보세요",
 	note: "메모지를 붙일 곳을 눌러주세요",
 	tape: "끌어서 마스킹테이프를 붙여보세요",
 	stk: "스티커를 붙일 곳을 눌러주세요",
 };
 const round = (value: number) => Math.round(value * 1000) / 1000;
+/** `pen` value for the colour the reader picks; the preset pens are 0…n. */
+const CUSTOM_PEN = -1;
+const DEFAULT_CUSTOM_PEN = "#E8590C";
+const CUSTOM_PEN_WIDTH = 0.08;
+
+/** Eraser sizes: the radius (in em) it reaches, on top of half a stroke's width. */
+const erasers = [
+	{ label: "작게", reach: 0.3, dot: "size-2" },
+	{ label: "보통", reach: 0.7, dot: "size-3.5" },
+	{ label: "크게", reach: 1.4, dot: "size-5" },
+] as const;
+
+/** Distance from point p to the segment a–b, all in em. */
+function segmentDistance(p: [number, number], a: [number, number], b: [number, number]) {
+	const dx = b[0] - a[0];
+	const dy = b[1] - a[1];
+	const length = dx * dx + dy * dy;
+	const t = length
+		? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / length))
+		: 0;
+	return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+}
+
+const touches = (stroke: Stroke, point: [number, number], eraserReach: number) => {
+	const reach = eraserReach + stroke.w / 2;
+	if (stroke.d.length === 1) {
+		const [only] = stroke.d;
+		return !!only && Math.hypot(point[0] - only[0], point[1] - only[1]) <= reach;
+	}
+	return stroke.d.some((a, index) => {
+		const b = stroke.d[index + 1];
+		return !!b && segmentDistance(point, a, b) <= reach;
+	});
+};
 
 /**
  * 꾸미기: draw, stick notes, tape and stickers around the passage. Everything is stored in em
@@ -53,14 +90,18 @@ export function DecorateMode({
 	const rootRef = useRef<HTMLDivElement>(null);
 	const [mode, setMode] = useState<Mode>("pen");
 	const [pen, setPen] = useState(0);
+	const [customColor, setCustomColor] = useState(DEFAULT_CUSTOM_PEN);
+	const [eraser, setEraser] = useState(1);
 	const [noteColor, setNoteColor] = useState(0);
 	const [tape, setTape] = useState("stripe");
 	const [sticker, setSticker] = useState(stickers[0] ?? "🌷");
 	const [strokes, setStrokes] = useState<Stroke[]>([]);
 	const [items, setItems] = useState<(Item | null)[]>([]);
-	const [history, setHistory] = useState<("stroke" | "item")[]>([]);
+	/** Earlier states for 되돌리기: one entry per stroke, item or erase gesture. */
+	const [history, setHistory] = useState<{ strokes: Stroke[]; items: (Item | null)[] }[]>([]);
 	const [tipVisible, setTipVisible] = useState(true);
 	const drawing = useRef<{
+		erasing?: boolean;
 		stroke?: Stroke;
 		tape?: number;
 		drag?: { index: number; from: [number, number]; item: Item };
@@ -111,62 +152,81 @@ export function DecorateMode({
 		context.globalAlpha = 1;
 	}, [strokes, fs, origin.x, origin.y]);
 
+	const remember = () => setHistory((list) => [...list, { strokes, items }]);
 	const addItem = (item: Item) => {
+		remember();
 		setItems((list) => [...list, item]);
-		setHistory((list) => [...list, "item"]);
+	};
+	const removeItem = (index: number) => {
+		remember();
+		setItems((list) => list.map((entry, at) => (at === index ? null : entry)));
+	};
+	/** Removes every stroke, note, tape or sticker under the eraser (one 되돌리기 step per gesture). */
+	const eraseAt = (clientX: number, clientY: number) => {
+		const point = toEm(clientX, clientY);
+		const reach = (erasers[eraser] ?? erasers[1]).reach;
+		setStrokes((list) => {
+			const next = list.filter((stroke) => !touches(stroke, point, reach));
+			return next.length === list.length ? list : next;
+		});
+		// Items: probe the centre and four points at the eraser's edge.
+		const edge = reach * fs;
+		const probes: [number, number][] = [
+			[0, 0],
+			[edge, 0],
+			[-edge, 0],
+			[0, edge],
+			[0, -edge],
+		];
+		const hit = new Set(
+			probes
+				.flatMap(([dx, dy]) => document.elementsFromPoint(clientX + dx, clientY + dy))
+				.map((element) => element.closest<HTMLElement>("[data-erase-item]")?.dataset.eraseItem)
+				.filter((index): index is string => index !== undefined)
+				.map(Number),
+		);
+		if (hit.size) setItems((list) => list.map((entry, at) => (hit.has(at) ? null : entry)));
+	};
+	const startErasing = (clientX: number, clientY: number) => {
+		remember();
+		drawing.current.erasing = true;
+		eraseAt(clientX, clientY);
 	};
 	const onCanvasDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
 		event.preventDefault();
 		event.currentTarget.setPointerCapture(event.pointerId);
 		setTipVisible(false);
 		const point = toEm(event.clientX, event.clientY);
-		if (mode === "pen") {
-			const tool = pens[pen] ?? pens[0];
-			if (!tool) return;
-			const stroke: Stroke = {
-				c: tool.c,
-				w: tool.w,
-				d: [point],
-				...(tool.hl ? { hl: 1 as const } : {}),
-			};
-			drawing.current.stroke = stroke;
-			setStrokes((list) => [...list, stroke]);
-			setHistory((list) => [...list, "stroke"]);
-		} else if (mode === "tape") {
-			drawing.current.tape = items.length;
-			addItem({
-				t: "tape",
-				x1: point[0],
-				y1: point[1],
-				x2: point[0] + 0.01,
-				y2: point[1],
-				p: tape as "stripe",
-			});
-		} else if (mode === "note") {
-			addItem({
-				t: "note",
-				x: round(point[0] - 1),
-				y: round(point[1] - 0.6),
-				w: 7,
-				c: noteColors[noteColor] ?? "#FFF1A8",
-				r: Math.round((Math.random() * 5 - 2.5) * 10) / 10,
-				text: "",
-			});
-		} else {
-			addItem({
-				t: "stk",
-				x: point[0],
-				y: point[1],
-				s: sticker,
-				z: 1.8,
-				r: Math.round(Math.random() * 24 - 12),
-			});
-		}
+		if (mode === "erase") return startErasing(event.clientX, event.clientY);
+		if (mode === "pen") return startStroke(point);
+		if (mode === "tape") drawing.current.tape = items.length;
+		addItem(
+			newItem(mode, point, {
+				tape: tape as Tape,
+				noteColor: noteColors[noteColor] ?? "#FFF1A8",
+				sticker,
+			}),
+		);
+	};
+	const startStroke = (point: [number, number]) => {
+		const tool =
+			pen === CUSTOM_PEN ? { c: customColor, w: CUSTOM_PEN_WIDTH } : (pens[pen] ?? pens[0]);
+		if (!tool) return;
+		const stroke: Stroke = {
+			c: tool.c,
+			w: tool.w,
+			d: [point],
+			...(tool.hl ? { hl: 1 as const } : {}),
+		};
+		drawing.current.stroke = stroke;
+		remember();
+		setStrokes((list) => [...list, stroke]);
 	};
 	const onCanvasMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
 		const point = toEm(event.clientX, event.clientY);
 		const { stroke } = drawing.current;
-		if (stroke) {
+		if (drawing.current.erasing) eraseAt(event.clientX, event.clientY);
+		else if (stroke) {
 			const last = stroke.d[stroke.d.length - 1];
 			if (last && Math.hypot(point[0] - last[0], point[1] - last[1]) > 0.05) {
 				stroke.d = [...stroke.d, point];
@@ -236,14 +296,8 @@ export function DecorateMode({
 		const last = history[history.length - 1];
 		if (!last) return;
 		setHistory((list) => list.slice(0, -1));
-		if (last === "stroke") setStrokes((list) => list.slice(0, -1));
-		else
-			setItems((list) => {
-				const next = [...list];
-				while (next.length && next[next.length - 1] === null) next.pop();
-				next.pop();
-				return next;
-			});
+		setStrokes(last.strokes);
+		setItems(last.items);
 	};
 	const finish = () => {
 		const kept = items
@@ -263,12 +317,16 @@ export function DecorateMode({
 		onDone(data);
 	};
 	const passThrough = mode === "pen" || mode === "tape";
+	const erasing = mode === "erase";
 	return (
 		<div ref={rootRef} className="absolute inset-0 z-30">
 			<canvas
 				ref={canvasRef}
 				aria-label="꾸미기 캔버스"
-				className="absolute inset-0 size-full cursor-crosshair touch-none"
+				className={cn(
+					"absolute inset-0 size-full touch-none",
+					erasing ? "cursor-cell" : "cursor-crosshair",
+				)}
 				onPointerDown={onCanvasDown}
 				onPointerMove={onCanvasMove}
 				onPointerUp={onCanvasUp}
@@ -288,14 +346,17 @@ export function DecorateMode({
 								item.t === "note" &&
 									"rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight text-note-ink shadow-[1px_3px_8px_rgb(0_0_0/0.16)]",
 								item.t === "stk" && "drop-shadow-[0_2px_3px_rgb(0_0_0/0.25)] select-none",
-								!passThrough && "pointer-events-auto cursor-grab touch-none",
+								!passThrough && !erasing && "pointer-events-auto cursor-grab touch-none",
+								erasing && "pointer-events-auto cursor-cell touch-none",
 							)}
 							style={decorationStyle(item, fs)}
 							onPointerDown={(event) => {
 								if ((event.target as HTMLElement).closest("textarea,button")) return;
 								event.preventDefault();
+								if (erasing) return removeItem(index);
 								drawing.current.drag = { index, from: toEm(event.clientX, event.clientY), item };
 							}}
+							data-erase-item={index}
 						>
 							{item.t === "note" && (
 								<textarea
@@ -321,9 +382,7 @@ export function DecorateMode({
 							<button
 								type="button"
 								aria-label="이 꾸미기 지우기"
-								onClick={() =>
-									setItems((list) => list.map((entry, at) => (at === index ? null : entry)))
-								}
+								onClick={() => removeItem(index)}
 								className="pointer-events-auto absolute -top-3 -right-3 grid size-6 place-items-center rounded-full bg-foreground font-sans text-background before:absolute before:-inset-2.5 before:content-['']"
 								style={item.t === "tape" ? { top: "50%", marginTop: -12, right: -14 } : undefined}
 							>
@@ -348,6 +407,7 @@ export function DecorateMode({
 					{(
 						[
 							["pen", "펜"],
+							["erase", "지우개"],
 							["note", "메모지"],
 							["tape", "테이프"],
 							["stk", "스티커"],
@@ -368,6 +428,28 @@ export function DecorateMode({
 					))}
 				</fieldset>
 				<div className="flex min-h-11 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
+					{erasing &&
+						erasers.map((size, index) => (
+							<Swatch
+								key={size.label}
+								label={`지우개 ${size.label}`}
+								selected={eraser === index}
+								onClick={() => setEraser(index)}
+							>
+								<span className={cn("block rounded-full bg-background", size.dot)} />
+							</Swatch>
+						))}
+					{mode === "pen" && (
+						<CustomColorSwatch
+							color={customColor}
+							selected={pen === CUSTOM_PEN}
+							onSelect={() => setPen(CUSTOM_PEN)}
+							onChange={(color) => {
+								setCustomColor(color);
+								setPen(CUSTOM_PEN);
+							}}
+						/>
+					)}
 					{mode === "pen" &&
 						pens.map((tool, index) => (
 							<Swatch
@@ -423,11 +505,13 @@ export function DecorateMode({
 				<div className="flex items-center gap-1.5">
 					<Button
 						variant="ghost"
-						className="h-11 text-background hover:bg-background/10 hover:text-background"
+						size="icon"
+						aria-label="되돌리기"
+						className="size-11 text-background hover:bg-background/10 hover:text-background"
 						onClick={undo}
 						disabled={!history.length}
 					>
-						되돌리기
+						<UndoIcon />
 					</Button>
 					<span className="flex-1" />
 					<Button
@@ -443,6 +527,83 @@ export function DecorateMode({
 				</div>
 			</div>
 		</div>
+	);
+}
+
+/** A new note, tape or sticker placed at `point` (em from the passage's first letter). */
+function newItem(
+	mode: "note" | "tape" | "stk",
+	point: [number, number],
+	tools: { tape: Tape; noteColor: string; sticker: string },
+): Item {
+	if (mode === "tape")
+		return {
+			t: "tape",
+			x1: point[0],
+			y1: point[1],
+			x2: point[0] + 0.01,
+			y2: point[1],
+			p: tools.tape,
+		};
+	if (mode === "note")
+		return {
+			t: "note",
+			x: round(point[0] - 1),
+			y: round(point[1] - 0.6),
+			w: 7,
+			c: tools.noteColor,
+			r: Math.round((Math.random() * 5 - 2.5) * 10) / 10,
+			text: "",
+		};
+	return {
+		t: "stk",
+		x: point[0],
+		y: point[1],
+		s: tools.sticker,
+		z: 1.8,
+		r: Math.round(Math.random() * 24 - 12),
+	};
+}
+
+/** 원하는 펜 색: the system colour picker, shown as a rainbow ring around the picked colour. */
+function CustomColorSwatch({
+	color,
+	selected,
+	onSelect,
+	onChange,
+}: {
+	color: string;
+	selected: boolean;
+	onSelect: () => void;
+	onChange: (color: string) => void;
+}) {
+	return (
+		<label
+			data-selected={selected || undefined}
+			className="relative grid size-11 shrink-0 cursor-pointer place-items-center rounded-xl has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-selected:bg-background/20 data-selected:ring-2 data-selected:ring-background"
+		>
+			<span
+				aria-hidden="true"
+				className="grid size-7 place-items-center rounded-full"
+				style={{
+					background:
+						"conic-gradient(#ff5f5f, #ffd25f, #6fdc8c, #5fb8ff, #a77bff, #ff5fc8, #ff5f5f)",
+				}}
+			>
+				<span
+					className="block size-4 rounded-full ring-2 ring-toolbar"
+					style={{ backgroundColor: color }}
+				/>
+			</span>
+			<input
+				type="color"
+				aria-label={selected ? "펜 색 직접 고르기, 사용 중" : "펜 색 직접 고르기"}
+				value={color}
+				onClick={onSelect}
+				onChange={(event) => onChange(event.target.value)}
+				className="absolute inset-0 size-full cursor-pointer opacity-0"
+			/>
+		</label>
 	);
 }
 

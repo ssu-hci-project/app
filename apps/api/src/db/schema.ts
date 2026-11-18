@@ -200,6 +200,25 @@ export const libraryMembers = sqliteTable(
 	],
 );
 
+/** A reading group's (모임) shelf: the books its members chose to read together. */
+export const libraryBooks = sqliteTable(
+	"library_books",
+	{
+		libraryId: text("library_id")
+			.notNull()
+			.references(() => libraries.id, { onDelete: "cascade" }),
+		bookId: text("book_id")
+			.notNull()
+			.references(() => books.id, { onDelete: "cascade" }),
+		addedBy: text("added_by").notNull(),
+		addedAt: text("added_at").notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.libraryId, table.bookId] }),
+		index("library_books_book").on(table.bookId),
+	],
+);
+
 export const bookChapters = sqliteTable(
 	"book_chapters",
 	{

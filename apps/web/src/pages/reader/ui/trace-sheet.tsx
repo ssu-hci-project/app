@@ -334,7 +334,9 @@ function TraceCard({
 			<AlertDialog open={confirming} onOpenChange={setConfirming}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>이 흔적을 지울까요?</AlertDialogTitle>
+						<AlertDialogTitle>
+							{trace.kind === "draw" ? "이 꾸미기를 지울까요?" : "이 흔적을 지울까요?"}
+						</AlertDialogTitle>
 						<AlertDialogDescription>
 							덧붙인 생각과 반응도 함께 사라져요. 되돌릴 수 없어요.
 						</AlertDialogDescription>

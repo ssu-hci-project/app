@@ -6,7 +6,7 @@ import { timeAgo } from "@/shared/lib";
 import { Button, CardButton, ListHeader, LoadState } from "@/shared/ui";
 import { ReadingCalendar } from "./reading-calendar";
 
-/** 홈: 이어 읽기 → 읽은 날 캘린더 → 함께 읽는 책 → 최근 흔적이 남은 책 → 올리기. */
+/** 내 서재 홈: 읽은 날 캘린더 → 이어 읽기 → 읽을 수 있는 책 → 최근 흔적이 남은 책 → 올리기. */
 export function HomeFeed({
 	books,
 	onImport,
@@ -30,17 +30,17 @@ export function HomeFeed({
 		.slice(0, 5);
 	return (
 		<div className="flex flex-col gap-7 pt-2">
+			<ReadingCalendar books={list} />
 			{lastOpened?.progress && (
 				<ContinueCard
 					book={lastOpened}
 					onOpen={() => flow.push("ReaderPage", { bookId: lastOpened.id })}
 				/>
 			)}
-			<ReadingCalendar books={list} />
 			<section aria-labelledby="shelf-heading">
 				<div className="flex items-baseline justify-between px-6 pb-3">
 					<ListHeader id="shelf-heading" className="px-0 pt-0 pb-0">
-						함께 읽는 책
+						읽을 수 있는 책
 					</ListHeader>
 					{books.isSuccess && (
 						<span className="text-t7 text-muted-foreground">{list.length}권</span>
@@ -86,7 +86,7 @@ export function HomeFeed({
 					<div className="flex min-w-0 flex-1 flex-col gap-1">
 						<h2 className="text-t5 font-bold text-strong">가진 전자책을 올려보세요</h2>
 						<p className="text-t7 leading-[19px] text-muted-foreground">
-							EPUB·TXT·HTML 파일을 올리면 이 서재 사람들이 함께 읽을 수 있어요
+							EPUB·TXT·HTML 파일을 올리면 혼자 읽거나 모임 책으로 고를 수 있어요
 						</p>
 					</div>
 					<Button size="lg" onClick={onImport}>

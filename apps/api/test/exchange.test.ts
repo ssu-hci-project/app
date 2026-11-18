@@ -79,6 +79,102 @@ describe("libraries", () => {
 		expect(missing).toMatchObject({ code: "NOT_FOUND" });
 	});
 
+	it("creates a reading group with books chosen together", async () => {
+		const alice = createReader();
+		const bob = createReader();
+		const first = await publicBook();
+		const second = await publicBook();
+		const mine = await personal(alice);
+		expect(mine.books).toEqual([]);
+		const [personalShelf] = await safe(
+			alice.libraries.addBooks({ libraryId: mine.id, bookIds: [first] }),
+		);
+		expect(personalShelf).toMatchObject({ code: "BAD_REQUEST" });
+
+		const [missing] = await safe(alice.libraries.create({ name: "봄 모임", bookIds: ["nope"] }));
+		expect(missing).toMatchObject({ code: "NOT_FOUND" });
+		const club = await alice.libraries.create({ name: "봄 모임", bookIds: [first] });
+		expect(club.books.map((book) => book.id)).toEqual([first]);
+
+		const preview = await bob.libraries.preview({ code: club.inviteCode });
+		expect(preview.books.map((book) => book.id)).toEqual([first]);
+		await bob.libraries.join({ code: club.inviteCode });
+		// Any member picks the next book; adding twice keeps one copy.
+		const added = await bob.libraries.addBooks({ libraryId: club.id, bookIds: [second, first] });
+		expect(added.books.map((book) => book.id)).toEqual([first, second]);
+
+		// The group's shelf holds only its books; the catalog still has every readable book.
+		const shelf = await bob.books.listPage({ libraryId: club.id, scope: "group" });
+		expect(shelf.items.map((book) => book.id).sort()).toEqual([first, second].sort());
+		expect(shelf.items.find((book) => book.id === first)?.readIn).toEqual([
+			{ id: club.id, name: "봄 모임" },
+		]);
+
+		// A book uploaded to the group lands on its shelf; another library's upload cannot.
+		const upload = async (libraryId: string, title: string) => {
+			const { bookId } = await alice.books.uploadBegin({
+				libraryId,
+				title,
+				author: "",
+				chapters: [{ title: "하나", chars: 3, paragraphs: 1 }],
+			});
+			await alice.books.uploadChunk({ bookId, ch: 0, start: 0, paragraphs: ["가나다"] });
+			await alice.books.uploadFinish({ bookId });
+			return bookId;
+		};
+		const own = await upload(mine.id, "내 책");
+		const [elsewhere] = await safe(
+			alice.libraries.addBooks({ libraryId: club.id, bookIds: [own] }),
+		);
+		expect(elsewhere).toMatchObject({ code: "NOT_FOUND" });
+		const shared = await upload(club.id, "모임 책");
+		expect(
+			(await alice.libraries.list()).find((library) => library.id === club.id)?.books.at(-1)?.id,
+		).toBe(shared);
+		await alice.books.remove({ bookId: shared });
+		expect(
+			(await alice.libraries.list())
+				.find((library) => library.id === club.id)
+				?.books.map((book) => book.id),
+		).toEqual([first, second]);
+	});
+
+	it("keeps 내 서재 across every library I read in", async () => {
+		const alice = createReader();
+		const bookId = await publicBook();
+		const mine = await personal(alice);
+		const club = await alice.libraries.create({ name: "목요 독서회" });
+		const { bookId: groupUpload } = await alice.books.uploadBegin({
+			libraryId: club.id,
+			title: "모임에만 있는 책",
+			author: "",
+			chapters: [{ title: "하나", chars: 3, paragraphs: 1 }],
+		});
+		await alice.books.uploadChunk({ bookId: groupUpload, ch: 0, start: 0, paragraphs: ["가나다"] });
+		await alice.books.uploadFinish({ bookId: groupUpload });
+		await alice.progress.save({ bookId, ch: 0, ratio: 0.5, pct: 50, date: "2026-11-18" });
+		await alice.traces.create({
+			libraryId: club.id,
+			bookId,
+			ch: 0,
+			p: 0,
+			s: 0,
+			e: 3,
+			quote: "첫 문",
+			kind: "underline",
+		});
+
+		// The same shelf from either library: the group's upload and my traces made in the group.
+		for (const libraryId of [mine.id, club.id]) {
+			const { items } = await alice.books.listPage({ libraryId, scope: "mine" });
+			expect(items.map((book) => book.id)).toEqual(expect.arrayContaining([bookId, groupUpload]));
+			expect(items.find((book) => book.id === bookId)?.traceCount).toBe(1);
+		}
+		// The personal catalog still cannot open the group's upload.
+		const { items: catalog } = await alice.books.listPage({ libraryId: mine.id });
+		expect(catalog.map((book) => book.id)).not.toContain(groupUpload);
+	});
+
 	it("copies the sample readers' traces into a new personal library", async () => {
 		const bookId = await publicBook();
 		await db
