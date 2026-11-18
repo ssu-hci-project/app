@@ -172,7 +172,7 @@ function QuestionForm({
 						onChange={(event) => setText(event.target.value)}
 						maxLength={1000}
 						placeholder={`Q. ${picked}에 답해보세요`}
-						className="min-h-28 rounded-xl px-4 py-3 text-st8"
+						className="min-h-28"
 					/>
 				)}
 				{create.isError && (

@@ -101,7 +101,7 @@ function MemoForm({
 					onChange={(event) => setText(event.target.value)}
 					maxLength={1000}
 					placeholder="이 구절을 읽고 떠오른 생각을 남겨보세요"
-					className="min-h-32 rounded-xl px-4 py-3 text-st8"
+					className="min-h-32"
 				/>
 				<p className="text-right text-st10 text-muted-foreground tabular-nums">
 					{text.length} / 1000

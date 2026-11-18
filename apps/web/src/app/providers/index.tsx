@@ -22,7 +22,11 @@ export function AppProviders({ children }: { children: ReactNode }) {
 				<TooltipProvider>
 					{children}
 					{/* 하단 내비게이션·쪽 넘김 막대 위로 띄워요. */}
-					<Toaster position="bottom-center" offset={{ bottom: 96 }} mobileOffset={{ bottom: 96 }} />
+					<Toaster
+						position="bottom-center"
+						offset={{ bottom: 96, left: 0, right: 0 }}
+						mobileOffset={{ bottom: 96, left: 0, right: 0 }}
+					/>
 				</TooltipProvider>
 				{import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
 			</MotionProvider>

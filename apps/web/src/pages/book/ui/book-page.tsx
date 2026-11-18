@@ -21,6 +21,7 @@ import {
 	ListButton,
 	ListHeader,
 	LoadState,
+	PopOnSelect,
 } from "@/shared/ui";
 
 export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }) {
@@ -223,10 +224,15 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 						className="w-14 min-w-0 shrink-0 px-0"
 						onClick={() => save.mutate({ bookId: book.id, saved: !saved })}
 					>
-						<HeartIcon
-							filled={saved}
-							className={cn("size-6!", saved && "fill-destructive text-destructive")}
-						/>
+						<PopOnSelect selected={saved}>
+							<HeartIcon
+								filled={saved}
+								className={cn(
+									"size-6! transition-colors duration-200",
+									saved && "fill-destructive text-destructive",
+								)}
+							/>
+						</PopOnSelect>
 					</Button>
 					<Button size="lg" className="flex-1" onClick={() => read()}>
 						{book.progress?.pct ? `이어 읽기 · ${book.progress.pct}%` : "바로 읽기"}

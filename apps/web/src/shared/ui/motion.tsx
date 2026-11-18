@@ -1,5 +1,6 @@
 import { AnimatePresence, LazyMotion, MotionConfig, m, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
+import { cn } from "@/shared/lib/cn";
 
 const features = () => import("./motion-features").then((module) => module.motionFeatures);
 export function MotionProvider({ children }: { children: ReactNode }) {
@@ -28,5 +29,31 @@ export function AnimatedListItem({ children }: { children: ReactNode }) {
 		>
 			{children}
 		</m.div>
+	);
+}
+
+export function PopOnSelect({
+	selected,
+	className,
+	children,
+}: {
+	selected: boolean;
+	className?: string;
+	children: ReactNode;
+}) {
+	const mounted = useRef(false);
+	useEffect(() => {
+		mounted.current = true;
+	}, []);
+	return (
+		<m.span
+			key={selected ? "on" : "off"}
+			className={cn("inline-flex", className)}
+			initial={selected && mounted.current ? { scale: 0.6 } : false}
+			animate={{ scale: 1 }}
+			transition={{ type: "spring", stiffness: 520, damping: 14 }}
+		>
+			{children}
+		</m.span>
 	);
 }

@@ -1,6 +1,6 @@
 import type { PassageHit, Trace } from "@app/contract";
 import { useFlow } from "@stackflow/react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { useDebounceValue, useLocalStorage } from "usehooks-ts";
 import { BookRow, chapterLabel, useBookPages } from "@/entities/book";
@@ -36,6 +36,7 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 	const results = useQuery({
 		...orpc.books.search.queryOptions({ input: { libraryId, q: debounced } }),
 		enabled: searchReady,
+		placeholderData: keepPreviousData,
 	});
 	const remember = (value = query.trim()) => {
 		if (value) setRecent([value, ...recent.filter((entry) => entry !== value)].slice(0, 10));
@@ -50,17 +51,24 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 			e: String(target.e),
 		});
 	};
-	const data = searchReady ? results.data : undefined;
+	const data = searchReady && !results.isPlaceholderData ? results.data : undefined;
 	const bookHits = data?.books ?? [];
 	const passages = data?.passages ?? [];
 	const traces = data?.traces ?? [];
-	const searchPending = !searchReady || results.isPending;
+	const searchPending = !searchReady || results.isPending || results.isPlaceholderData;
 	const searchFailed = searchReady && !data && results.isError;
 	const counts = {
 		all: bookHits.length + passages.length + traces.length,
 		book: bookHits.length,
 		text: passages.length,
 		trace: traces.length,
+	};
+	const shown = results.data;
+	const chipCounts = shown && {
+		all: shown.books.length + shown.passages.length + shown.traces.length,
+		book: shown.books.length,
+		text: shown.passages.length,
+		trace: shown.traces.length,
 	};
 	return (
 		<div className="flex flex-col">
@@ -158,8 +166,8 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 						).map(([value, label]) => (
 							<Chip key={value} size="m" selected={kind === value} onClick={() => setKind(value)}>
 								{label}{" "}
-								<span className="inline-grid min-w-[1ch] place-items-center tabular-nums">
-									{searchPending || searchFailed ? (
+								<span className="inline-grid min-w-[2ch] place-items-center tabular-nums">
+									{!chipCounts ? (
 										<>
 											<span
 												aria-hidden="true"
@@ -167,8 +175,10 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 											/>
 											<span className="sr-only">세는 중</span>
 										</>
+									) : chipCounts[value] > 99 ? (
+										"99+"
 									) : (
-										counts[value]
+										chipCounts[value]
 									)}
 								</span>
 							</Chip>

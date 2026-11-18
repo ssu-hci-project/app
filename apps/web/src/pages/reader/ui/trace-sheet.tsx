@@ -2,7 +2,7 @@ import { reactionEmojis, type Trace } from "@app/contract";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { personColor, personName, ReaderAvatar } from "@/entities/profile";
-import { DrawingPreview, kindLabel, overlapping } from "@/entities/trace";
+import { DrawingPreview, overlapping } from "@/entities/trace";
 import type { SheetControl } from "@/features/profile-edit";
 import { orpc } from "@/shared/api";
 import { timeAgo } from "@/shared/lib";
@@ -16,7 +16,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AnimatedListItem,
-	Badge,
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
@@ -36,6 +35,7 @@ import {
 	ReactionEmoji,
 	SmileIcon,
 	Textarea,
+	TextButton,
 	useStepOverlay,
 } from "@/shared/ui";
 import { type Passage, useReaderStore } from "../model/reader-store";
@@ -108,11 +108,7 @@ export function TraceSheet({
 					/>
 				</BottomSheetBody>
 				<BottomSheetFooter>
-					<Button variant="secondary" size="lg" onClick={() => overlay.close()}>
-						닫기
-					</Button>
 					<Button
-						size="lg"
 						disabled={!passage}
 						onClick={() => {
 							if (!passage) return;
@@ -173,9 +169,6 @@ function TraceCard({
 					size="sm"
 				/>
 				<span className="truncate text-st9 font-semibold">{name}</span>
-				<Badge variant="secondary" className="shrink-0">
-					{kindLabel[trace.kind]}
-				</Badge>
 				<span className="shrink-0 text-t7 text-muted-foreground">{timeAgo(trace.createdAt)}</span>
 				{trace.isMine && (
 					<DropdownMenu>
@@ -264,9 +257,14 @@ function TraceCard({
 						onFocus={() => useReaderStore.setState({ typing: true })}
 						onBlur={() => useReaderStore.setState({ typing: false })}
 						placeholder="생각을 덧붙여 보세요"
-						className="min-h-11 flex-1 rounded-xl text-st8"
+						className="min-h-11 flex-1 px-3.5 py-2.5 text-t6 leading-[22.5px]"
 					/>
-					<Button type="submit" size="lg" disabled={!draft.trim() || reply.isPending}>
+					<Button
+						type="submit"
+						size="sm"
+						className="h-11"
+						disabled={!draft.trim() || reply.isPending}
+					>
 						등록
 					</Button>
 				</form>
@@ -292,13 +290,13 @@ function TraceCard({
 						render={
 							<Button
 								variant="ghost"
-								className="h-11 px-2.5 text-muted-foreground"
+								className="h-9 gap-1 px-2 text-t7 font-semibold text-sub"
 								aria-label="반응 남기기"
 								disabled={temporary}
 							/>
 						}
 					>
-						<SmileIcon />
+						<SmileIcon className="size-5" />
 						반응
 					</PopoverTrigger>
 					<PopoverContent side="top" className="z-60 w-auto flex-row gap-0 rounded-full p-1">
@@ -318,9 +316,10 @@ function TraceCard({
 						))}
 					</PopoverContent>
 				</Popover>
-				<Button
-					variant="ghost"
-					className="ml-auto h-11 px-2 font-semibold text-brand"
+				<TextButton
+					size="xs"
+					tone="primary"
+					className="ml-auto h-9 px-2"
 					disabled={temporary}
 					onClick={() =>
 						useReaderStore.setState({
@@ -330,7 +329,7 @@ function TraceCard({
 					}
 				>
 					생각 덧붙이기
-				</Button>
+				</TextButton>
 			</footer>
 			<AlertDialog open={confirming} onOpenChange={setConfirming}>
 				<AlertDialogContent>

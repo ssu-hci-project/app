@@ -32,7 +32,9 @@ Figma MCP로 읽은 [TDS Mobile UI Kit](https://www.figma.com/design/tDvgcmd9FHa
 | Chip, RemovableChip | `48081:12638`, `48081:12568` | S: 높이 32, 좌우 11, 13 semibold. M: 높이 38, 15. 선택 Fill은 `--chip-selected` |
 | AlertDialog | `52332:21143` | 폭 311(최대 320), radius 24, 제목 20/1.35 bold, 설명 15/1.6, 버튼 L 가로 2개(취소 `weak`) |
 | BottomCta | `22695:10080` | 위 그라데이션 36, 좌우 20, 아래 20+safe area, XL 버튼(56, radius 16), 보조 버튼 `weak` |
-| Toast | `2415:8309` | 어두운 반투명 면, 흰 글자 15 semibold, 아이콘 24 |
+| Textarea, TextAreaField | `50817:11885` | Box Text Area: 최소 54, 좌우 16, 위아래 14, radius 14, 17 medium, 포커스 시 브랜드 5% 배경 |
+| Slider | `47597:1966` | 레일 4(radius 2.5, `--progress-track`), 진행 브랜드색, 손잡이 26 흰색 + 테두리·그림자 18%, 위아래 18.5 |
+| Toast | `46908:27156` | 하단 Fit: 알약, 회색 46% + 블러 15, 좌우 16/15·위아래 14, 간격 12, 아이콘 24, 15 semibold, 액션 버튼 31(13 semibold). sonner `unstyled` + `classNames`, `useNotice(message, tone, action)` |
 | IconButton, TextButton | `2388:30933`, `2388:30929` | 터치 영역 44, 아이콘 24 / 13·14·15·17 semibold |
 | ListHeader | `11184:783` | 좌우 24, 제목 17 bold `text-strong` |
 
@@ -104,3 +106,13 @@ Figma의 24×24 슬롯과 내부 inset을 유지하며, SVG 파일 자체의 치
 | 😂 | `55070:4098` |
 | 💡 | `55070:2974` |
 | 🌱 | `55070:2376` |
+
+## TDS에 없는 컴포넌트
+
+TDS에 없을 때만 [원티드 디자인 시스템](https://www.figma.com/design/VbAvdgJlDgVgq37SSLIBcb)의 구조와 간격을 빌리고,
+색·글자·radius는 TDS 토큰을 씁니다.
+
+| 앱 컴포넌트 | 원티드 노드 | 반영한 규격 |
+| --- | --- | --- |
+| AvatarGroup, ReaderAvatar | `16215:26176`, `16215:25725` | 크기 24/32/40, 8px 겹침, 배경색 1.5px 테두리, 뒤 텍스트 14 semibold 간격 10 |
+| 책 상세 흔적 카드 | `16215:29448` | 제목 15 semibold, 캡션 13 medium, 묶음 간격 4 |

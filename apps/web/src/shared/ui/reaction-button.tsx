@@ -1,5 +1,6 @@
 import { m } from "motion/react";
 import { cn } from "@/shared/lib";
+import { PopOnSelect } from "./motion";
 import { ReactionEmoji } from "./reaction-emoji";
 
 export function ReactionButton({
@@ -25,12 +26,19 @@ export function ReactionButton({
 			disabled={disabled}
 			onClick={onClick}
 			className={cn(
-				"flex h-8 items-center gap-1 rounded-full bg-muted px-2.5 text-t7 font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none",
-				selected && "bg-secondary text-secondary-foreground ring-1 ring-primary/40",
+				"flex h-8 items-center gap-1 rounded-full bg-neutral-weak px-2.5 text-t7 font-semibold text-sub outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none",
+				selected && "bg-accent text-brand ring-1 ring-primary/20",
 			)}
 		>
-			<ReactionEmoji emoji={emoji} decorative className="size-4" />
-			<m.span key={count} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+			<PopOnSelect selected={selected}>
+				<ReactionEmoji emoji={emoji} decorative className="size-4" />
+			</PopOnSelect>
+			<m.span
+				key={count}
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				className="tabular-nums"
+			>
 				{count}
 			</m.span>
 		</m.button>

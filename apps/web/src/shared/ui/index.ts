@@ -88,7 +88,7 @@ export { Input } from "./input";
 export { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "./item";
 export { List, ListButton, ListHeader } from "./list";
 export { LoadingSkeleton, LoadState, MobileScreen } from "./mobile-screen";
-export { AnimatedListItem, MotionProvider, PresenceList } from "./motion";
+export { AnimatedListItem, MotionProvider, PopOnSelect, PresenceList } from "./motion";
 export { appFrame, useStepOverlay } from "./overlay";
 export { Popover, PopoverContent, PopoverTrigger } from "./popover";
 export { ReactionButton } from "./reaction-button";

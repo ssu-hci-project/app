@@ -40,7 +40,6 @@ export function FontSheet({
 								onValueChange={(value) =>
 									setSize(Array.isArray(value) ? (value[0] ?? size) : value)
 								}
-								className="py-3"
 							/>
 							<span aria-hidden="true" className="font-serif text-t3">
 								가

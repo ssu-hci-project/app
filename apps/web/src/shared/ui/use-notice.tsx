@@ -1,12 +1,13 @@
 import { toast } from "sonner";
 
 type Tone = "positive" | "critical" | "default";
+type Action = { label: string; onClick: () => void };
 
-/** Shows a short toast at the bottom of the mobile frame. */
 export function useNotice() {
-	return (message: string, tone: Tone = "default") => {
-		if (tone === "positive") toast.success(message);
-		else if (tone === "critical") toast.error(message);
-		else toast(message);
+	return (message: string, tone: Tone = "default", action?: Action) => {
+		const options = action ? { action, duration: 5000 } : undefined;
+		if (tone === "positive") toast.success(message, options);
+		else if (tone === "critical") toast.error(message, options);
+		else toast(message, options);
 	};
 }
