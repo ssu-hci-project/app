@@ -2,7 +2,6 @@ export {
 	bookByline,
 	chapterLabel,
 	chapterNumber,
-	editionLabel,
 	readingTime,
 } from "./model/book-meta";
 export { findCachedBook } from "./model/cached-book";

@@ -1,4 +1,4 @@
-import { memoTextSchema } from "@app/contract";
+import { memoTextSchema, textLimits } from "@app/contract";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
@@ -99,12 +99,12 @@ function MemoForm({
 					aria-label={target.q ? "이 질문에 대한 생각" : "이 구절에 대한 생각"}
 					value={text}
 					onChange={(event) => setText(event.target.value)}
-					maxLength={1000}
+					maxLength={textLimits.memo}
 					placeholder="이 구절을 읽고 떠오른 생각을 남겨보세요"
 					className="min-h-32"
 				/>
 				<p className="text-right text-st10 text-muted-foreground tabular-nums">
-					{text.length} / 1000
+					{text.length} / {textLimits.memo}
 				</p>
 				{create.isError && (
 					<p role="alert" className="text-st9 text-destructive">

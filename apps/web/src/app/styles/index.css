@@ -84,6 +84,7 @@
 	--color-primary-pressed: var(--primary-pressed);
 	--color-search-fill: var(--search-fill);
 	--color-neutral-weak: var(--neutral-weak);
+	--color-neutral-pressed: color-mix(in oklch, var(--neutral-weak), var(--foreground) 8%);
 	--color-progress-track: var(--progress-track);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-popover: var(--popover);

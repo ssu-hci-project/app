@@ -1,4 +1,4 @@
-import { memoTextSchema } from "@app/contract";
+import { memoTextSchema, textLimits } from "@app/contract";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
@@ -170,7 +170,7 @@ function QuestionForm({
 						aria-label="질문에 대한 답"
 						value={text}
 						onChange={(event) => setText(event.target.value)}
-						maxLength={1000}
+						maxLength={textLimits.memo}
 						placeholder={`Q. ${picked}에 답해보세요`}
 						className="min-h-28"
 					/>

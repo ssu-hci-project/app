@@ -1,9 +1,9 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { libraryInput, personSchema } from "./common";
+import { libraryInput, personSchema, textLimits } from "./common";
 import { traceSchema } from "./traces";
 
-export const progressSchema = z.object({
+const progressSchema = z.object({
 	ch: z.number().int().nonnegative(),
 	/** Position inside the chapter, 0–1, so a different font size reopens at the same place. */
 	ratio: z.number().min(0).max(1),
@@ -13,7 +13,7 @@ export const progressSchema = z.object({
 });
 export type ReadingProgress = z.infer<typeof progressSchema>;
 
-export const bookSchema = z.object({
+const bookSchema = z.object({
 	id: z.string(),
 	title: z.string(),
 	author: z.string(),
@@ -133,7 +133,7 @@ export const booksContract = {
 	search: oc
 		.route({ method: "GET", path: "/libraries/{libraryId}/search", tags: ["books"] })
 		.errors(errors)
-		.input(libraryInput.extend({ q: z.string().trim().min(1).max(50) }))
+		.input(libraryInput.extend({ q: z.string().trim().min(1).max(textLimits.search) }))
 		.output(
 			z.object({
 				bookIds: z.array(z.string()),

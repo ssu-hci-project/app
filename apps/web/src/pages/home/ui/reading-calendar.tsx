@@ -1,4 +1,4 @@
-import type { Book } from "@app/contract";
+import { type Book, UNKNOWN_EDITION } from "@app/contract";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -162,7 +162,13 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 							return (
 								<BookRow
 									key={entry.id}
-									book={{ title: entry.title, author: book?.author ?? "", color: entry.color }}
+									book={{
+										title: entry.title,
+										color: entry.color,
+										author: book?.author ?? "",
+										edition: book?.edition ?? UNKNOWN_EDITION,
+										sourceUrl: book?.sourceUrl ?? null,
+									}}
 									onClick={() => {
 										overlay.close();
 										flow.push("BookPage", { bookId: entry.id });

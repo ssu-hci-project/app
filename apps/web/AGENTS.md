@@ -24,7 +24,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   직접 `fetch`하지 마세요.
 - **폼**은 손으로 복사한 zod 스키마가 아니라 계약의 스키마
   스키마로 검증합니다. 그래야 폼과 API가 어긋나지 않습니다.
-  사용자에게 보이는 메시지는 계약 스키마에 둡니다.
+  사용자에게 보이는 메시지는 계약 스키마에 둡니다. 입력의 `maxLength`·글자 수 표시는 계약의 `textLimits`를 씁니다.
 - **색상**은 테마 토큰(`text-muted-foreground`, `text-destructive`,
   `border-input`, `bg-primary`…)을 쓰고, `text-slate-400` 같은 원시 팔레트
   클래스는 쓰지 않습니다. 그래야 테마를 일관되게 유지할 수 있습니다.
@@ -45,7 +45,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   진도는 `progress.save`로 장과 장 안 비율을 저장합니다. 구절의 밑줄·메모·질문·꾸미기는
   `traces`, AI 질문은 `questions.generate`를 사용합니다. 쓰던 생각을 AI에 보내지 마세요.
 - AI 기능 표시는 `AiSparkleIcon`(`shared/ui/ai-icon.tsx`)을 씁니다. TDS twinkle 리소스를 메인/서브 테마 색으로 표시합니다. AI 결과가 있을 때만 `--magic` 톤 `Alert`로 안내합니다.
-- 판본이 `판본 미확인`이거나 앱에서 읽는 작품(`sourceUrl` 있음)이면 판본을 노출하지 않습니다. 출처와 이용 조건은 리더의 "책 정보" 시트에서 보여줍니다. 책 메타 표기는 `@/entities/book`의 `bookByline`/`editionLabel`을 씁니다.
+- 판본이 `판본 미확인`이거나 앱에서 읽는 작품(`sourceUrl` 있음)이면 판본을 노출하지 않습니다. 출처와 이용 조건은 리더의 "책 정보" 시트에서 보여줍니다. 저자·판본 표기는 `@/entities/book`의 `bookByline`을, 사람 이름은 `@/entities/profile`의 `personName`을 씁니다.
 - 기록 작성은 별도 액티비티에서 개인 저장이 기본입니다. 공개 범위 선택은 `Field` 안의 버튼과 `ChoiceGroup`(카드형 라디오)을 사용하고 확정 버튼 전에는 서버 상태를 바꾸지 않습니다. 알림은 `useNotice()` 토스트로 모바일 프레임 하단에 표시합니다.
 - `/api`는 `bun run dev` 중에는 API로 프록시되고, 프로덕션에서는 같은 Worker가
   제공하므로 API base URL을 설정할 필요가 없습니다.

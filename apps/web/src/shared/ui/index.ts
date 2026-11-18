@@ -47,6 +47,7 @@ export {
 	CardHeader,
 	CardTitle,
 } from "./card";
+export { CardButton } from "./card-button";
 export { CheckboxRow } from "./checkbox-row";
 export { Chip, RemovableChip } from "./chip";
 export { ChoiceCard } from "./choice-card";

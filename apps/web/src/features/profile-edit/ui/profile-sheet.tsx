@@ -1,4 +1,4 @@
-import { type Profile, profileInputSchema, readerColors } from "@app/contract";
+import { type Profile, profileInputSchema, readerColors, textLimits } from "@app/contract";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { defaultColor, useProfile } from "@/entities/profile";
@@ -89,7 +89,7 @@ function ProfileForm({ profile, takenColors }: { profile: Profile; takenColors: 
 					label="이름"
 					value={nick}
 					onChange={(event) => setNick(event.target.value)}
-					maxLength={12}
+					maxLength={textLimits.nick}
 					placeholder="예) 지운"
 					autoComplete="nickname"
 					error={error}

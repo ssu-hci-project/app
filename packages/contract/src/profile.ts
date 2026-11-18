@@ -1,9 +1,13 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { readerColorSchema } from "./common";
+import { readerColorSchema, textLimits } from "./common";
 
 export const profileInputSchema = z.object({
-	nick: z.string().trim().min(1, "이름을 적어주세요").max(12, "이름은 12자 이내로 적어주세요"),
+	nick: z
+		.string()
+		.trim()
+		.min(1, "이름을 적어주세요")
+		.max(textLimits.nick, `이름은 ${textLimits.nick}자 이내로 적어주세요`),
 	color: readerColorSchema,
 });
 

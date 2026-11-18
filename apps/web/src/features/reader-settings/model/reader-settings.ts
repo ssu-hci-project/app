@@ -17,7 +17,7 @@ type ReaderSettings = {
 	setFont: (font: ReaderFont) => void;
 };
 
-export const allFilters: TraceFilters = { underline: true, memo: true, draw: true, react: true };
+const allFilters: TraceFilters = { underline: true, memo: true, draw: true, react: true };
 
 /** Reader preferences, kept on this device and shared by every book. */
 export const useReaderSettings = create<ReaderSettings>()(

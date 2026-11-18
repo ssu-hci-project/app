@@ -6,7 +6,7 @@ import { requireBook } from "./access";
 import { generateQuestions } from "./generate-questions";
 
 /** Shown when Gemini is unavailable: the first three, or the other three for "다른 질문 보기". */
-export const fallbackQuestions = [
+const fallbackQuestions = [
 	{ chip: "가장 의문이었던 점은?", q: "이 장면에서 가장 의문이었던 점은 무엇인가요?" },
 	{ chip: "마음에 남은 이유는?", q: "이 문장이 마음에 남은 이유는 무엇인가요?" },
 	{ chip: "다르게 볼 수 있다면?", q: "이 장면을 다르게 본다면 어떻게 볼 수 있을까요?" },

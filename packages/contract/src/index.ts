@@ -14,7 +14,7 @@ export type {
 } from "./books";
 export { bookUploadSchema, UPLOAD_CHUNK_CHARS, UPLOAD_PARAGRAPH_CHARS } from "./books";
 export type { Person } from "./common";
-export { reactionEmojis, readerColors } from "./common";
+export { reactionEmojis, readerColors, textLimits, UNKNOWN_EDITION } from "./common";
 export type { Library } from "./libraries";
 export { libraryNameSchema } from "./libraries";
 export type { Profile } from "./profile";

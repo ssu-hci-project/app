@@ -1,4 +1,4 @@
-import { reactionEmojis, type Trace } from "@app/contract";
+import { reactionEmojis, type Trace, textLimits } from "@app/contract";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { personColor, personName, ReaderAvatar } from "@/entities/profile";
@@ -252,7 +252,7 @@ function TraceCard({
 						autoFocus
 						aria-label={`${name}의 흔적에 생각 덧붙이기`}
 						value={draft}
-						maxLength={500}
+						maxLength={textLimits.reply}
 						onChange={(event) => useReaderStore.setState({ draft: event.target.value })}
 						onFocus={() => useReaderStore.setState({ typing: true })}
 						onBlur={() => useReaderStore.setState({ typing: false })}

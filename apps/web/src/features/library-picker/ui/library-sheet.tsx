@@ -1,4 +1,4 @@
-import { libraryNameSchema } from "@app/contract";
+import { libraryNameSchema, textLimits } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -198,7 +198,7 @@ export function LibrarySheet() {
 								id="library-name"
 								value={name}
 								onChange={(event) => setName(event.target.value)}
-								maxLength={30}
+								maxLength={textLimits.libraryName}
 								placeholder="예: 목요 독서회"
 								aria-invalid={!!nameError || undefined}
 								className="h-12 flex-1 text-st8"
