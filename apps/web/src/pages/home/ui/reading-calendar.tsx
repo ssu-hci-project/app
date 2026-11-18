@@ -1,7 +1,6 @@
 import type { Book } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import { BookRow } from "@/entities/book";
 import { orpc } from "@/shared/api";
@@ -11,6 +10,9 @@ import {
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
+	ChevronDownIcon,
+	ChevronLeftIcon,
+	ChevronRightIcon,
 	useStepOverlay,
 } from "@/shared/ui";
 
@@ -40,7 +42,7 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 					id="calendar-heading"
 					type="button"
 					onClick={() => setMonth(dayjs().startOf("month"))}
-					className="flex h-11 items-center gap-1 rounded-lg px-2 text-lg font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+					className="flex h-11 items-center gap-1 rounded-lg px-2 text-st7 font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
 				>
 					{month.format("YYYY년 M월")}
 					<ChevronDownIcon className="size-5" aria-hidden="true" />
@@ -52,14 +54,14 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 						aria-label="이전 달"
 						onClick={() => setMonth(month.subtract(1, "month"))}
 					>
-						<ChevronLeftIcon />
+						<ChevronLeftIcon className="size-5" />
 					</AppBarIconButton>
 					<AppBarIconButton
 						className="size-11"
 						aria-label="다음 달"
 						onClick={() => setMonth(month.add(1, "month"))}
 					>
-						<ChevronRightIcon />
+						<ChevronRightIcon className="size-5" />
 					</AppBarIconButton>
 				</div>
 			</div>
@@ -68,7 +70,7 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 					<span
 						key={name}
 						className={cn(
-							"text-center text-xs font-medium text-muted-foreground",
+							"text-center text-st10 font-medium text-muted-foreground",
 							index === 0 && "text-destructive",
 						)}
 					>
@@ -87,9 +89,9 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 						<>
 							<span
 								className={cn(
-									"grid size-7 place-items-center rounded-full text-[13px]",
+									"grid size-7 place-items-center rounded-full text-t7",
 									future && "text-muted-foreground",
-									isToday && "border border-primary font-bold text-primary",
+									isToday && "border border-primary font-bold text-brand",
 								)}
 							>
 								{date.date()}
@@ -103,7 +105,7 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 									/>
 								))}
 								{opened.length > 3 && (
-									<span className="text-[10px] leading-none font-semibold text-muted-foreground">
+									<span className="text-st12 leading-none font-semibold text-muted-foreground">
 										+{opened.length - 3}
 									</span>
 								)}
@@ -142,12 +144,12 @@ export function ReadingCalendar({ books }: { books: Book[] }) {
 					);
 				})}
 			</div>
-			<p className="mt-2 text-center text-[13px] text-muted-foreground">
+			<p className="mt-2 text-center text-t7 text-muted-foreground">
 				{readDays
 					? `${month.format("M월")}에 ${readDays}일 읽었어요`
 					: "책을 펼친 날에 점이 찍혀요"}
 			</p>
-			<BottomSheet {...overlay.bind("day")}>
+			<BottomSheet {...overlay.bind("day", !!day)}>
 				<BottomSheetContent
 					title={day ? `${dayjs(day).format("M월 D일")}에 읽은 책` : "그날 읽은 책"}
 					description={`${dayBooks.length}권을 펼쳤어요`}

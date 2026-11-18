@@ -1,14 +1,15 @@
 import { reactionEmojis } from "@app/contract";
-import {
-	HighlighterIcon,
-	MessageSquareTextIcon,
-	PenLineIcon,
-	SmileIcon,
-	SparklesIcon,
-	UnderlineIcon,
-} from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib";
+import {
+	Button,
+	MessageSquareTextIcon,
+	PencilIcon,
+	QuestionIcon,
+	ReactionEmoji,
+	SmileIcon,
+	UnderlineIcon,
+} from "@/shared/ui";
 
 export type ToolbarAction = "underline" | "memo" | "react" | "question" | "decorate" | "traces";
 
@@ -24,18 +25,20 @@ function Tool({
 	onClick: () => void;
 }) {
 	return (
-		<button
+		<Button
+			variant="ghost"
+			size="icon"
 			type="button"
 			aria-pressed={active}
 			onClick={onClick}
 			className={cn(
-				"flex h-13 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl text-[11px] leading-none font-semibold outline-none focus-visible:ring-2 focus-visible:ring-background active:bg-background/15 [&_svg]:size-5",
+				"flex h-13 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl text-st11 leading-none font-semibold outline-none focus-visible:ring-2 focus-visible:ring-background active:bg-background/15 [&_svg]:size-5",
 				active && "bg-background text-foreground active:bg-background",
 			)}
 		>
 			{icon}
 			{label}
-		</button>
+		</Button>
 	);
 }
 
@@ -66,10 +69,10 @@ export function SelectionToolbar({
 			<div
 				role="toolbar"
 				aria-label="고른 구절에 남기기"
-				className="toolbar-in flex max-w-full items-center rounded-2xl bg-toolbar p-1 text-background shadow-[0_6px_20px_rgb(0_0_0/0.25)]"
+				className="toolbar-in flex max-w-full items-center rounded-2xl bg-toolbar p-1 text-toolbar-foreground shadow-floating"
 			>
 				<Tool
-					icon={underlined ? <HighlighterIcon /> : <UnderlineIcon />}
+					icon={<UnderlineIcon />}
 					label={underlined ? "밑줄 지우기" : "밑줄"}
 					active={underlined}
 					onClick={() => onAction("underline")}
@@ -81,15 +84,13 @@ export function SelectionToolbar({
 					active={emojiOpen}
 					onClick={() => onAction("react")}
 				/>
-				<Tool icon={<SparklesIcon />} label="질문" onClick={() => onAction("question")} />
-				<Tool icon={<PenLineIcon />} label="꾸미기" onClick={() => onAction("decorate")} />
+				<Tool icon={<QuestionIcon />} label="질문" onClick={() => onAction("question")} />
+				<Tool icon={<PencilIcon />} label="꾸미기" onClick={() => onAction("decorate")} />
 				{traceCount > 0 && (
 					<>
 						<span aria-hidden="true" className="mx-0.5 h-8 w-px bg-background/25" />
 						<Tool
-							icon={
-								<span className="text-base leading-5 font-bold tabular-nums">{traceCount}</span>
-							}
+							icon={<span className="text-st8 leading-5 font-bold tabular-nums">{traceCount}</span>}
 							label="흔적"
 							onClick={() => onAction("traces")}
 						/>
@@ -111,20 +112,22 @@ function EmojiRow({
 	return (
 		<fieldset
 			className={cn(
-				"toolbar-in m-0 flex min-w-0 rounded-full border-0 bg-card p-1 shadow-[0_6px_24px_rgb(0_0_0/0.18)]",
+				"toolbar-in m-0 flex min-w-0 rounded-full border-0 bg-card p-1 shadow-floating",
 				className,
 			)}
 		>
 			<legend className="sr-only">반응 고르기</legend>
 			{reactionEmojis.map((emoji) => (
-				<button
+				<Button
+					variant="ghost"
+					size="icon"
 					key={emoji}
 					type="button"
 					onClick={() => onEmoji(emoji)}
-					className="grid size-11 place-items-center rounded-full text-[22px] outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+					className="grid size-11 place-items-center rounded-full text-t3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
 				>
-					{emoji}
-				</button>
+					<ReactionEmoji emoji={emoji} />
+				</Button>
 			))}
 		</fieldset>
 	);

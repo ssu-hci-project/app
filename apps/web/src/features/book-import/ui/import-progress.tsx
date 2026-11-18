@@ -1,4 +1,3 @@
-import { Spinner } from "@/shared/ui";
 import { useImportProgress } from "../model/import-book";
 
 /** Covers the screen while a book is read and uploaded. */
@@ -17,9 +16,16 @@ export function ImportProgressOverlay() {
 			aria-live="polite"
 			className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/95 px-6 text-center"
 		>
-			<Spinner className="size-8 text-primary" />
-			<p className="text-base font-semibold">{title}</p>
-			<p className="max-w-full truncate text-[13px] text-muted-foreground tabular-nums">{detail}</p>
+			{progress.stage !== "open" && (
+				<progress
+					aria-label={title}
+					className="h-2 w-full max-w-56 accent-primary"
+					max={progress.stage === "parse" ? progress.total : 100}
+					value={progress.stage === "parse" ? progress.done : progress.percent}
+				/>
+			)}
+			<p className="text-st8 font-semibold">{title}</p>
+			<p className="max-w-full truncate text-t7 text-muted-foreground tabular-nums">{detail}</p>
 		</div>
 	);
 }
@@ -28,7 +34,7 @@ export function ImportProgressOverlay() {
 export function DropHint() {
 	return (
 		<div className="pointer-events-none absolute inset-0 z-40 grid place-items-center bg-secondary/95 p-6 text-center">
-			<p className="text-lg font-bold text-secondary-foreground">놓으면 서재에 올려요</p>
+			<p className="text-st7 font-bold text-secondary-foreground">놓으면 서재에 올려요</p>
 		</div>
 	);
 }

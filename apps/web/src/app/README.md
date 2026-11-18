@@ -20,3 +20,9 @@ fixed 내비게이션의 기준을 모바일 프레임 안으로 제한하므로
   추가합니다.
 - `styles/`: 유일한 Tailwind 진입점(`@import "tailwindcss"` + `@theme`)과
   진짜 전역 CSS.
+
+
+`AppProviders`의 `MotionProvider`가 애니메이션 기능을 지연 로딩하고 동작 줄이기 설정을 따릅니다.
+시스템 색상 설정은 루트 `.dark`와 `color-scheme`에 동기화해 portal로 열리는 시트·메뉴에도 적용합니다.
+떠 있는 UI의 그림자는 `shadow-floating`, 고정 CTA 위 그림자는 `shadow-footer`를 사용하며,
+다크 모드에서는 낮은 불투명도의 회색으로 표시합니다.

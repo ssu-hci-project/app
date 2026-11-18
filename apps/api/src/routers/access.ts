@@ -40,9 +40,14 @@ export const colorOf = (book: { id: string; color: string | null }) =>
 
 export async function people(db: Db, ids: string[]): Promise<Map<string, Person>> {
 	const unique = [...new Set(ids)];
-	const rows = unique.length
-		? await db.select().from(profiles).where(inArray(profiles.userId, unique))
-		: [];
+	const rows: (typeof profiles.$inferSelect)[] = [];
+	for (let start = 0; start < unique.length; start += 90)
+		rows.push(
+			...(await db
+				.select()
+				.from(profiles)
+				.where(inArray(profiles.userId, unique.slice(start, start + 90)))),
+		);
 	return new Map(
 		unique.map((id) => {
 			const row = rows.find((profile) => profile.userId === id);

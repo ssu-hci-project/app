@@ -83,6 +83,10 @@
 	},
 	"overrides": [
 		{
+			"includes": ["apps/web/src/shared/ui/assets/*.svg"],
+			"linter": { "rules": { "a11y": { "noSvgWithoutTitle": "off" } } }
+		},
+		{
 			"includes": ["apps/*/src/**", "packages/*/src/**"],
 			"linter": {
 				"rules": {

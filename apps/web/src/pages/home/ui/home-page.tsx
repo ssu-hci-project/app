@@ -1,16 +1,26 @@
 import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow, useStepFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDownIcon, HouseIcon, LibraryBigIcon, SearchIcon } from "lucide-react";
 import { type DragEvent, useState } from "react";
 import { useCurrentLibrary } from "@/entities/library";
 import { personName, ReaderAvatar, useProfile } from "@/entities/profile";
 import { DropHint, ImportProgressOverlay, useBookImport } from "@/features/book-import";
-import { BookMenuSheet } from "@/features/book-menu";
 import { LibrarySheet } from "@/features/library-picker";
 import { ProfileSheet } from "@/features/profile-edit";
 import { orpc } from "@/shared/api";
-import { AppBar, AppScreen, AppScreenContent, LoadState, useStepOverlay } from "@/shared/ui";
+import {
+	AppBar,
+	AppScreen,
+	AppScreenContent,
+	ChevronDownIcon,
+	HomeTabIcon,
+	HouseIcon,
+	LibraryBigIcon,
+	LoadState,
+	SearchIcon,
+	TabBar,
+	useStepOverlay,
+} from "@/shared/ui";
 import { HomeFeed } from "./home-feed";
 import { MyShelf } from "./my-shelf";
 import { SearchPanel } from "./search-panel";
@@ -26,21 +36,16 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 	const flow = useFlow();
 	const { replaceStep } = useStepFlow("HomePage");
 	const { isActive } = useActivity();
-	const overlay = useStepOverlay();
+	const overlay = useStepOverlay(["book-menu", "day"]);
 	const { library, query: libraries } = useCurrentLibrary();
 	const profile = useProfile();
 	const tab: Tab = tabs.some((entry) => entry.value === params.tab) ? (params.tab as Tab) : "home";
-	const [menuBookId, setMenuBookId] = useState<string>();
 	const [dragging, setDragging] = useState(false);
 	const books = useQuery({
 		...orpc.books.list.queryOptions({ input: { libraryId: library?.id ?? "" } }),
-		enabled: !!library,
+		enabled: !!library && tab === "home",
 	});
 	const importer = useBookImport((bookId) => flow.push("BookPage", { bookId }));
-	const openMenu = (bookId: string) => {
-		setMenuBookId(bookId);
-		overlay.open("book-menu");
-	};
 	const takenColors = (library?.members ?? [])
 		.filter((member) => member.id !== profile.data?.id && member.color)
 		.map((member) => member.color as string);
@@ -71,7 +76,7 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 						<button
 							type="button"
 							onClick={() => overlay.open("library")}
-							className="flex h-11 min-w-0 items-center gap-1 rounded-lg px-3 text-lg font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+							className="flex h-11 min-w-0 items-center gap-1 rounded-lg px-4 text-st7 font-bold text-strong outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
 						>
 							<span className="truncate">{library?.name ?? "서재"}</span>
 							<ChevronDownIcon className="size-5 shrink-0" aria-hidden="true" />
@@ -99,45 +104,27 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 					/>
 					{library && tab === "home" && <HomeFeed books={books} onImport={importer.chooseFile} />}
 					{library && tab === "search" && (
-						<SearchPanel
-							libraryId={library.id}
-							books={books.data ?? []}
-							onImport={importer.chooseFile}
-						/>
+						<SearchPanel libraryId={library.id} onImport={importer.chooseFile} />
 					)}
 					{library && tab === "my" && (
-						<MyShelf
-							books={books}
-							myId={profile.data?.id}
-							onMenu={openMenu}
-							onImport={importer.chooseFile}
-						/>
+						<MyShelf libraryId={library.id} onImport={importer.chooseFile} />
 					)}
 				</AppScreenContent>
 				{dragging && <DropHint />}
 			</div>
 			{isActive && (
-				<nav
-					aria-label="하단 내비게이션"
-					className="absolute inset-x-0 bottom-0 z-10 grid grid-cols-3 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
-				>
-					{tabs.map(({ value, label, icon: Icon }) => (
-						<button
-							key={value}
-							type="button"
-							aria-current={tab === value ? "page" : undefined}
-							onClick={() => replaceStep({ tab: value })}
-							className="flex h-16 flex-col items-center justify-center gap-1 text-muted-foreground outline-offset-[-4px] focus-visible:outline-2 focus-visible:outline-ring active:bg-muted aria-[current=page]:text-foreground"
-						>
-							<Icon className="size-6" aria-hidden="true" />
-							<span className="text-xs font-medium">{label}</span>
-						</button>
-					))}
-				</nav>
+				<TabBar
+					value={tab}
+					onValueChange={(value) => replaceStep({ tab: value })}
+					options={tabs.map(({ value, label, icon: Icon }) => ({
+						value,
+						label,
+						icon: value === "home" ? <HomeTabIcon /> : <Icon />,
+					}))}
+				/>
 			)}
 			<LibrarySheet />
 			<ProfileSheet takenColors={takenColors} />
-			<BookMenuSheet book={books.data?.find((book) => book.id === menuBookId)} />
 			<ImportProgressOverlay />
 		</AppScreen>
 	);

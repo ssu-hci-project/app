@@ -14,13 +14,26 @@ export function TextField({
 }: FieldProps & ComponentProps<"input">) {
 	const id = useId();
 	return (
-		<Field data-invalid={!!error || undefined}>
-			<FieldLabel htmlFor={id}>{label}</FieldLabel>
-			<Input id={id} aria-invalid={!!error || undefined} className="h-12 text-base" {...props} />
+		<Field data-invalid={!!error || undefined} className="gap-1.5">
+			<FieldLabel htmlFor={id} className="px-1 text-t7 leading-[1.35] font-medium">
+				{label}
+			</FieldLabel>
+			<Input
+				id={id}
+				aria-invalid={!!error || undefined}
+				aria-describedby={error || description ? `${id}-help` : undefined}
+				{...props}
+			/>
 			{error ? (
-				<FieldError>{error}</FieldError>
+				<FieldError id={`${id}-help`} className="px-1 text-t7">
+					{error}
+				</FieldError>
 			) : (
-				description && <FieldDescription>{description}</FieldDescription>
+				description && (
+					<FieldDescription id={`${id}-help`} className="px-1 text-t7">
+						{description}
+					</FieldDescription>
+				)
 			)}
 		</Field>
 	);
@@ -36,7 +49,7 @@ export function TextAreaField({
 	return (
 		<Field data-invalid={!!error || undefined}>
 			<FieldLabel htmlFor={id}>{label}</FieldLabel>
-			<Textarea id={id} aria-invalid={!!error || undefined} className="text-base" {...props} />
+			<Textarea id={id} aria-invalid={!!error || undefined} {...props} />
 			{error ? (
 				<FieldError>{error}</FieldError>
 			) : (

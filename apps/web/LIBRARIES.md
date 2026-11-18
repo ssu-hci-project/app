@@ -11,14 +11,17 @@
 | 조건부/병합 Tailwind 클래스 | `cn()` (`shared/lib/cn.ts`, clsx + tailwind-merge) |
 | Tailwind 스타일 변형 (버튼 size/variant 등) | `class-variance-authority` |
 | debounce/throttle, groupBy/pick/omit 등 | `es-toolkit`. 함수는 `recommend` 스킬로 찾고, 시그니처는 `node_modules/es-toolkit/dist/<category>/<fn>.d.ts`에서 확인 (JSDoc + 예제, 설치된 버전과 일치) |
+| 상태 변화·리스트 애니메이션 | `motion/react`. 공통 `MotionProvider`에서 지연 로딩하고 동작 줄이기를 따름 |
 | 공용 훅 (useLocalStorage, useDebounce, useMediaQuery, useClickOutside) | `usehooks-ts` |
 | 접근성 있는 dialog/dropdown/tooltip/select 등 | `bunx shadcn@latest add <component>`. Base UI 기반으로 `shared/ui`에 생성. 포커스 트랩 모달이나 커스텀 드롭다운을 직접 만들지 않음 |
-| 아이콘 | `lucide-react` |
+| 아이콘 | `shared/ui`의 TDS 아이콘. 대응 리소스가 없는 로딩·AI만 `lucide-react` |
 | 환경 변수 | 현재는 없음. `VITE_*` 변수를 추가하면 zod 스키마로 `shared/config/env.ts`를 만들고 그곳에서만 읽음 |
 
 `debounce`, 직접 짠 fetch-loading-error `useState` 3종 세트, 커스텀 토스트
 컴포넌트, 손으로 이어 붙인 className, 직접 만든 접근성 모달/드롭다운을 쓰려는
 참이라면 멈추세요. 위 라이브러리가 이미 해줍니다.
+
+훅 회귀 테스트는 `@testing-library/react` + `happy-dom`으로 실행합니다(`bun test`).
 
 ## 실제로 필요할 때 추가 (기본 설치 안 됨)
 

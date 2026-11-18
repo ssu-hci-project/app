@@ -1,7 +1,6 @@
 import { libraryNameSchema } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import { useMutation } from "@tanstack/react-query";
-import { CheckIcon, CopyIcon, LogOutIcon, Share2Icon } from "lucide-react";
 import { useState } from "react";
 import { useCurrentLibrary } from "@/entities/library";
 import { orpc } from "@/shared/api";
@@ -19,8 +18,13 @@ import {
 	BottomSheetBody,
 	BottomSheetContent,
 	Button,
+	CheckIcon,
+	ChoiceCard,
+	CopyIcon,
 	Input,
+	LogOutIcon,
 	Separator,
+	Share2Icon,
 	useNotice,
 	useStepOverlay,
 } from "@/shared/ui";
@@ -84,11 +88,10 @@ export function LibrarySheet() {
 						{libraries.map((entry) => {
 							const current = entry.id === library?.id;
 							return (
-								<button
+								<ChoiceCard
 									key={entry.id}
-									type="button"
-									aria-pressed={current}
-									onClick={() => {
+									selected={current}
+									onSelect={() => {
 										select(entry.id);
 										overlay.close();
 									}}
@@ -98,23 +101,23 @@ export function LibrarySheet() {
 									)}
 								>
 									<span className="flex min-w-0 flex-1 flex-col">
-										<span className="truncate text-base font-semibold">{entry.name}</span>
-										<span className="text-[13px] text-muted-foreground">
+										<span className="truncate text-st8 font-semibold">{entry.name}</span>
+										<span className="text-t7 text-muted-foreground">
 											{entry.members.length}명이 함께 읽어요
 										</span>
 									</span>
-									{current && <CheckIcon className="size-5 text-primary" aria-hidden="true" />}
-								</button>
+									{current && <CheckIcon className="size-5 text-brand" aria-hidden="true" />}
+								</ChoiceCard>
 							);
 						})}
 					</fieldset>
 
 					{library && (
 						<section className="flex flex-col gap-3">
-							<h3 className="text-base font-bold">이 서재에 초대하기</h3>
-							<div className="flex flex-col items-center gap-1 rounded-xl bg-secondary px-4 py-5">
-								<span className="text-[13px] text-muted-foreground">초대 코드</span>
-								<span className="font-mono text-[28px] font-bold tracking-[0.2em] text-secondary-foreground">
+							<h3 className="text-t5 font-bold text-strong">이 서재에 초대하기</h3>
+							<div className="flex flex-col items-center gap-1 rounded-xl bg-muted px-4 py-5">
+								<span className="text-t7 text-sub">초대 코드</span>
+								<span className="font-mono text-st2 font-bold tracking-[0.2em] text-strong">
 									{library.inviteCode}
 								</span>
 							</div>
@@ -156,7 +159,7 @@ export function LibrarySheet() {
 							flow.push("InvitePage", { code: value });
 						}}
 					>
-						<label htmlFor="invite-code" className="text-base font-bold">
+						<label htmlFor="invite-code" className="text-st8 font-bold">
 							초대 코드로 참여
 						</label>
 						<div className="flex gap-2">
@@ -168,7 +171,7 @@ export function LibrarySheet() {
 								autoCapitalize="characters"
 								autoCorrect="off"
 								spellCheck={false}
-								className="h-12 flex-1 text-base"
+								className="h-12 flex-1 text-st8"
 							/>
 							<Button type="submit" size="lg" variant="secondary" disabled={!code.trim()}>
 								참여
@@ -187,7 +190,7 @@ export function LibrarySheet() {
 							create.mutate(parsed.data);
 						}}
 					>
-						<label htmlFor="library-name" className="text-base font-bold">
+						<label htmlFor="library-name" className="text-st8 font-bold">
 							새 서재 만들기
 						</label>
 						<div className="flex gap-2">
@@ -198,7 +201,7 @@ export function LibrarySheet() {
 								maxLength={30}
 								placeholder="예: 목요 독서회"
 								aria-invalid={!!nameError || undefined}
-								className="h-12 flex-1 text-base"
+								className="h-12 flex-1 text-st8"
 							/>
 							<Button
 								type="submit"
@@ -210,7 +213,7 @@ export function LibrarySheet() {
 							</Button>
 						</div>
 						{nameError && (
-							<p role="alert" className="text-sm text-destructive">
+							<p role="alert" className="text-st9 text-destructive">
 								{nameError}
 							</p>
 						)}

@@ -1,4 +1,3 @@
-import { ChevronLeftIcon } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useTimeout } from "usehooks-ts";
 import { cn } from "@/shared/lib";
@@ -13,6 +12,7 @@ import {
 } from "./app-screen";
 import { ResultSection } from "./result-section";
 import { Skeleton } from "./skeleton";
+import { ChevronLeftIcon } from "./tds-icon";
 
 export function MobileScreen({
 	title,
@@ -112,7 +112,7 @@ export function LoadState({
 	retry: () => void;
 	shape?: LoadShape;
 }) {
-	if (pending) return <DelayedSkeleton shape={shape} />;
+	if (pending) return <LoadingSkeleton shape={shape} />;
 	if (error)
 		return (
 			<ResultSection
@@ -124,9 +124,9 @@ export function LoadState({
 	return null;
 }
 
-function DelayedSkeleton({ shape }: { shape: LoadShape }) {
+export function LoadingSkeleton({ shape = "list" }: { shape?: LoadShape }) {
 	const [visible, setVisible] = useState(false);
-	useTimeout(() => setVisible(true), 1000);
+	useTimeout(() => setVisible(true), 250);
 	return (
 		<div role="status" className="flex min-h-16 flex-col gap-3 py-2">
 			{visible &&

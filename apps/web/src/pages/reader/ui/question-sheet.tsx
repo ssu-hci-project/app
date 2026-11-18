@@ -1,9 +1,7 @@
 import { memoTextSchema } from "@app/contract";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
-import { cn } from "@/shared/lib";
 import {
 	AiSparkleIcon,
 	Alert,
@@ -13,6 +11,8 @@ import {
 	BottomSheetContent,
 	BottomSheetFooter,
 	Button,
+	ChoiceCard,
+	RefreshCwIcon,
 	Skeleton,
 	Spinner,
 	Textarea,
@@ -40,7 +40,7 @@ export function QuestionSheet({
 }) {
 	const overlay = useStepOverlay();
 	return (
-		<BottomSheet {...overlay.bind("question")}>
+		<BottomSheet {...overlay.bind("question", !!passage)}>
 			<BottomSheetContent
 				title={
 					<span className="flex items-center gap-1.5">
@@ -81,8 +81,10 @@ function QuestionForm({
 }) {
 	const overlay = useStepOverlay();
 	const [again, setAgain] = useState(false);
-	const [picked, setPicked] = useState<string>();
-	const [text, setText] = useState("");
+	const [picked, setPicked] = useState<string | undefined>(
+		() => useReaderStore.getState().failedDraft?.q,
+	);
+	const [text, setText] = useState(() => useReaderStore.getState().failedDraft?.text ?? "");
 	const questions = useQuery({
 		...orpc.questions.generate.queryOptions({
 			input: { libraryId, bookId, ch, quote: passage.quote.slice(0, 2000), again },
@@ -92,10 +94,19 @@ function QuestionForm({
 	});
 	const create = useMutation(
 		orpc.traces.create.mutationOptions({
-			onSuccess: (trace) => {
-				useReaderStore.setState({ answered: { q: trace.q ?? "", passage } });
+			onMutate: (values) => {
+				if (values.kind !== "qa") return;
+				useReaderStore.setState({ answered: { q: values.q, passage }, failedDraft: null });
 				overlay.switchTo("same");
 				onAnswered();
+			},
+			onError: (_error, values) => {
+				if (values.kind !== "qa") return;
+				useReaderStore.setState({
+					answered: null,
+					failedDraft: { kind: "qa", q: values.q, text: values.text },
+				});
+				overlay.switchTo("question");
 			},
 		}),
 	);
@@ -142,20 +153,14 @@ function QuestionForm({
 							</Alert>
 						)}
 						{list.map((question) => (
-							<button
+							<ChoiceCard
 								key={question.q}
-								type="button"
-								aria-pressed={picked === question.q}
-								onClick={() => setPicked(question.q)}
-								className={cn(
-									"rounded-xl border px-4 py-3 text-left text-[15px] leading-[22px] break-keep outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-									picked === question.q
-										? "border-primary bg-secondary font-semibold text-secondary-foreground"
-										: "border-magic/30",
-								)}
+								selected={picked === question.q}
+								onSelect={() => setPicked(question.q)}
+								className={picked === question.q ? undefined : "border-magic/30"}
 							>
 								{question.q}
-							</button>
+							</ChoiceCard>
 						))}
 					</fieldset>
 				)}
@@ -167,11 +172,11 @@ function QuestionForm({
 						onChange={(event) => setText(event.target.value)}
 						maxLength={1000}
 						placeholder={`Q. ${picked}에 답해보세요`}
-						className="min-h-28 rounded-xl px-4 py-3 text-base"
+						className="min-h-28 rounded-xl px-4 py-3 text-st8"
 					/>
 				)}
 				{create.isError && (
-					<p role="alert" className="text-sm text-destructive">
+					<p role="alert" className="text-st9 text-destructive">
 						남기지 못했어요. 다시 시도해주세요.
 					</p>
 				)}

@@ -1,20 +1,17 @@
-import {
-	CheckIcon,
-	LayersIcon,
-	LightbulbIcon,
-	MessageSquareTextIcon,
-	PenLineIcon,
-	SmileIcon,
-	UnderlineIcon,
-} from "lucide-react";
 import { type ReactNode, useState } from "react";
-import { cn } from "@/shared/lib";
 import {
 	BottomSheet,
 	BottomSheetBody,
 	BottomSheetContent,
 	BottomSheetFooter,
 	Button,
+	CheckboxRow,
+	LayersIcon,
+	LightbulbIcon,
+	MessageSquareTextIcon,
+	PenLineIcon,
+	SmileIcon,
+	UnderlineIcon,
 } from "@/shared/ui";
 import { someHidden, type TraceFilters, useReaderSettings } from "../model/reader-settings";
 
@@ -65,35 +62,17 @@ export function FilterSheet({
 				<BottomSheetBody withFooter className="pt-2">
 					<div className="flex flex-col">
 						{rows.map((row) => (
-							<button
+							<CheckboxRow
 								key={row.key}
-								type="button"
-								aria-pressed={draft[row.key]}
-								onClick={() => setDraft({ ...draft, [row.key]: !draft[row.key] })}
-								className="flex min-h-15 items-center gap-3.5 rounded-lg py-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-							>
-								<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-foreground [&_svg]:size-5">
-									{row.icon}
-								</span>
-								<span className="flex min-w-0 flex-1 flex-col">
-									<span className="text-[15px] leading-[22px] font-semibold">{row.title}</span>
-									<span className="text-[13px] leading-[19px] text-muted-foreground">
-										{row.description}
-									</span>
-								</span>
-								<span
-									aria-hidden="true"
-									className={cn(
-										"grid size-6 shrink-0 place-items-center rounded-md border-2 border-input text-primary-foreground",
-										draft[row.key] && "border-primary bg-primary",
-									)}
-								>
-									{draft[row.key] && <CheckIcon className="size-4" strokeWidth={3} />}
-								</span>
-							</button>
+								checked={draft[row.key]}
+								onCheckedChange={(checked) => setDraft({ ...draft, [row.key]: checked })}
+								title={row.title}
+								description={row.description}
+								leading={row.icon}
+							/>
 						))}
 					</div>
-					<p className="mt-3 flex items-center gap-1.5 text-[13px] text-muted-foreground">
+					<p className="mt-3 flex items-center gap-1.5 text-t7 text-muted-foreground">
 						<LightbulbIcon className="size-4" aria-hidden="true" />
 						하나도 고르지 않으면 본문만 보여요
 					</p>

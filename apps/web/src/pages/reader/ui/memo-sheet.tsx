@@ -10,7 +10,6 @@ import {
 	Button,
 	Spinner,
 	Textarea,
-	useNotice,
 	useStepOverlay,
 } from "@/shared/ui";
 import { useReaderStore } from "../model/reader-store";
@@ -31,7 +30,7 @@ export function MemoSheet({
 	const overlay = useStepOverlay();
 	const target = useReaderStore((state) => state.memo);
 	return (
-		<BottomSheet {...overlay.bind("memo")}>
+		<BottomSheet {...overlay.bind("memo", !!target)}>
 			<BottomSheetContent title={target?.q ? "생각 덧붙이기" : "생각 남기기"}>
 				{target && (
 					<MemoForm
@@ -62,14 +61,18 @@ function MemoForm({
 	onSaved: () => void;
 }) {
 	const overlay = useStepOverlay();
-	const notify = useNotice();
-	const [text, setText] = useState("");
+	const [text, setText] = useState(() => useReaderStore.getState().failedDraft?.text ?? "");
 	const create = useMutation(
 		orpc.traces.create.mutationOptions({
-			onSuccess: () => {
+			onMutate: () => {
+				useReaderStore.setState({ failedDraft: null });
 				overlay.close();
-				notify(target.q ? "생각을 덧붙였어요" : "흔적을 남겼어요");
 				onSaved();
+			},
+			onError: (_error, values) => {
+				if (!("text" in values)) return;
+				useReaderStore.setState({ memo: target, failedDraft: { kind: "memo", text: values.text } });
+				overlay.open("memo");
 			},
 		}),
 	);
@@ -90,7 +93,7 @@ function MemoForm({
 		>
 			<BottomSheetBody withFooter className="flex flex-col gap-3 pt-3">
 				<PassageQuote quote={target.passage.quote} />
-				{target.q && <p className="text-sm font-semibold text-primary">Q. {target.q}</p>}
+				{target.q && <p className="text-st9 font-semibold text-brand">Q. {target.q}</p>}
 				<Textarea
 					autoFocus
 					aria-label={target.q ? "이 질문에 대한 생각" : "이 구절에 대한 생각"}
@@ -98,13 +101,13 @@ function MemoForm({
 					onChange={(event) => setText(event.target.value)}
 					maxLength={1000}
 					placeholder="이 구절을 읽고 떠오른 생각을 남겨보세요"
-					className="min-h-32 rounded-xl px-4 py-3 text-base"
+					className="min-h-32 rounded-xl px-4 py-3 text-st8"
 				/>
-				<p className="text-right text-xs text-muted-foreground tabular-nums">
+				<p className="text-right text-st10 text-muted-foreground tabular-nums">
 					{text.length} / 1000
 				</p>
 				{create.isError && (
-					<p role="alert" className="text-sm text-destructive">
+					<p role="alert" className="text-st9 text-destructive">
 						남기지 못했어요. 다시 시도해주세요.
 					</p>
 				)}

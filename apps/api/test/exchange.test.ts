@@ -242,6 +242,7 @@ describe("books", () => {
 		const hit = result.passages.find((passage) => passage.bookId === bookId);
 		expect(hit).toMatchObject({ ch: 0, p: 1, s: 0, e: 2, match: "정원", chapterTitle: "봄" });
 		expect(result.traces.map((trace) => trace.text)).toContain("정원 이야기가 좋아요");
+		expect(result.titles).toEqual({ [bookId]: `공용 ${bookId.slice(0, 4)}` });
 		const byTitle = await reader.books.search({
 			libraryId: library.id,
 			q: `공용${bookId.slice(0, 2)}`,

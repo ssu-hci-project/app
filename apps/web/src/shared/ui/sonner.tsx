@@ -1,21 +1,27 @@
-import { CircleAlertIcon, CircleCheckIcon } from "lucide-react";
 import type { CSSProperties } from "react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { CircleAlertIcon, CircleCheckIcon } from "./tds-icon";
 
 const Toaster = (props: ToasterProps) => (
 	<Sonner
-		theme="light"
+		theme="system"
 		className="toaster group"
 		icons={{
-			success: <CircleCheckIcon className="size-4 text-primary" />,
-			error: <CircleAlertIcon className="size-4 text-destructive" />,
+			success: <CircleCheckIcon className="size-6 text-secondary" />,
+			error: <CircleAlertIcon className="size-6 text-destructive" />,
+		}}
+		toastOptions={{
+			classNames: {
+				toast:
+					"gap-2.5! px-5! py-3.5! text-t6! font-semibold! backdrop-blur-xl [&_[data-icon]]:size-6!",
+			},
 		}}
 		style={
 			{
-				"--normal-bg": "var(--popover)",
-				"--normal-text": "var(--popover-foreground)",
-				"--normal-border": "var(--border)",
-				"--border-radius": "var(--radius)",
+				"--normal-bg": "var(--chip-selected)",
+				"--normal-text": "var(--background)",
+				"--normal-border": "transparent",
+				"--border-radius": "20px",
 			} as CSSProperties
 		}
 		{...props}

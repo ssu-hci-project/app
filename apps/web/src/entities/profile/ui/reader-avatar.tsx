@@ -2,7 +2,7 @@ import type { Person } from "@app/contract";
 import { cn } from "@/shared/lib";
 import { personColor } from "../model/person";
 
-const sizes = { xs: "size-6 text-[11px]", sm: "size-8 text-xs", md: "size-9 text-sm" } as const;
+const sizes = { xs: "size-6 text-st11", sm: "size-8 text-st10", md: "size-10 text-st9" } as const;
 
 /** First letter of the name on the reader's colour. */
 export function ReaderAvatar({

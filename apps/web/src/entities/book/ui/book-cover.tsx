@@ -37,14 +37,14 @@ export function BookCover({
 						<p
 							className={cn(
 								"line-clamp-4 font-serif font-semibold tracking-tight break-keep",
-								size === "lg" ? "text-xl leading-snug" : "text-[15px] leading-tight",
+								size === "lg" ? "text-t4 leading-snug" : "text-t6 leading-tight",
 							)}
 						>
 							{book.title}
 						</p>
 						<span className="mt-2 block h-0.5 w-[18px] bg-white/70" />
 					</div>
-					<p className={cn("truncate opacity-85", size === "lg" ? "text-xs" : "text-[10px]")}>
+					<p className={cn("truncate opacity-85", size === "lg" ? "text-st10" : "text-st12")}>
 						{book.author}
 					</p>
 				</>

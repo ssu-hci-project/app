@@ -23,12 +23,12 @@ export function FontSheet({
 			<BottomSheetContent title="글자 설정" description="읽기 편한 크기로 맞춰보세요.">
 				<BottomSheetBody withFooter className="flex flex-col gap-6">
 					<div className="flex flex-col gap-3">
-						<div className="flex items-center justify-between text-sm font-semibold">
+						<div className="flex items-center justify-between text-st9 font-semibold">
 							<span id="reader-size-label">글자 크기</span>
 							<span className="tabular-nums">{size}px</span>
 						</div>
 						<div className="flex items-center gap-4">
-							<span aria-hidden="true" className="font-serif text-[13px]">
+							<span aria-hidden="true" className="font-serif text-t7">
 								가
 							</span>
 							<Slider
@@ -42,13 +42,13 @@ export function FontSheet({
 								}
 								className="py-3"
 							/>
-							<span aria-hidden="true" className="font-serif text-[22px]">
+							<span aria-hidden="true" className="font-serif text-t3">
 								가
 							</span>
 						</div>
 					</div>
 					<div className="flex flex-col gap-3">
-						<span className="text-sm font-semibold">줄 간격</span>
+						<span className="text-st9 font-semibold">줄 간격</span>
 						<Segmented
 							label="줄 간격"
 							value={leading}
@@ -61,7 +61,7 @@ export function FontSheet({
 						/>
 					</div>
 					<div className="flex flex-col gap-3">
-						<span className="text-sm font-semibold">글꼴</span>
+						<span className="text-st9 font-semibold">글꼴</span>
 						<Segmented<ReaderFont>
 							label="글꼴"
 							value={font}

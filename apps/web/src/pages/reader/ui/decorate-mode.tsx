@@ -1,5 +1,4 @@
 import { type Decoration, DRAWING_LIMIT, type Drawing, type Stroke } from "@app/contract";
-import { XIcon } from "lucide-react";
 import {
 	type ReactNode,
 	type PointerEvent as ReactPointerEvent,
@@ -16,7 +15,7 @@ import {
 	tapes,
 } from "@/entities/trace";
 import { cn } from "@/shared/lib";
-import { Button, useNotice } from "@/shared/ui";
+import { Button, useNotice, XIcon } from "@/shared/ui";
 
 type Mode = "pen" | "note" | "tape" | "stk";
 type Item = Decoration & { text?: string };
@@ -281,7 +280,7 @@ export function DecorateMode({
 							className={cn(
 								"absolute",
 								item.t === "note" &&
-									"rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight text-[#2B3040] shadow-[1px_3px_8px_rgb(0_0_0/0.16)]",
+									"rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight text-note-ink shadow-[1px_3px_8px_rgb(0_0_0/0.16)]",
 								item.t === "stk" && "drop-shadow-[0_2px_3px_rgb(0_0_0/0.25)] select-none",
 								!passThrough && "pointer-events-auto cursor-grab touch-none",
 							)}
@@ -309,7 +308,7 @@ export function DecorateMode({
 											),
 										)
 									}
-									className="pointer-events-auto block min-h-[3.2em] w-full resize-none bg-transparent outline-none [field-sizing:content] placeholder:text-[#2B3040]/60"
+									className="pointer-events-auto block min-h-[3.2em] w-full resize-none bg-transparent outline-none [field-sizing:content] placeholder:text-note-ink/60"
 								/>
 							)}
 							{item.t === "stk" && item.s}
@@ -329,14 +328,14 @@ export function DecorateMode({
 				)}
 			</div>
 			{tipVisible && (
-				<p className="pointer-events-none absolute top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-foreground/85 px-3.5 py-2 text-xs font-medium whitespace-nowrap text-background">
+				<p className="pointer-events-none absolute top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-foreground/85 px-3.5 py-2 text-st10 font-medium whitespace-nowrap text-background">
 					{tips[mode]}
 				</p>
 			)}
 			<div
 				role="toolbar"
 				aria-label="꾸미기 도구"
-				className="absolute inset-x-2 bottom-2 flex flex-col gap-2 rounded-[20px] bg-toolbar p-2.5 text-background shadow-[0_8px_24px_rgb(0_0_0/0.3)]"
+				className="absolute inset-x-2 bottom-2 flex flex-col gap-2 rounded-[20px] bg-toolbar p-2.5 text-toolbar-foreground shadow-floating"
 			>
 				<fieldset className="m-0 flex min-w-0 rounded-xl border-0 bg-background/10 p-1">
 					<legend className="sr-only">꾸미기 종류</legend>
@@ -356,7 +355,7 @@ export function DecorateMode({
 								setMode(value);
 								setTipVisible(true);
 							}}
-							className="h-9 flex-1 rounded-lg text-sm font-semibold text-background/80 aria-pressed:bg-background aria-pressed:text-foreground"
+							className="h-9 flex-1 rounded-lg text-st9 font-semibold text-background/80 aria-pressed:bg-background aria-pressed:text-foreground"
 						>
 							{label}
 						</button>
@@ -411,7 +410,7 @@ export function DecorateMode({
 								selected={sticker === emoji}
 								onClick={() => setSticker(emoji)}
 							>
-								<span className="text-[22px] leading-none">{emoji}</span>
+								<span className="text-t3 leading-none">{emoji}</span>
 							</Swatch>
 						))}
 				</div>

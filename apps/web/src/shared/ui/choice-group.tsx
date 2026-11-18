@@ -55,7 +55,7 @@ export function ChoiceItem({
 			<Field orientation="horizontal">
 				{icon && <span className="mt-0.5 shrink-0 [&_svg]:size-5">{icon}</span>}
 				<FieldContent>
-					<FieldTitle className="text-base">{label}</FieldTitle>
+					<FieldTitle className="text-st8">{label}</FieldTitle>
 					{description && <FieldDescription>{description}</FieldDescription>}
 				</FieldContent>
 				<RadioGroupItem value={value} className="size-5" />

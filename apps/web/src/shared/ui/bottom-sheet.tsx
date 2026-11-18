@@ -1,4 +1,3 @@
-import { XIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib";
 import { Button } from "./button";
@@ -10,6 +9,7 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "./drawer";
+import { XIcon } from "./tds-icon";
 
 type SheetProps = { open: boolean; onOpenChange: (open: boolean) => void; children: ReactNode };
 
@@ -35,8 +35,8 @@ export function BottomSheetContent({
 }) {
 	return (
 		<DrawerContent className={className}>
-			<DrawerHeader className="relative pr-14 text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
-				<DrawerTitle className="text-xl font-bold">{title}</DrawerTitle>
+			<DrawerHeader className="relative px-6 pt-[21px] pr-16 pb-0 text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
+				<DrawerTitle className="text-t4 leading-[1.35] font-bold">{title}</DrawerTitle>
 				{description && <DrawerDescription className="break-keep">{description}</DrawerDescription>}
 				<DrawerClose
 					render={<Button variant="ghost" size="icon" className="absolute top-2 right-2 size-11" />}
@@ -63,7 +63,7 @@ export function BottomSheetBody({
 	return (
 		<div
 			className={cn(
-				"min-h-0 flex-1 overflow-y-auto px-4 pt-4",
+				"min-h-0 flex-1 overflow-y-auto px-6 pt-4",
 				withFooter ? "pb-4" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
 				className,
 			)}
@@ -84,7 +84,7 @@ export function BottomSheetFooter({
 	return (
 		<div
 			className={cn(
-				"flex shrink-0 gap-2 border-t bg-popover px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] *:flex-1",
+				"flex shrink-0 gap-2 bg-popover px-5 pt-[34px] pb-[calc(20px+env(safe-area-inset-bottom))] *:flex-1",
 				className,
 			)}
 		>
@@ -106,7 +106,7 @@ export function MenuSheetContent({ title, children }: { title: ReactNode; childr
 	return (
 		<DrawerContent>
 			<DrawerHeader className="text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
-				<DrawerTitle className="text-sm text-muted-foreground">{title}</DrawerTitle>
+				<DrawerTitle className="text-st9 text-muted-foreground">{title}</DrawerTitle>
 			</DrawerHeader>
 			<div className="flex flex-col px-2 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
 				{children}
@@ -140,8 +140,8 @@ export function MenuSheetItem({
 		>
 			{icon}
 			<span className="flex flex-col">
-				<span className="text-base font-medium">{label}</span>
-				{description && <span className="text-sm text-muted-foreground">{description}</span>}
+				<span className="text-st8 font-medium">{label}</span>
+				{description && <span className="text-st9 text-muted-foreground">{description}</span>}
 			</span>
 		</button>
 	);

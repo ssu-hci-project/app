@@ -5,10 +5,7 @@ import { Item, ItemContent, ItemTitle } from "./item";
 /** Heading above a `List`. */
 export function ListHeader({ className, ...props }: ComponentProps<"h2">) {
 	return (
-		<h2
-			className={cn("px-4 pt-3 pb-1 text-sm font-bold text-muted-foreground", className)}
-			{...props}
-		/>
+		<h2 className={cn("px-6 pt-6 pb-2 text-t5 font-bold text-strong", className)} {...props} />
 	);
 }
 
@@ -21,20 +18,30 @@ export function ListButton({
 	title,
 	detail,
 	onClick,
+	leading,
+	trailing,
 }: {
 	title: ReactNode;
 	detail?: ReactNode;
 	onClick: () => void;
+	leading?: ReactNode;
+	trailing?: ReactNode;
 }) {
 	return (
-		<Item
-			render={<button type="button" onClick={onClick} />}
-			className="cursor-pointer rounded-none px-4 py-3 text-left active:bg-muted"
-		>
-			<ItemContent>
-				<ItemTitle className="line-clamp-none text-base">{title}</ItemTitle>
-				{detail && <div className="text-sm text-muted-foreground">{detail}</div>}
-			</ItemContent>
-		</Item>
+		<div className="flex items-center bg-card">
+			<Item
+				render={<button type="button" onClick={onClick} />}
+				className="min-h-11 min-w-0 flex-1 cursor-pointer flex-nowrap gap-4 rounded-none border-0 px-6 py-3 text-left active:bg-muted"
+			>
+				{leading && <span className="shrink-0">{leading}</span>}
+				<ItemContent className="min-w-0 gap-0">
+					<ItemTitle className="line-clamp-none text-t5 leading-[1.35] font-bold">
+						{title}
+					</ItemTitle>
+					{detail && <div className="text-t7 leading-[1.35] text-muted-foreground">{detail}</div>}
+				</ItemContent>
+			</Item>
+			{trailing && <div className="shrink-0 pr-3">{trailing}</div>}
+		</div>
 	);
 }

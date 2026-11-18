@@ -8,6 +8,7 @@ import {
 	eq,
 	inArray,
 	like,
+	lt,
 	max,
 	ne,
 	or,
@@ -47,6 +48,12 @@ async function bookViews(
 	userId: string,
 ): Promise<Book[]> {
 	if (!rows.length) return [];
+	if (rows.length > 80) {
+		const views: Book[] = [];
+		for (let start = 0; start < rows.length; start += 80)
+			views.push(...(await bookViews(db, rows.slice(start, start + 80), library, userId)));
+		return views;
+	}
 	const ids = rows.map((row) => row.id);
 	const [chapters, traceStats, saved, mine] = await Promise.all([
 		db
@@ -167,6 +174,42 @@ function passageHits(
 }
 
 export const booksRouter = {
+	listPage: os.books.listPage.handler(async ({ context, input }) => {
+		const library = await requireMember(context.db, input.libraryId, context.userId);
+		const saved = sql`exists (select 1 from saved_books sb where sb.book_id = ${books.id} and sb.user_id = ${context.userId})`;
+		const opened = sql`exists (select 1 from progress pr where pr.book_id = ${books.id} and pr.user_id = ${context.userId})`;
+		const uploaded = eq(books.addedBy, context.userId);
+		const rows = await context.db
+			.select()
+			.from(books)
+			.where(
+				and(
+					visibleIn(library.id),
+					input.scope === "saved"
+						? saved
+						: input.scope === "uploaded"
+							? uploaded
+							: input.scope === "mine"
+								? or(saved, opened, uploaded)
+								: undefined,
+					input.cursor
+						? or(
+								lt(books.createdAt, input.cursor.createdAt),
+								and(eq(books.createdAt, input.cursor.createdAt), lt(books.id, input.cursor.id)),
+							)
+						: undefined,
+				),
+			)
+			.orderBy(desc(books.createdAt), desc(books.id))
+			.limit(input.limit + 1);
+		const page = rows.slice(0, input.limit);
+		const last = page.at(-1);
+		return {
+			items: await bookViews(context.db, page, library, context.userId),
+			nextCursor:
+				rows.length > input.limit && last ? { createdAt: last.createdAt, id: last.id } : null,
+		};
+	}),
 	list: os.books.list.handler(async ({ context, input }) => {
 		const library = await requireMember(context.db, input.libraryId, context.userId);
 		const rows = await context.db
@@ -245,48 +288,45 @@ export const booksRouter = {
 	search: os.books.search.handler(async ({ context, input }) => {
 		const library = await requireMember(context.db, input.libraryId, context.userId);
 		const q = input.q;
-		const visible = await context.db
-			.select({ id: books.id, title: books.title, author: books.author })
-			.from(books)
-			.where(visibleIn(library.id));
-		const ids = visible.map((book) => book.id);
-		const chapters = ids.length
+		const visible = await context.db.select().from(books).where(visibleIn(library.id));
+		const hasVisibleBooks = visible.length > 0;
+		const chapters = hasVisibleBooks
 			? await context.db
 					.select({ bookId: bookChapters.bookId, ch: bookChapters.ch, title: bookChapters.title })
 					.from(bookChapters)
-					.where(inArray(bookChapters.bookId, ids))
+					.where(
+						sql`${bookChapters.bookId} in (select ${books.id} from ${books} where ${visibleIn(library.id)})`,
+					)
 			: [];
 		const titles = new Map(
-			visible.map((book) => [
-				book.id,
-				{
-					title: book.title,
-					chapters: new Map(
-						chapters.filter((row) => row.bookId === book.id).map((row) => [row.ch, row.title]),
-					),
-				},
-			]),
+			visible.map((book) => [book.id, { title: book.title, chapters: new Map<number, string>() }]),
 		);
-		const needle = q.toLowerCase().replace(/\s+/g, "");
+		for (const chapter of chapters) {
+			titles.get(chapter.bookId)?.chapters.set(chapter.ch, chapter.title);
+		}
 		const squash = (text: string) => text.toLowerCase().replace(/\s+/g, "");
-		const bookIds = visible
-			.filter(
-				(book) =>
-					squash(book.title).includes(needle) ||
-					squash(book.author).includes(needle) ||
-					[...(titles.get(book.id)?.chapters.values() ?? [])].some((title) =>
-						squash(title).includes(needle),
-					),
-			)
-			.map((book) => book.id);
+		const needle = squash(q);
+		const matchingBooks = visible.filter(
+			(book) =>
+				squash(book.title).includes(needle) ||
+				squash(book.author).includes(needle) ||
+				Array.from(titles.get(book.id)?.chapters.values() ?? []).some((title) =>
+					squash(title).includes(needle),
+				),
+		);
 		// One Latin letter matches nearly every paragraph; Korean syllables are specific enough.
 		const searchText = q.length >= 2 || /[가-힣]/.test(q);
 		const paragraphs =
-			searchText && ids.length
+			searchText && hasVisibleBooks
 				? await context.db
 						.select()
 						.from(bookParagraphs)
-						.where(and(inArray(bookParagraphs.bookId, ids), likeAny(bookParagraphs.text, q)))
+						.where(
+							and(
+								sql`${bookParagraphs.bookId} in (select ${books.id} from ${books} where ${visibleIn(library.id)})`,
+								likeAny(bookParagraphs.text, q),
+							),
+						)
 						.orderBy(asc(bookParagraphs.bookId), asc(bookParagraphs.ch), asc(bookParagraphs.p))
 						.limit(PASSAGE_LIMIT)
 				: [];
@@ -302,14 +342,19 @@ export const booksRouter = {
 			)
 			.orderBy(desc(traces.createdAt))
 			.limit(60);
+		const visibleTraces = traceRows.filter((row) => titles.has(row.bookId));
+		const [matchedBooks, matchedTraces] = await Promise.all([
+			bookViews(context.db, matchingBooks.slice(0, 60), library, context.userId),
+			traceViews(context.db, visibleTraces, context.userId),
+		]);
 		return {
-			bookIds,
-			passages: passageHits(paragraphs, q, titles),
-			traces: await traceViews(
-				context.db,
-				traceRows.filter((row) => titles.has(row.bookId)),
-				context.userId,
+			bookIds: matchingBooks.map((book) => book.id),
+			books: matchedBooks,
+			titles: Object.fromEntries(
+				visibleTraces.map(({ bookId }) => [bookId, titles.get(bookId)?.title ?? ""]),
 			),
+			passages: passageHits(paragraphs, q, titles),
+			traces: matchedTraces,
 		};
 	}),
 	uploadBegin: os.books.uploadBegin.handler(async ({ context, input }) => {

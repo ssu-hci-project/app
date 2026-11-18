@@ -24,6 +24,7 @@ export const books = sqliteTable("books", {
 		.$defaultFn(() => crypto.randomUUID()),
 	title: text("title").notNull(),
 	author: text("author").notNull(),
+	/** Archived fixed-page count. New books use chapter chars and store 0 here. */
 	pageCount: integer("page_count").notNull(),
 	/** null: a public-domain book every library shares. Otherwise the library it was uploaded to. */
 	libraryId: text("library_id").references(() => libraries.id, { onDelete: "cascade" }),
@@ -38,6 +39,7 @@ export const books = sqliteTable("books", {
 		.$defaultFn(() => new Date().toISOString()),
 });
 
+// Read-only archives for the 0009/0010 data migrations. No runtime API uses these tables.
 export const bookmarks = sqliteTable("bookmarks", {
 	visibility: text("visibility", { enum: ["private", "group", "legacy"] })
 		.notNull()

@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { m } from "motion/react";
+import { type ReactNode, useId } from "react";
 import { cn } from "@/shared/lib";
 
-/** A row of mutually exclusive options (iOS-style segmented control), 44px tall. */
+/** TDS fixed segmented control, L: 48px tall with 40px items. */
 export function Segmented<T extends string | number>({
 	label,
 	value,
@@ -15,9 +16,13 @@ export function Segmented<T extends string | number>({
 	onValueChange: (value: T) => void;
 	className?: string;
 }) {
+	const selectionId = useId();
 	return (
 		<fieldset
-			className={cn("m-0 flex h-11 min-w-0 gap-1 rounded-xl border-0 bg-muted p-1", className)}
+			className={cn(
+				"m-0 flex h-12 min-w-0 rounded-xl border-0 bg-neutral-weak px-[5px] py-1",
+				className,
+			)}
 		>
 			<legend className="sr-only">{label}</legend>
 			{options.map((option) => (
@@ -27,10 +32,16 @@ export function Segmented<T extends string | number>({
 					aria-pressed={option.value === value}
 					onClick={() => onValueChange(option.value)}
 					className={cn(
-						"h-9 flex-1 rounded-lg text-sm font-semibold text-muted-foreground outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm",
+						"relative isolate h-10 min-w-0 flex-1 rounded-lg px-2 text-t5 leading-[1.252] font-medium text-muted-foreground outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 aria-pressed:font-semibold aria-pressed:text-foreground",
 						option.className,
 					)}
 				>
+					{option.value === value && (
+						<m.span
+							layoutId={selectionId}
+							className="absolute inset-0 -z-10 rounded-lg bg-card shadow-[0_1px_1px_rgb(0_0_0/9%)]"
+						/>
+					)}
 					{option.label}
 				</button>
 			))}

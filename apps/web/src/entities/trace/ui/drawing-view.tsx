@@ -64,7 +64,7 @@ export function DrawingView({
 						// biome-ignore lint/suspicious/noArrayIndexKey: decorations have no id and never reorder.
 						key={index}
 						data-hit
-						className="absolute rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight whitespace-pre-wrap text-[#2B3040] shadow-[1px_3px_8px_rgb(0_0_0/0.16)] break-keep"
+						className="absolute rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight whitespace-pre-wrap text-note-ink shadow-[1px_3px_8px_rgb(0_0_0/0.16)] break-keep"
 						style={decorationStyle(item, fs)}
 					>
 						{item.text}
@@ -123,7 +123,7 @@ export function DrawingPreview({ data }: { data: Drawing }) {
 					<p
 						// biome-ignore lint/suspicious/noArrayIndexKey: decorations have no id and never reorder.
 						key={index}
-						className="max-w-full -rotate-1 px-2.5 py-1.5 font-hand text-lg leading-tight text-[#2B3040] shadow-[1px_2px_5px_rgb(0_0_0/0.12)]"
+						className="max-w-full -rotate-1 px-2.5 py-1.5 font-hand text-st7 leading-tight text-note-ink shadow-[1px_2px_5px_rgb(0_0_0/0.12)]"
 						style={{ background: note.c }}
 					>
 						{note.text}
@@ -144,7 +144,7 @@ export function DrawingPreview({ data }: { data: Drawing }) {
 					))}
 					{stickerItems.map((item, index) => (
 						// biome-ignore lint/suspicious/noArrayIndexKey: decorations have no id and never reorder.
-						<span key={index} className="text-2xl">
+						<span key={index} className="text-st3">
 							{item.t === "stk" ? item.s : null}
 						</span>
 					))}

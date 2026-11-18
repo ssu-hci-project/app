@@ -72,6 +72,7 @@ const errors = {
 	BAD_REQUEST: { message: "책 내용을 확인해주세요" },
 };
 const bookInput = libraryInput.extend({ bookId: z.string() });
+const bookCursor = z.object({ createdAt: z.string(), id: z.string() });
 
 export const bookUploadSchema = libraryInput.extend({
 	title: z.string().trim().min(1, "책 제목이 없어요").max(120),
@@ -89,6 +90,17 @@ export const bookUploadSchema = libraryInput.extend({
 });
 
 export const booksContract = {
+	listPage: oc
+		.route({ method: "GET", path: "/libraries/{libraryId}/book-pages", tags: ["books"] })
+		.errors(errors)
+		.input(
+			libraryInput.extend({
+				scope: z.enum(["catalog", "mine", "saved", "uploaded"]).default("catalog"),
+				cursor: bookCursor.nullable().default(null),
+				limit: z.number().int().min(1).max(40).default(20),
+			}),
+		)
+		.output(z.object({ items: z.array(bookSchema), nextCursor: bookCursor.nullable() })),
 	/** Public-domain books plus the ones uploaded to this library, with my progress. */
 	list: oc
 		.route({ method: "GET", path: "/libraries/{libraryId}/books", tags: ["books"] })
@@ -125,6 +137,9 @@ export const booksContract = {
 		.output(
 			z.object({
 				bookIds: z.array(z.string()),
+				books: z.array(bookSchema),
+				/** Book titles for the returned trace matches. */
+				titles: z.record(z.string(), z.string()),
 				/** Up to 60 matches, at most 3 per paragraph. Empty when the query is too short. */
 				passages: z.array(passageHitSchema),
 				traces: z.array(traceSchema),

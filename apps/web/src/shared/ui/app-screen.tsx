@@ -1,7 +1,7 @@
 import { useActivity } from "@stackflow/react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/shared/lib";
-import { Button } from "./button";
+import { IconButton } from "./icon-button";
 
 /**
  * One Stackflow activity. A pushed screen slides in from the right and the one under it shifts left,
@@ -11,6 +11,7 @@ export function AppScreen({ children }: { children: ReactNode }) {
 	const { transitionState, isActive, isRoot, zIndex } = useActivity();
 	return (
 		<div
+			inert={!isActive}
 			data-transition={transitionState}
 			data-root={isRoot || undefined}
 			data-covered={(!isActive && transitionState === "enter-done") || undefined}
@@ -35,7 +36,7 @@ export function AppBar({ className, ...props }: ComponentProps<"header">) {
 	return (
 		<header
 			className={cn(
-				"flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 bg-card px-2 pt-[env(safe-area-inset-top)]",
+				"flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 bg-background px-2 pt-[env(safe-area-inset-top)]",
 				className,
 			)}
 			{...props}
@@ -48,7 +49,7 @@ export function AppBarLeft({ className, ...props }: ComponentProps<"div">) {
 }
 
 export function AppBarMain({ title }: { title: string }) {
-	return <h1 className="min-w-0 flex-1 truncate text-center text-lg font-bold">{title}</h1>;
+	return <h1 className="min-w-0 flex-1 truncate text-center text-st7 font-bold">{title}</h1>;
 }
 
 export function AppBarRight({ className, ...props }: ComponentProps<"div">) {
@@ -57,6 +58,6 @@ export function AppBarRight({ className, ...props }: ComponentProps<"div">) {
 	);
 }
 
-export function AppBarIconButton(props: ComponentProps<typeof Button>) {
-	return <Button type="button" variant="ghost" size="icon" {...props} />;
+export function AppBarIconButton(props: ComponentProps<typeof IconButton>) {
+	return <IconButton {...props} />;
 }

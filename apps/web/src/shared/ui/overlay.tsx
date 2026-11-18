@@ -1,4 +1,5 @@
 import { useActivity, useStepFlow } from "@stackflow/react";
+import { useEffect } from "react";
 
 /**
  * Sheets, dialogs and toasts render into the mobile frame instead of <body>, so on wide screens they
@@ -10,17 +11,25 @@ export const appFrame = () => document.getElementById("app-frame");
 type OverlayParams = { overlay?: string };
 
 /**
- * Keeps which sheet is open in the activity's `overlay` step param, so browser back closes the sheet
- * before leaving the screen and a refreshed URL reopens it.
+ * Keeps the sheet in an activity step so browser back closes it first.
+ * Sheets that require in-memory context are cleared when restored as the initial step.
  */
-export function useStepOverlay() {
+export function useStepOverlay(transient: readonly string[] = []) {
 	const activity = useActivity();
 	const { pushStep, popStep, replaceStep } = useStepFlow(activity.name as never) as unknown as {
 		pushStep: (update: (params: OverlayParams) => OverlayParams) => void;
 		replaceStep: (update: (params: OverlayParams) => OverlayParams) => void;
 		popStep: () => void;
 	};
-	const current = (activity.params as OverlayParams).overlay;
+	const overlay = (activity.params as OverlayParams).overlay;
+	const restoredWithoutContext =
+		activity.steps.length === 1 && !!overlay && transient.includes(overlay);
+	useEffect(() => {
+		if (activity.isActive && restoredWithoutContext) {
+			replaceStep((params) => ({ ...params, overlay: undefined }));
+		}
+	}, [activity.isActive, replaceStep, restoredWithoutContext]);
+	const current = restoredWithoutContext ? undefined : overlay;
 	const withOverlay = (overlay?: string) => (params: OverlayParams) => ({ ...params, overlay });
 	const close = () => {
 		if (!current) return;
@@ -40,10 +49,10 @@ export function useStepOverlay() {
 		switchTo: (key: string) => replaceStep(withOverlay(key)),
 		close,
 		/** `open`/`onOpenChange` for a sheet bound to `key`. */
-		bind: (key: string) => ({
-			open: current === key,
+		bind: (key: string, available = true) => ({
+			open: activity.isActive && available && current === key,
 			onOpenChange: (open: boolean) => {
-				if (!open && current === key) close();
+				if (!open && activity.isActive && available && current === key) close();
 			},
 		}),
 	};

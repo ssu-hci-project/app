@@ -1,10 +1,12 @@
 import type { Trace } from "@app/contract";
-import { MessageSquareTextIcon } from "lucide-react";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { chapterNumber } from "@/entities/book";
 import { personColor } from "@/entities/profile";
 import { cn } from "@/shared/lib";
+import { MessageSquareTextIcon, ReactionEmoji } from "@/shared/ui";
 import { buildSegments, markStyle, type Visible } from "../lib/segments";
+
+const emptyTraces: Trace[] = [];
 
 type Selection = { p: number; s: number; e: number } | null;
 
@@ -29,13 +31,22 @@ export const ChapterText = memo(function ChapterText({
 	selection: Selection;
 	onMarker: (traces: Trace[]) => void;
 }) {
+	const tracesByParagraph = useMemo(() => {
+		const grouped = new Map<number, Trace[]>();
+		for (const trace of traces) {
+			const group = grouped.get(trace.p);
+			if (group) group.push(trace);
+			else grouped.set(trace.p, [trace]);
+		}
+		return grouped;
+	}, [traces]);
 	return (
 		<>
 			<header className="break-inside-avoid pt-6">
-				<p className="font-sans text-xs font-bold tracking-wide text-primary">
+				<p className="font-sans text-st10 font-bold tracking-wide text-brand">
 					{chapterNumber(ch)}
 				</p>
-				<h1 className="mt-5 mb-[26px] border-b border-rule pb-[22px] font-serif text-[30px] leading-[1.25] font-medium tracking-tight break-keep text-reader-ink">
+				<h1 className="mt-5 mb-[26px] border-b border-rule pb-[22px] font-serif text-t1 leading-[1.25] font-medium tracking-tight break-keep text-reader-ink">
 					{title || chapterNumber(ch)}
 				</h1>
 			</header>
@@ -45,7 +56,7 @@ export const ChapterText = memo(function ChapterText({
 					key={p}
 					p={p}
 					text={text}
-					traces={traces.filter((trace) => trace.p === p)}
+					traces={tracesByParagraph.get(p) ?? emptyTraces}
 					visible={visible}
 					selection={selection?.p === p ? selection : undefined}
 					onMarker={onMarker}
@@ -102,7 +113,7 @@ function Paragraph({
 							data-marker
 							aria-label={`메모와 질문 ${segment.notes.length}개 보기`}
 							onClick={() => onMarker(segment.notes)}
-							className="relative mx-1 inline-flex h-6 items-center gap-0.5 align-middle font-sans text-xs font-semibold text-muted-foreground before:absolute before:-inset-2.5 before:content-['']"
+							className="relative mx-1 inline-flex h-6 items-center gap-0.5 align-middle font-sans text-st10 font-semibold text-muted-foreground before:absolute before:-inset-2.5 before:content-['']"
 							style={{ color: personColor(segment.notes.at(-1)?.author) }}
 						>
 							<MessageSquareTextIcon className="size-5" aria-hidden="true" />
@@ -116,9 +127,9 @@ function Paragraph({
 							data-marker
 							aria-label={`반응 ${group.emoji} ${group.traces.length}개 보기`}
 							onClick={() => onMarker(group.traces)}
-							className="relative mx-0.5 inline-flex h-6 items-center gap-0.5 rounded-full bg-card/70 px-1.5 align-middle font-sans text-xs font-semibold text-muted-foreground before:absolute before:-inset-2.5 before:content-['']"
+							className="relative mx-0.5 inline-flex h-6 items-center gap-0.5 rounded-full bg-card/70 px-1.5 align-middle font-sans text-st10 font-semibold text-muted-foreground before:absolute before:-inset-2.5 before:content-['']"
 						>
-							<span className="text-base leading-none">{group.emoji}</span>
+							<ReactionEmoji emoji={group.emoji} decorative className="size-4" />
 							{group.traces.length > 1 && group.traces.length}
 						</button>
 					))}

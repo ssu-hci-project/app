@@ -1,5 +1,5 @@
 import type { Trace } from "@app/contract";
-import { LightbulbIcon } from "lucide-react";
+import { useState } from "react";
 import { personColor, personName } from "@/entities/profile";
 import { cn, timeAgo } from "@/shared/lib";
 import {
@@ -8,6 +8,8 @@ import {
 	BottomSheetContent,
 	BottomSheetFooter,
 	Button,
+	InfiniteLoader,
+	LightbulbIcon,
 	useStepOverlay,
 } from "@/shared/ui";
 import { useReaderStore } from "../model/reader-store";
@@ -16,6 +18,8 @@ import { useReaderStore } from "../model/reader-store";
 export function SameQuestionSheet({ traces }: { traces: Trace[] }) {
 	const overlay = useStepOverlay();
 	const answered = useReaderStore((state) => state.answered);
+	const [window, setWindow] = useState({ key: answered?.q, count: 20 });
+	const visibleCount = window.key === answered?.q ? window.count : 20;
 	const answers = answered
 		? traces
 				.filter((trace) => trace.kind === "qa" && trace.q === answered.q)
@@ -24,13 +28,13 @@ export function SameQuestionSheet({ traces }: { traces: Trace[] }) {
 				)
 		: [];
 	return (
-		<BottomSheet {...overlay.bind("same")}>
+		<BottomSheet {...overlay.bind("same", !!answered)}>
 			<BottomSheetContent
 				title="같은 질문, 다른 생각"
 				description={answered ? `Q. ${answered.q}` : undefined}
 			>
 				<BottomSheetBody withFooter className="flex flex-col gap-2.5">
-					{answers.map((trace) => (
+					{answers.slice(0, visibleCount).map((trace) => (
 						<article
 							key={trace.id}
 							className={cn(
@@ -38,7 +42,7 @@ export function SameQuestionSheet({ traces }: { traces: Trace[] }) {
 								trace.isMine && "border-secondary bg-secondary",
 							)}
 						>
-							<p className="flex items-center gap-1.5 text-sm font-semibold">
+							<p className="flex items-center gap-1.5 text-st9 font-semibold">
 								<span
 									className="size-2 rounded-full"
 									style={{ backgroundColor: personColor(trace.author) }}
@@ -48,17 +52,22 @@ export function SameQuestionSheet({ traces }: { traces: Trace[] }) {
 									{timeAgo(trace.createdAt)}
 								</span>
 							</p>
-							<p className="mt-1.5 text-[15px] leading-[23px] whitespace-pre-wrap break-keep">
+							<p className="mt-1.5 text-t6 leading-[23px] whitespace-pre-wrap break-keep">
 								{trace.text}
 							</p>
 						</article>
 					))}
+					<InfiniteLoader
+						hasMore={answers.length > visibleCount}
+						loading={false}
+						loadMore={() => setWindow({ key: answered?.q, count: visibleCount + 20 })}
+					/>
 					{answers.length < 2 && (
-						<p className="text-[15px] leading-[22px] text-muted-foreground">
+						<p className="text-t6 leading-[22px] text-muted-foreground">
 							아직 같은 질문에 답한 독자가 없어요. 친구가 답하면 여기에 보여요.
 						</p>
 					)}
-					<p className="mt-1 flex items-center gap-1.5 text-[13px] text-muted-foreground">
+					<p className="mt-1 flex items-center gap-1.5 text-t7 text-muted-foreground">
 						<LightbulbIcon className="size-4" aria-hidden="true" />
 						최근에 남긴 순서예요
 					</p>

@@ -5,7 +5,7 @@ export function PassageQuote({ quote, className }: { quote: string; className?: 
 	return (
 		<blockquote
 			className={cn(
-				"line-clamp-2 border-l-[3px] border-primary pl-2.5 font-serif text-sm leading-5 text-muted-foreground",
+				"line-clamp-2 border-l-[3px] border-primary pl-2.5 font-serif text-st9 leading-5 text-muted-foreground",
 				className,
 			)}
 		>

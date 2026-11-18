@@ -19,7 +19,7 @@ export function ResultSection({
 	return (
 		<Empty>
 			<EmptyHeader>
-				<EmptyTitle className="text-lg font-bold">{title}</EmptyTitle>
+				<EmptyTitle className="text-st7 font-bold">{title}</EmptyTitle>
 				{description && <EmptyDescription>{description}</EmptyDescription>}
 			</EmptyHeader>
 			{(action || secondaryAction) && (

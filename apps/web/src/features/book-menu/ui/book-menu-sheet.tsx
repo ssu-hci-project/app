@@ -1,7 +1,6 @@
 import type { Book } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import { useMutation } from "@tanstack/react-query";
-import { BookOpenIcon, HeartIcon, HeartOffIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { orpc } from "@/shared/api";
 import {
@@ -13,9 +12,12 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
+	BookOpenIcon,
+	HeartIcon,
 	MenuSheet,
 	MenuSheetContent,
 	MenuSheetItem,
+	Trash2Icon,
 	useNotice,
 	useStepOverlay,
 } from "@/shared/ui";
@@ -28,11 +30,12 @@ export function BookMenuSheet({ book }: { book: Book | undefined }) {
 	const [confirming, setConfirming] = useState(false);
 	const save = useMutation(
 		orpc.saved.set.mutationOptions({
-			onSuccess: ({ saved }) => notify(saved ? "내 서재에 담았어요" : "내 서재에서 뺐어요"),
+			scope: { id: `saved:${book?.id}` },
 		}),
 	);
 	const remove = useMutation(
 		orpc.books.remove.mutationOptions({
+			onMutate: () => setConfirming(false),
 			onSuccess: () => {
 				setConfirming(false);
 				notify("서재에서 삭제했어요");
@@ -54,7 +57,7 @@ export function BookMenuSheet({ book }: { book: Book | undefined }) {
 						}}
 					/>
 					<MenuSheetItem
-						icon={book.saved ? <HeartOffIcon /> : <HeartIcon />}
+						icon={<HeartIcon filled={book.saved} />}
 						label={book.saved ? "내 서재에서 빼기" : "내 서재에 담기"}
 						onClick={() => {
 							overlay.close();

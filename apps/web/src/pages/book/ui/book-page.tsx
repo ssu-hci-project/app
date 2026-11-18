@@ -1,7 +1,6 @@
-import type { ActivityComponentType } from "@stackflow/react";
+import type { InferActivityParams } from "@stackflow/config";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronLeftIcon, HeartIcon } from "lucide-react";
 import { useState } from "react";
 import { BookCover, chapterLabel, chapterNumber, readingTime } from "@/entities/book";
 import { useCurrentLibrary } from "@/entities/library";
@@ -13,17 +12,22 @@ import {
 	AppBarIconButton,
 	AppScreen,
 	AppScreenContent,
+	AvatarGroup,
+	BottomCta,
 	Button,
+	ChevronLeftIcon,
+	HeartIcon,
+	List,
+	ListButton,
+	ListHeader,
 	LoadState,
-	useNotice,
 } from "@/shared/ui";
 
-export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
+export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }) {
 	const flow = useFlow();
 	const { isRoot } = useActivity();
-	const notify = useNotice();
 	const { library } = useCurrentLibrary();
-	const [scrolled, setScrolled] = useState(false);
+	const [headerMode, setHeaderMode] = useState<"top" | "scrolled" | "compact">("top");
 	const detail = useQuery({
 		...orpc.books.get.queryOptions({
 			input: { libraryId: library?.id ?? "", bookId: params.bookId },
@@ -32,7 +36,7 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 	});
 	const save = useMutation(
 		orpc.saved.set.mutationOptions({
-			onSuccess: ({ saved }) => notify(saved ? "내 서재에 담았어요" : "내 서재에서 뺐어요"),
+			scope: { id: `saved:${params.bookId}` },
 		}),
 	);
 	const read = (target: { ch?: number; p?: number; s?: number; e?: number } = {}) =>
@@ -47,12 +51,18 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 		});
 	const data = detail.data;
 	const book = data?.book;
-	const saved = save.isPending ? !!save.variables?.saved : !!book?.saved;
+	const coverTint = book ? `color-mix(in srgb, ${book.color} 13%, var(--background))` : undefined;
+	const showTitle = headerMode === "compact";
+	const saved = !!book?.saved;
 	const readers = data?.readers ?? [];
 	return (
 		<AppScreen>
 			<AppBar
-				className={cn("border-b border-transparent transition-colors", scrolled && "border-border")}
+				className={cn(
+					"border-b border-transparent transition-colors",
+					headerMode !== "top" && "border-border",
+				)}
+				style={{ backgroundColor: headerMode === "top" ? coverTint : undefined }}
 			>
 				<AppBarIconButton
 					className="size-11"
@@ -62,18 +72,21 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 					<ChevronLeftIcon />
 				</AppBarIconButton>
 				<span
-					aria-hidden={!scrolled}
+					aria-hidden={!showTitle}
 					className={cn(
-						"min-w-0 flex-1 truncate text-[17px] font-semibold opacity-0 transition-opacity",
-						scrolled && "opacity-100",
+						"min-w-0 flex-1 truncate text-t5 font-semibold opacity-0 transition-opacity",
+						showTitle && "opacity-100",
 					)}
 				>
 					{book?.title}
 				</span>
 			</AppBar>
 			<AppScreenContent
-				className="bg-card pb-[calc(104px+env(safe-area-inset-bottom))]"
-				onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 200)}
+				className="bg-background pb-[calc(112px+env(safe-area-inset-bottom))]"
+				onScroll={(event) => {
+					const { scrollTop } = event.currentTarget;
+					setHeaderMode(scrollTop > 200 ? "compact" : scrollTop > 12 ? "scrolled" : "top");
+				}}
 			>
 				<LoadState
 					pending={detail.isPending}
@@ -85,16 +98,18 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 					<>
 						<header
 							className="flex flex-col items-center px-6 pt-3 text-center"
-							style={{ background: `linear-gradient(${book.color}21, var(--card) 78%)` }}
+							style={{ background: `linear-gradient(${coverTint}, var(--background) 78%)` }}
 						>
 							<BookCover book={book} size="lg" />
-							<h1 className="mt-5 text-2xl leading-8 font-bold break-keep">{book.title}</h1>
-							<p className="mt-1 text-[15px] text-muted-foreground">{book.author || "작자 미상"}</p>
-							<p className="mt-1 text-[13px] text-muted-foreground">
+							<h1 className="mt-5 text-st3 leading-[1.35] font-bold text-strong break-keep">
+								{book.title}
+							</h1>
+							<p className="mt-1 text-t6 text-muted-foreground">{book.author || "작자 미상"}</p>
+							<p className="mt-1 text-t7 text-muted-foreground">
 								{book.chapterCount}장 · {readingTime(book.chars)}
 							</p>
 						</header>
-						<dl className="mx-5 mt-6 grid grid-cols-3 rounded-xl bg-muted py-4 text-center">
+						<dl className="mx-6 mt-6 grid grid-cols-3 rounded-xl bg-muted py-4 text-center">
 							{(
 								[
 									["장", book.chapterCount],
@@ -106,27 +121,26 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 									key={label}
 									className={cn("flex flex-col-reverse", index > 0 && "border-l border-input")}
 								>
-									<dt className="text-xs text-muted-foreground">{label}</dt>
-									<dd className="text-base font-bold">{value}</dd>
+									<dt className="text-st10 text-muted-foreground">{label}</dt>
+									<dd className="text-st8 font-bold">{value}</dd>
 								</div>
 							))}
 						</dl>
 						{readers.length > 0 && (
-							<section className="px-5 pt-7">
-								<h2 className="pb-3 text-lg font-bold">함께 읽는 사람</h2>
-								<div className="flex items-center">
-									<div className="flex">
-										{readers.slice(0, 6).map((person, index) => (
+							<section className="px-6 pt-7">
+								<h2 className="pb-3 text-t5 font-bold text-strong">함께 읽는 사람</h2>
+								<div className="flex items-center gap-2.5">
+									<AvatarGroup>
+										{readers.slice(0, 5).map((person) => (
 											<ReaderAvatar
 												key={person.id}
 												person={person}
 												name={person.nick ?? "독자"}
-												size="md"
-												className={cn("ring-2 ring-card", index > 0 && "-ml-2")}
+												size="sm"
 											/>
 										))}
-									</div>
-									<span className="ml-3 text-[13px] text-muted-foreground">
+									</AvatarGroup>
+									<span className="min-w-0 truncate text-st9 font-semibold text-sub">
 										{readers
 											.slice(0, 3)
 											.map((person) => person.nick ?? "독자")
@@ -137,33 +151,33 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 							</section>
 						)}
 						{data.opening.length > 0 && (
-							<section className="px-5 pt-7">
-								<h2 className="pb-3 text-lg font-bold">첫 문장</h2>
-								<p className="line-clamp-6 font-serif text-base leading-7 whitespace-pre-line break-keep">
+							<section className="px-6 pt-7">
+								<h2 className="pb-3 text-t5 font-bold text-strong">첫 문장</h2>
+								<p className="line-clamp-6 font-serif text-st8 leading-7 whitespace-pre-line break-keep">
 									{data.opening.join("\n\n")}
 								</p>
 							</section>
 						)}
 						{data.recentTraces.length > 0 && (
-							<section className="flex flex-col gap-2.5 px-5 pt-7">
-								<h2 className="pb-0.5 text-lg font-bold">최근 흔적</h2>
+							<section className="flex flex-col gap-2.5 px-6 pt-7">
+								<h2 className="pb-0.5 text-t5 font-bold text-strong">최근 흔적</h2>
 								{data.recentTraces.map((trace) => (
 									<button
 										key={trace.id}
 										type="button"
 										onClick={() => read(trace)}
-										className="rounded-xl border p-3.5 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+										className="rounded-2xl bg-neutral-weak p-4 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-[color-mix(in_oklch,var(--neutral-weak),var(--foreground)_8%)]"
 									>
-										<span className="block truncate font-serif text-[13px] text-muted-foreground">
+										<span className="block truncate font-serif text-t7 text-muted-foreground">
 											“{trace.quote}”
 										</span>
-										<span className="mt-1.5 block text-sm leading-[21px]">
+										<span className="mt-1 block text-t6 leading-[1.467] font-semibold text-strong">
 											{trace.q && (
-												<span className="block font-semibold text-primary">Q. {trace.q}</span>
+												<span className="block font-semibold text-brand">Q. {trace.q}</span>
 											)}
 											{trace.text}
 										</span>
-										<span className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+										<span className="mt-2 flex items-center gap-1.5 text-t7 font-medium text-muted-foreground">
 											<span
 												className="size-2 rounded-full"
 												style={{ backgroundColor: personColor(trace.author) }}
@@ -174,52 +188,51 @@ export const BookPage: ActivityComponentType<"BookPage"> = ({ params }) => {
 								))}
 							</section>
 						)}
-						<section className="px-5 pt-7">
-							<h2 className="pb-1 text-lg font-bold">목차</h2>
-							<ol>
+						<section className="pt-3">
+							<ListHeader>목차</ListHeader>
+							<List>
 								{data.chapters.map((chapter) => (
-									<li key={chapter.ch}>
-										<button
-											type="button"
-											onClick={() => read({ ch: chapter.ch })}
-											className="flex h-13 w-full items-center gap-3 border-b text-left text-[15px] outline-none focus-visible:bg-muted active:bg-muted"
-										>
-											<span className="w-9 shrink-0 text-[13px] font-semibold text-primary">
+									<ListButton
+										key={chapter.ch}
+										onClick={() => read({ ch: chapter.ch })}
+										leading={
+											<span className="block w-7 text-t7 font-semibold text-brand">
 												{chapterNumber(chapter.ch).replace("장", "")}
 											</span>
-											<span className="min-w-0 flex-1 truncate">
-												{chapter.title || chapterLabel(chapter.ch, "")}
-											</span>
-											{book.progress?.ch === chapter.ch && (
-												<span className="shrink-0 text-xs font-semibold text-primary">읽는 중</span>
-											)}
-										</button>
-									</li>
+										}
+										title={chapter.title || chapterLabel(chapter.ch, "")}
+										trailing={
+											book.progress?.ch === chapter.ch && (
+												<span className="pr-3 text-st10 font-semibold text-brand">읽는 중</span>
+											)
+										}
+									/>
 								))}
-							</ol>
+							</List>
 						</section>
 					</>
 				)}
 			</AppScreenContent>
 			{book && (
-				<div className="absolute inset-x-0 bottom-0 z-10 flex gap-2.5 bg-card px-5 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))] shadow-[0_-12px_16px_var(--card)]">
+				<BottomCta>
 					<Button
-						variant="outline"
+						variant="weak"
+						size="lg"
 						aria-pressed={saved}
 						aria-label={saved ? "내 서재에서 빼기" : "내 서재에 담기"}
-						className="size-14 shrink-0 rounded-xl"
+						className="w-14 min-w-0 shrink-0 px-0"
 						onClick={() => save.mutate({ bookId: book.id, saved: !saved })}
 					>
-						<HeartIcon className={cn("size-6!", saved && "fill-destructive text-destructive")} />
+						<HeartIcon
+							filled={saved}
+							className={cn("size-6!", saved && "fill-destructive text-destructive")}
+						/>
 					</Button>
-					<Button
-						className="h-14 flex-1 rounded-xl text-[17px] font-semibold"
-						onClick={() => read()}
-					>
+					<Button size="lg" className="flex-1" onClick={() => read()}>
 						{book.progress?.pct ? `이어 읽기 · ${book.progress.pct}%` : "바로 읽기"}
 					</Button>
-				</div>
+				</BottomCta>
 			)}
 		</AppScreen>
 	);
-};
+}

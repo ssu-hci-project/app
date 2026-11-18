@@ -9,7 +9,6 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { bookColor } from "../src/lib/book-color";
-import { paginate } from "../src/lib/paginate";
 import { splitParagraphs } from "../src/lib/paragraphs";
 import { SAMPLE_BASE_TIME, SAMPLE_LIBRARY_ID } from "../src/lib/sample";
 
@@ -41,25 +40,18 @@ const statements = readdirSync(dir)
 		const text = readFileSync(join(dir, `${work.id}.txt`), "utf8");
 		const paragraphs = splitParagraphs(text);
 		paragraphsByBook.set(work.id, paragraphs);
-		const pages = paginate(text);
 		const chars = paragraphs.reduce((sum, paragraph) => sum + paragraph.length, 0);
 		return [
 			`-- ${work.title} (${work.author}) · ${work.license} · ${work.sourceUrl}`,
-			`INSERT INTO books (id, title, author, edition, page_count, source_url, license, color, created_at) VALUES ${row([work.id, work.title, work.author, work.edition, pages.length, work.sourceUrl, work.license, bookColor(work.id), "2026-10-01T09:00:00.000Z"])}
+			`INSERT INTO books (id, title, author, edition, page_count, source_url, license, color, created_at) VALUES ${row([work.id, work.title, work.author, work.edition, 0, work.sourceUrl, work.license, bookColor(work.id), "2026-10-01T09:00:00.000Z"])}
 	ON CONFLICT(id) DO UPDATE SET title = excluded.title, author = excluded.author, edition = excluded.edition,
-	page_count = excluded.page_count, source_url = excluded.source_url, license = excluded.license, color = excluded.color;`,
+			source_url = excluded.source_url, license = excluded.license, color = excluded.color;`,
 			`DELETE FROM book_chapters WHERE book_id = ${sql(work.id)};`,
 			`INSERT INTO book_chapters (book_id, ch, title, chars) VALUES ${row([work.id, 0, work.title, chars])};`,
 			`DELETE FROM book_paragraphs WHERE book_id = ${sql(work.id)};`,
 			...paragraphs.map(
 				(paragraph, p) =>
 					`INSERT INTO book_paragraphs (book_id, ch, p, text) VALUES ${row([work.id, 0, p, paragraph])};`,
-			),
-			// Legacy fixed pages for the old reader; removed with it.
-			`DELETE FROM book_pages WHERE book_id = ${sql(work.id)};`,
-			...pages.map(
-				(page, index) =>
-					`INSERT INTO book_pages (book_id, page, text) VALUES ${row([work.id, index + 1, page])};`,
 			),
 		];
 	});

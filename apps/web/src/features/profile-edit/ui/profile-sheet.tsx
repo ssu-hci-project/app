@@ -1,6 +1,5 @@
 import { type Profile, profileInputSchema, readerColors } from "@app/contract";
 import { useMutation } from "@tanstack/react-query";
-import { CheckIcon } from "lucide-react";
 import { useState } from "react";
 import { defaultColor, useProfile } from "@/entities/profile";
 import { orpc } from "@/shared/api";
@@ -11,6 +10,7 @@ import {
 	BottomSheetContent,
 	BottomSheetFooter,
 	Button,
+	CheckIcon,
 	Spinner,
 	TextField,
 	useNotice,
@@ -95,12 +95,14 @@ function ProfileForm({ profile, takenColors }: { profile: Profile; takenColors: 
 					error={error}
 				/>
 				<fieldset className="flex flex-col">
-					<legend className="mb-3 text-sm font-medium">나의 색</legend>
+					<legend className="mb-3 text-st9 font-medium">나의 색</legend>
 					<div className="grid grid-cols-4 justify-items-center gap-y-3">
 						{readerColors.map((option) => {
 							const taken = takenColors.includes(option) && option !== color;
 							return (
-								<button
+								<Button
+									variant="ghost"
+									size="icon"
 									key={option}
 									type="button"
 									aria-pressed={option === color}
@@ -114,12 +116,12 @@ function ProfileForm({ profile, takenColors }: { profile: Profile; takenColors: 
 									style={{ backgroundColor: option }}
 								>
 									{option === color && <CheckIcon className="size-5" strokeWidth={3} />}
-								</button>
+								</Button>
 							);
 						})}
 					</div>
 					{takenColors.length > 0 && (
-						<p className="mt-3 text-[13px] text-muted-foreground">
+						<p className="mt-3 text-t7 text-muted-foreground">
 							흐린 색은 이 서재의 다른 사람이 쓰고 있어요.
 						</p>
 					)}

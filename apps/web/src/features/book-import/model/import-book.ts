@@ -4,10 +4,8 @@ import { useCurrentLibrary } from "@/entities/library";
 import { client } from "@/shared/api";
 import { useNotice } from "@/shared/ui";
 import { chunkBook, normaliseBook } from "../lib/chunk";
-import { parseEpub } from "../lib/epub";
 import { ImportError, importMessage } from "../lib/import-error";
 import type { ParsedBook } from "../lib/parsed-book";
-import { decodeText, parseHtml, parseTxt } from "../lib/text";
 
 const MAX_BYTES = 60 * 1024 * 1024;
 const ACCEPT = ".epub,.txt,.html,.htm,application/epub+zip,text/plain,text/html";
@@ -29,8 +27,11 @@ async function parseFile(file: File): Promise<ParsedBook> {
 	const buffer = await file.arrayBuffer().catch(() => {
 		throw new ImportError("read");
 	});
-	if (extension === "epub" || file.type === "application/epub+zip")
+	if (extension === "epub" || file.type === "application/epub+zip") {
+		const { parseEpub } = await import("../lib/epub");
 		return parseEpub(buffer, (done, total) => report({ stage: "parse", done, total }));
+	}
+	const { decodeText, parseHtml, parseTxt } = await import("../lib/text");
 	if (extension === "html" || extension === "htm") return parseHtml(decodeText(buffer), name);
 	if (extension === "txt" || file.type.startsWith("text/"))
 		return parseTxt(decodeText(buffer), name);

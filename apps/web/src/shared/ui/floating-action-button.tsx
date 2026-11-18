@@ -14,8 +14,8 @@ export function FloatingActionButton({
 		<Button
 			aria-label={extended ? undefined : label}
 			className={cn(
-				"h-14 rounded-full shadow-lg [&_svg:not([class*='size-'])]:size-6",
-				extended ? "px-5 text-base" : "w-14 px-0",
+				"h-14 rounded-full shadow-lg dark:shadow-floating [&_svg:not([class*='size-'])]:size-6",
+				extended ? "px-5 text-st8" : "w-14 px-0",
 				className,
 			)}
 			{...props}

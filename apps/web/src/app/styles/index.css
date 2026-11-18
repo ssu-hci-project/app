@@ -5,7 +5,49 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+	--text-*: initial;
+	--text-t1: 30px;
+	--text-t1--line-height: 40px;
+	--text-st2: 28px;
+	--text-st2--line-height: 37px;
+	--text-t2: 26px;
+	--text-t2--line-height: 35px;
+	--text-st3: 24px;
+	--text-st3--line-height: 33px;
+	--text-t3: 22px;
+	--text-t3--line-height: 31px;
+	--text-t4: 20px;
+	--text-t4--line-height: 29px;
+	--text-st7: 18px;
+	--text-st7--line-height: 27px;
+	--text-t5: 17px;
+	--text-t5--line-height: 25.5px;
+	--text-st8: 16px;
+	--text-st8--line-height: 24px;
+	--text-t6: 15px;
+	--text-t6--line-height: 22.5px;
+	--text-st9: 14px;
+	--text-st9--line-height: 21px;
+	--text-t7: 13px;
+	--text-t7--line-height: 19.5px;
+	--text-st10: 12px;
+	--text-st10--line-height: 18px;
+	--text-st11: 11px;
+	--text-st11--line-height: 16.5px;
+	--text-st12: 10px;
+	--text-st12--line-height: 15px;
+}
+
 @theme inline {
+	--color-strong: var(--text-strong);
+	--color-note-ink: #2b3040;
+	--color-sub: var(--text-secondary);
+	--color-brand: var(--brand-text);
+	--color-chip-selected: var(--chip-selected);
+	--color-chip-selected-border: var(--chip-selected-border);
+	--shadow-floating: var(--elevation-floating);
+	--shadow-footer: var(--elevation-footer);
 	--font-heading: var(--font-sans);
 	--font-sans:
 		"Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto,
@@ -35,6 +77,10 @@
 	--color-secondary: var(--secondary);
 	--color-primary-foreground: var(--primary-foreground);
 	--color-primary: var(--primary);
+	--color-primary-pressed: var(--primary-pressed);
+	--color-search-fill: var(--search-fill);
+	--color-neutral-weak: var(--neutral-weak);
+	--color-progress-track: var(--progress-track);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
@@ -48,7 +94,8 @@
 	--color-rule: var(--rule);
 	--color-reader-ink: var(--reader-ink);
 	--color-selection: var(--selection);
-	--color-toolbar: var(--foreground);
+	--color-toolbar: var(--toolbar);
+	--color-toolbar-foreground: var(--toolbar-foreground);
 	--font-serif: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", serif;
 	--font-hand: "Nanum Pen Script", cursive;
 	--radius-sm: calc(var(--radius) * 0.6);
@@ -61,32 +108,45 @@
 }
 
 :root {
-	--background: #faf8f3;
-	--foreground: #262b28;
+	--text-strong: #191f28;
+	--text-secondary: rgb(3 18 40 / 70%);
+	--brand-text: #008081;
+	--chip-selected: rgb(0 12 30 / 80%);
+	--chip-selected-border: rgb(3 24 50 / 46%);
+	--elevation-floating: 0 6px 20px rgb(0 0 0 / 20%);
+	--elevation-footer: 0 -12px 16px var(--card);
+	--search-fill: #f2f4f6;
+	--neutral-weak: rgb(7 25 76 / 5%);
+	--progress-track: #e5e8eb;
+	--background: #fff;
+	--foreground: rgb(0 12 30 / 80%);
 	--card: #fff;
-	--card-foreground: #262b28;
+	--card-foreground: rgb(0 12 30 / 80%);
 	--popover: #fff;
-	--popover-foreground: #262b28;
-	--primary: #285c48;
+	--popover-foreground: rgb(0 12 30 / 80%);
+	--primary: #008081;
+	--primary-pressed: color-mix(in srgb, var(--primary), white 12%);
 	--primary-foreground: #fff;
-	--secondary: #e4eee7;
-	--secondary-foreground: #285c48;
-	--muted: #f0eee8;
-	--muted-foreground: #59635d;
-	--accent: #e4eee7;
-	--accent-foreground: #285c48;
+	--secondary: #66b2b2;
+	--secondary-foreground: #000801;
+	--muted: #f9fafb;
+	--muted-foreground: rgb(0 19 43 / 58%);
+	--accent: color-mix(in srgb, var(--secondary), white 80%);
+	--accent-foreground: #000801;
 	--destructive: #b42318;
-	--border: #dedcd4;
-	--input: #dedcd4;
-	--ring: #285c48;
+	--border: rgb(0 27 55 / 10%);
+	--input: rgb(0 27 55 / 10%);
+	--ring: #008081;
 	--bookmark: #a84e35;
 	--warning: #b54708;
-	--magic: #b44fb0;
+	--magic: #66b2b2;
 	/* 리더: 종이 면, 구분선, 본문 글자, 고른 문장 배경 */
 	--paper: #f5f1e8;
 	--rule: #e4dccb;
 	--reader-ink: #2b2b28;
 	--selection: #d9d4c7;
+	--toolbar: #242424;
+	--toolbar-foreground: #fff;
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
@@ -104,24 +164,40 @@
 }
 
 .dark {
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.205 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.205 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
+	--text-strong: #fdfdfe;
+	--text-secondary: rgb(242 242 255 / 69%);
+	--brand-text: #66b2b2;
+	--chip-selected: rgb(253 253 255 / 89%);
+	--chip-selected-border: oklch(1 0 0 / 30%);
+	--elevation-floating: 0 4px 12px rgb(80 80 80 / 12%);
+	--elevation-footer: 0 -4px 12px rgb(80 80 80 / 8%);
+	--search-fill: #2c2c35;
+	--neutral-weak: rgb(217 217 255 / 11%);
+	--progress-track: #3c3c47;
+	--paper: #1c1b18;
+	--rule: #37352f;
+	--reader-ink: #e8e5de;
+	--selection: #434238;
+	--background: #17171c;
+	--foreground: rgb(253 253 255 / 89%);
+	--card: #17171c;
+	--card-foreground: rgb(253 253 255 / 89%);
+	--popover: #202027;
+	--popover-foreground: rgb(253 253 255 / 89%);
+	--primary: #008081;
+	--primary-foreground: #fff;
+	--secondary: #66b2b2;
+	--secondary-foreground: #000801;
+	--muted: #202027;
+	--muted-foreground: rgb(217 217 255 / 55%);
+	--accent: color-mix(in srgb, var(--secondary) 20%, var(--background));
+	--accent-foreground: rgb(253 253 255 / 89%);
+	--destructive: #fa616d;
+	--bookmark: #d98a72;
+	--warning: #f2a35e;
+	--border: rgb(222 222 255 / 12%);
+	--input: rgb(222 222 255 / 16%);
+	--ring: var(--secondary);
 	--chart-1: oklch(0.87 0 0);
 	--chart-2: oklch(0.556 0 0);
 	--chart-3: oklch(0.439 0 0);
@@ -129,12 +205,12 @@
 	--chart-5: oklch(0.269 0 0);
 	--sidebar: oklch(0.205 0 0);
 	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
+	--sidebar-primary: var(--primary);
+	--sidebar-primary-foreground: var(--primary-foreground);
+	--sidebar-accent: var(--accent);
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.556 0 0);
+	--sidebar-ring: var(--ring);
 }
 
 @layer base {

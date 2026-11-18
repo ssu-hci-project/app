@@ -14,6 +14,7 @@ type ReaderStore = {
 	answered: { q: string; passage: Passage } | null;
 	/** 생각 남기기 target; `q` set when adding to a question. */
 	memo: { passage: Passage; q?: string } | null;
+	failedDraft: { kind: "memo" | "qa"; text: string; q?: string } | null;
 };
 
 /**
@@ -27,4 +28,5 @@ export const useReaderStore = create<ReaderStore>(() => ({
 	typing: false,
 	answered: null,
 	memo: null,
+	failedDraft: null,
 }));

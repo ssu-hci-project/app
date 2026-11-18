@@ -56,13 +56,15 @@ export const InvitePage: ActivityComponentType<"InvitePage"> = ({ params }) => {
 			{preview.data && (
 				<>
 					<div className="flex flex-col gap-2">
-						<p className="text-[13px] font-semibold text-primary">함께 읽는 서재</p>
-						<h1 className="text-[22px] leading-[30px] font-bold break-keep">{preview.data.name}</h1>
-						<p className="text-[15px] text-muted-foreground">
+						<p className="text-t7 font-semibold text-brand">함께 읽는 서재</p>
+						<h1 className="text-t3 leading-[1.35] font-bold text-strong break-keep">
+							{preview.data.name}
+						</h1>
+						<p className="text-t6 text-muted-foreground">
 							{preview.data.memberCount}명이 함께 읽어요 · 올린 책 {preview.data.bookCount}권
 						</p>
 					</div>
-					<p className="text-[15px] leading-[22px]">
+					<p className="text-t6 leading-[22px]">
 						참여하면 이 서재 사람들이 남긴 밑줄과 메모를 볼 수 있고, 내가 남긴 흔적도 이 서재
 						사람들에게 보여요.
 					</p>

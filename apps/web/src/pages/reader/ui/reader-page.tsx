@@ -1,8 +1,7 @@
 import type { Drawing, reactionEmojis, Trace } from "@app/contract";
-import type { ActivityComponentType } from "@stackflow/react";
+import type { InferActivityParams } from "@stackflow/config";
 import { useActivity, useFlow } from "@stackflow/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ALargeSmallIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import { chapterLabel, ProgressBar } from "@/entities/book";
@@ -12,17 +11,21 @@ import { DrawingView, overlapping } from "@/entities/trace";
 import { ProfileSheet, useProfileGate } from "@/features/profile-edit";
 import { FilterIcon, FilterSheet, FontSheet, useReaderSettings } from "@/features/reader-settings";
 import { orpc } from "@/shared/api";
-import { cn, today } from "@/shared/lib";
-import { AppBarIconButton, AppScreen, Spinner, useNotice, useStepOverlay } from "@/shared/ui";
+import { cn } from "@/shared/lib";
 import {
-	bookPercent,
-	GAP,
-	GUTTER,
-	parseTarget,
-	readLocalPosition,
-	saveLocalPosition,
-} from "../lib/position";
+	ALargeSmallIcon,
+	AppBarIconButton,
+	AppScreen,
+	ChevronLeftIcon,
+	ChevronRightIcon,
+	LoadingSkeleton,
+	LoadState,
+	useNotice,
+	useStepOverlay,
+} from "@/shared/ui";
+import { bookPercent, GAP, GUTTER, parseTarget, readLocalPosition } from "../lib/position";
 import { type Passage, useReaderStore } from "../model/reader-store";
+import { useReadingProgress } from "../model/use-reading-progress";
 import { ChapterText } from "./chapter-view";
 import { DecorateMode } from "./decorate-mode";
 import { MemoSheet } from "./memo-sheet";
@@ -37,20 +40,21 @@ type Pending =
 	| { kind: "passage"; p: number; s: number; e: number };
 type Anchor = { trace: Trace; x: number; y: number };
 
-export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
+export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage"> }) {
 	const flow = useFlow();
 	const { isActive, isRoot } = useActivity();
-	const overlay = useStepOverlay();
+	const overlay = useStepOverlay(["thread", "memo", "question", "same"]);
 	const notify = useNotice();
 	const queryClient = useQueryClient();
 	const gate = useProfileGate();
 	const profile = useProfile();
-	const { library } = useCurrentLibrary();
+	const { library, query: libraries } = useCurrentLibrary();
 	const libraryId = library?.id ?? "";
 	const bookId = params.bookId;
 	const settings = useReaderSettings();
 	const { filters } = settings;
 	const typing = useReaderStore((state) => state.typing);
+	const writes = useIsMutating();
 
 	const detail = useQuery({
 		...orpc.books.get.queryOptions({ input: { libraryId, bookId } }),
@@ -76,10 +80,12 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 		...orpc.books.chapter.queryOptions({ input: { libraryId, bookId, ch: ch ?? 0 } }),
 		enabled: !!libraryId && ch !== null,
 	});
+	const loading = !chapter.data || chapter.data.ch !== ch;
+	const failedRequest = [libraries, detail, chapter].find((query) => query.isLoadingError);
 	const traces = useQuery({
 		...orpc.traces.list.queryOptions({ input: { libraryId, bookId } }),
 		enabled: !!libraryId,
-		refetchInterval: overlay.current === "thread" && !typing ? 15_000 : false,
+		refetchInterval: overlay.current === "thread" && !typing && !writes ? 15_000 : false,
 	});
 	const chapterCount = detail.data?.chapters.length ?? 0;
 	useEffect(() => {
@@ -197,8 +203,8 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 	}, []);
 	const goPage = useCallback(
 		(next: number) => {
+			if (ch === null || loading) return;
 			clearSelection();
-			if (ch === null) return;
 			if (next < 0) {
 				if (ch > 0) {
 					pending.current = { kind: "end" };
@@ -210,13 +216,13 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 				if (ch + 1 < chapterCount) {
 					pending.current = { kind: "ratio", ratio: 0 };
 					setCh(ch + 1);
-				} else notify("마지막 쪽이에요");
+				}
 				return;
 			}
 			setAnimate(true);
 			setPage(next);
 		},
-		[ch, pages, chapterCount, clearSelection, notify],
+		[ch, pages, chapterCount, clearSelection, loading],
 	);
 
 	// Keyboard ←/→.
@@ -237,16 +243,14 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 	// ---- progress -----------------------------------------------------------------------------
 	const chapterChars = detail.data?.chapters.map((entry) => entry.chars) ?? [];
 	const pct = ch === null ? 0 : bookPercent(chapterChars, ch, page, pages);
-	const saveProgress = useMutation(orpc.progress.save.mutationOptions());
-	const persist = useDebounceCallback((next: { ch: number; ratio: number; pct: number }) => {
-		saveProgress.mutate({ bookId, ...next, date: today() });
-	}, 1000);
-	useEffect(() => {
-		if (ch === null || !chapter.data || chapter.data.ch !== ch) return;
-		const ratio = pages > 1 ? page / pages : 0;
-		saveLocalPosition(bookId, ch, ratio);
-		persist({ ch, ratio, pct });
-	}, [ch, page, pages, pct, bookId, chapter.data, persist]);
+	useReadingProgress({
+		bookId,
+		ch,
+		page,
+		pages,
+		pct,
+		ready: isActive && !!chapter.data && chapter.data.ch === ch,
+	});
 
 	// ---- selection ----------------------------------------------------------------------------
 	const paragraphs = chapter.data?.paragraphs ?? [];
@@ -391,8 +395,9 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 		if (action === "traces") return openThread(selectionTraces);
 		if (action === "react") return setEmojiOpen(!emojiOpen);
 		if (action === "underline" && myUnderline) {
+			if (myUnderline.id.startsWith("optimistic:")) return;
 			clearSelection();
-			remove.mutate({ traceId: myUnderline.id }, { onSuccess: () => notify("밑줄을 지웠어요") });
+			remove.mutate({ traceId: myUnderline.id });
 			return;
 		}
 		gate(({ open, close }) => {
@@ -400,10 +405,7 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 				close();
 				clearSelection();
 				settings.show("underline");
-				create.mutate(
-					{ ...anchorOf(passage), kind: "underline" },
-					{ onSuccess: () => notify("밑줄을 그었어요") },
-				);
+				create.mutate({ ...anchorOf(passage), kind: "underline" });
 			} else if (action === "memo") {
 				useReaderStore.setState({ memo: { passage } });
 				open("memo");
@@ -448,10 +450,7 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 		if (!decorating) return;
 		const { passage } = decorating;
 		setDecorating(null);
-		create.mutate(
-			{ ...anchorOf(passage), kind: "draw", data },
-			{ onSuccess: () => notify("꾸미기를 남겼어요") },
-		);
+		create.mutate({ ...anchorOf(passage), kind: "draw", data });
 	};
 	const leaveTrace = useCallback(
 		(passage: Passage) => {
@@ -467,7 +466,6 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 	// ---- render -------------------------------------------------------------------------------
 	const book = detail.data?.book;
 	const chapterInfo = detail.data?.chapters.find((entry) => entry.ch === ch);
-	const loading = !chapter.data || chapter.data.ch !== ch;
 	const takenColors = (library?.members ?? [])
 		.filter((member) => member.id !== profile.data?.id && member.color)
 		.map((member) => member.color as string);
@@ -482,8 +480,8 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 					<ChevronLeftIcon />
 				</AppBarIconButton>
 				<div className="min-w-0 flex-1 px-1">
-					<h1 className="truncate text-[17px] leading-[22px] font-bold">{book?.title ?? ""}</h1>
-					<p className="truncate text-xs leading-4 text-muted-foreground">{library?.name}</p>
+					<h1 className="truncate text-t5 leading-[22px] font-bold">{book?.title ?? ""}</h1>
+					<p className="truncate text-st10 leading-4 text-muted-foreground">{library?.name}</p>
 				</div>
 				<AppBarIconButton
 					className="size-11"
@@ -580,13 +578,18 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 						</div>
 					)}
 				</div>
-				{loading && (
-					<div
-						className="absolute inset-0 grid place-items-center bg-paper"
-						role="status"
-						aria-label="책을 펼치는 중이에요"
-					>
-						<Spinner className="size-7 text-muted-foreground" />
+				{loading && failedRequest && (
+					<div className="absolute inset-0 grid place-items-center bg-paper">
+						<LoadState
+							pending={failedRequest.isFetching}
+							error
+							retry={() => failedRequest.refetch()}
+						/>
+					</div>
+				)}
+				{loading && !failedRequest && (
+					<div className="absolute inset-0 bg-paper px-5 pt-6">
+						<LoadingSkeleton shape="article" />
 					</div>
 				)}
 				{selection && toolbarTop && !decorating && (
@@ -615,13 +618,13 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 					<AppBarIconButton
 						className="size-11"
 						aria-label="이전 쪽"
-						disabled={ch === 0 && page === 0}
+						disabled={loading || (ch === 0 && page === 0)}
 						onClick={() => goPage(page - 1)}
 					>
 						<ChevronLeftIcon />
 					</AppBarIconButton>
 					<p
-						className="min-w-0 truncate px-2 text-[13px] text-muted-foreground tabular-nums"
+						className="min-w-0 truncate px-2 text-t7 text-muted-foreground tabular-nums"
 						aria-live="polite"
 					>
 						{ch !== null && chapterInfo && !loading
@@ -631,6 +634,7 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 					<AppBarIconButton
 						className="size-11"
 						aria-label="다음 쪽"
+						disabled={loading || (ch === chapterCount - 1 && page === pages - 1)}
 						onClick={() => goPage(page + 1)}
 					>
 						<ChevronRightIcon />
@@ -674,7 +678,7 @@ export const ReaderPage: ActivityComponentType<"ReaderPage"> = ({ params }) => {
 			<ProfileSheet takenColors={takenColors} />
 		</AppScreen>
 	);
-};
+}
 
 function findSpan(cols: HTMLElement, p: number, s: number) {
 	return [...cols.querySelectorAll<HTMLElement>(`[data-sentence][data-p="${p}"]`)].find(
