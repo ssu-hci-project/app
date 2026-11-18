@@ -108,8 +108,13 @@ describe("buildSegments", () => {
 
 	it("draws marks as a fixed band", () => {
 		expect(markStyle([])).toBeUndefined();
-		expect(markStyle([{ color: "#285C48", dotted: false }])?.background).toContain(
-			"calc(100% - 0px) / 100% 2px",
+		const pen = markStyle([{ color: "#285C48", dotted: false }], 1)?.background ?? "";
+		expect(pen).toContain("data:image/svg+xml");
+		expect(pen).toContain(encodeURIComponent("#285C48"));
+		expect(pen).toContain("calc(100% - 0px)");
+		expect(markStyle([{ color: "#285C48", dotted: false }], 1)).toEqual(
+			markStyle([{ color: "#285C48", dotted: false }], 1),
 		);
+		expect(markStyle([{ color: "#999", dotted: true }])?.background).toContain("100% 2px");
 	});
 });
