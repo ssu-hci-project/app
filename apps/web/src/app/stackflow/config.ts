@@ -20,6 +20,8 @@ declare module "@stackflow/config" {
 			e?: string;
 			overlay?: string;
 		};
+		/** `scope`: mine | all | none (traces to include), `text=0` leaves the text out. */
+		ExportPage: { bookId: string; scope?: string; text?: string; overlay?: string };
 		InvitePage: { code: string; overlay?: string };
 	}
 }
@@ -29,6 +31,7 @@ export const config = defineConfig({
 		{ name: "HomePage", route: "/" },
 		{ name: "BookPage", route: "/books/:bookId" },
 		{ name: "ReaderPage", route: "/books/:bookId/read" },
+		{ name: "ExportPage", route: "/books/:bookId/export" },
 		{ name: "InvitePage", route: "/invite/:code" },
 	],
 	initialActivity: () => "HomePage",

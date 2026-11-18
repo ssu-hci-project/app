@@ -10,6 +10,7 @@ import {
 	AppScreen,
 	AppScreenContent,
 } from "./app-screen";
+import { BottomCta } from "./bottom-cta";
 import { ResultSection } from "./result-section";
 import { Skeleton } from "./skeleton";
 import { ChevronLeftIcon } from "./tds-icon";
@@ -21,6 +22,7 @@ export function MobileScreen({
 	fab,
 	contextual,
 	footer,
+	cta,
 	children,
 }: {
 	title: string;
@@ -32,6 +34,8 @@ export function MobileScreen({
 	contextual?: ReactNode;
 	/** 화면 하단에 고정되는 CTA나 도구 막대. 키보드가 올라와도 보이도록 본문 밖에 둡니다. */
 	footer?: ReactNode;
+	/** 하단 CTA 버튼. 위쪽 그라데이션이 있는 TDS Bottom CTA로 띄웁니다. */
+	cta?: ReactNode;
 	children: ReactNode;
 }) {
 	const footerRef = useRef<HTMLDivElement>(null);
@@ -63,9 +67,9 @@ export function MobileScreen({
 				<div
 					className={cn(
 						"flex flex-col gap-6 px-4 py-5",
-						fab && footer
+						fab && (footer || cta)
 							? "pb-[calc(168px+env(safe-area-inset-bottom))]"
-							: fab || footer
+							: fab || footer || cta
 								? "pb-[calc(104px+env(safe-area-inset-bottom))]"
 								: "pb-[calc(24px+env(safe-area-inset-bottom))]",
 					)}
@@ -86,6 +90,7 @@ export function MobileScreen({
 					{contextual}
 				</div>
 			)}
+			{cta && <BottomCta>{cta}</BottomCta>}
 			{footer && (
 				<div
 					ref={footerRef}

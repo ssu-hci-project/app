@@ -24,6 +24,7 @@ import {
 	Button,
 	CardButton,
 	ChevronLeftIcon,
+	DocumentIcon,
 	HeartIcon,
 	List,
 	ListButton,
@@ -105,6 +106,14 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 				>
 					{book?.title}
 				</span>
+				<AppBarIconButton
+					className="size-11"
+					aria-label="PDF로 내보내기"
+					disabled={!book}
+					onClick={() => flow.push("ExportPage", { bookId: params.bookId })}
+				>
+					<DocumentIcon />
+				</AppBarIconButton>
 			</AppBar>
 			<AppScreenContent
 				className="bg-background pb-[calc(112px+env(safe-area-inset-bottom))]"
