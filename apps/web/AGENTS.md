@@ -19,7 +19,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   `useQuery(orpc.<ns>.<proc>.queryOptions())`,
   `useMutation(orpc.<ns>.<proc>.mutationOptions(...))`. mutation 훅에서
   invalidate하지 마세요. `shared/api/query-client.ts`의 `MutationCache`가
-  mutation 성공 시 활성 쿼리를 다시 가져옵니다. 잦은 진도 저장은 mutation의 `meta.invalidates`에 책 목록·독서 달력 키만 지정해 리더 조회를 반복시키지 않습니다. 즉각적인 반응이
+  mutation 성공 시 변경 범위에 해당하는 활성 쿼리를 다시 가져옵니다. 잦은 진도 저장은 mutation의 `meta.invalidates`에 책 목록·독서 달력 키만 지정합니다. 홈 목록과 달력은 화면이 가려져 있는 동안 재조회하지 않고, 다시 활성화되면 오래된 데이터를 갱신합니다. 즉각적인 반응이
   필요하면 낙관적 업데이트를 쓰세요. 타입은 `@app/contract`에서 옵니다. API를
   직접 `fetch`하지 마세요.
 - **폼**은 손으로 복사한 zod 스키마가 아니라 계약의 스키마

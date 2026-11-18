@@ -1,4 +1,4 @@
-import { useFlow } from "@stackflow/react";
+import { useActivity, useFlow } from "@stackflow/react";
 import { useState } from "react";
 import { BookRow, ProgressBar, useBookPages } from "@/entities/book";
 import { BookMenuSheet } from "@/features/book-menu";
@@ -24,8 +24,9 @@ const empty: Record<Filter, [string, string]> = {
 /** 내 서재: books I opened, saved or uploaded. */
 export function MyShelf({ libraryId, onImport }: { libraryId: string; onImport: () => void }) {
 	const flow = useFlow();
+	const { isActive } = useActivity();
 	const [filter, setFilter] = useState<Filter>("all");
-	const books = useBookPages(libraryId, filter === "all" ? "mine" : filter);
+	const books = useBookPages(libraryId, filter === "all" ? "mine" : filter, isActive);
 	const rows = books.data?.pages.flatMap((page) => page.items) ?? [];
 	const overlay = useStepOverlay();
 	const [menuId, setMenuId] = useState<string>();
@@ -89,7 +90,7 @@ export function MyShelf({ libraryId, onImport }: { libraryId: string; onImport: 
 				))}
 			</div>
 			<InfiniteLoader
-				hasMore={books.hasNextPage}
+				hasMore={isActive && books.hasNextPage}
 				loading={books.isFetchingNextPage}
 				error={books.isFetchNextPageError}
 				loadMore={() => books.fetchNextPage()}

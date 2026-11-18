@@ -1,5 +1,5 @@
 import type { PassageHit, Trace } from "@app/contract";
-import { useFlow } from "@stackflow/react";
+import { useActivity, useFlow } from "@stackflow/react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { useDebounceValue, useLocalStorage } from "usehooks-ts";
@@ -25,8 +25,9 @@ const RECENT_KEY = "exchange-reading:recent-searches";
 /** 찾기: 책 · 본문 · 흔적. The server searches chapter text paragraph by paragraph. */
 export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImport: () => void }) {
 	const flow = useFlow();
+	const { isActive } = useActivity();
 	const [query, setQuery] = useState("");
-	const catalog = useBookPages(libraryId, "catalog", !query.trim());
+	const catalog = useBookPages(libraryId, "catalog", isActive && !query.trim());
 	const books = catalog.data?.pages.flatMap((page) => page.items) ?? [];
 	const [kind, setKind] = useState<Kind>("all");
 	const q = query.trim();
@@ -35,7 +36,7 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 	const [recent, setRecent] = useLocalStorage<string[]>(RECENT_KEY, []);
 	const results = useQuery({
 		...orpc.books.search.queryOptions({ input: { libraryId, q: debounced } }),
-		enabled: searchReady,
+		enabled: isActive && searchReady,
 		placeholderData: keepPreviousData,
 	});
 	const remember = (value = query.trim()) => {
@@ -143,7 +144,7 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 							/>
 						))}
 						<InfiniteLoader
-							hasMore={catalog.hasNextPage}
+							hasMore={isActive && catalog.hasNextPage}
 							loading={catalog.isFetchingNextPage}
 							error={catalog.isFetchNextPageError}
 							loadMore={() => catalog.fetchNextPage()}

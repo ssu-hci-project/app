@@ -25,14 +25,16 @@ export const visibleIn = (libraryId: string) =>
 
 /** A ready book the reader may open through `libraryId`. */
 export async function requireBook(db: Db, bookId: string, libraryId: string, userId: string) {
-	const library = await requireMember(db, libraryId, userId);
-	const book = await db
-		.select()
-		.from(books)
-		.where(and(eq(books.id, bookId), visibleIn(libraryId)))
+	const row = await db
+		.select({ library: libraries, book: books })
+		.from(libraryMembers)
+		.innerJoin(libraries, eq(libraries.id, libraryMembers.libraryId))
+		.leftJoin(books, and(eq(books.id, bookId), visibleIn(libraryId)))
+		.where(and(eq(libraryMembers.libraryId, libraryId), eq(libraryMembers.userId, userId)))
 		.get();
-	if (!book) throw new ORPCError("NOT_FOUND", { message: "책을 찾을 수 없어요" });
-	return { book, library };
+	if (!row) throw new ORPCError("FORBIDDEN", { message: "이 서재에 먼저 참여해주세요" });
+	if (!row.book) throw new ORPCError("NOT_FOUND", { message: "책을 찾을 수 없어요" });
+	return { book: row.book, library: row.library };
 }
 
 export const colorOf = (book: { id: string; color: string | null }) =>
@@ -48,9 +50,10 @@ export async function people(db: Db, ids: string[]): Promise<Map<string, Person>
 				.from(profiles)
 				.where(inArray(profiles.userId, unique.slice(start, start + 90)))),
 		);
+	const byId = new Map(rows.map((profile) => [profile.userId, profile]));
 	return new Map(
 		unique.map((id) => {
-			const row = rows.find((profile) => profile.userId === id);
+			const row = byId.get(id);
 			return [id, { id, nick: row?.nick ?? null, color: row?.color ?? null }];
 		}),
 	);
@@ -78,8 +81,14 @@ export async function traceViews(
 		db,
 		rows.map((row) => row.authorId),
 	);
+	const byTrace = new Map<string, (typeof reactionRows)[number][]>();
+	for (const reaction of reactionRows) {
+		const group = byTrace.get(reaction.traceId);
+		if (group) group.push(reaction);
+		else byTrace.set(reaction.traceId, [reaction]);
+	}
 	return rows.map(({ authorId, data, ...row }) => {
-		const mine = reactionRows.filter((reaction) => reaction.traceId === row.id);
+		const mine = byTrace.get(row.id) ?? [];
 		const counts = new Map<string, number>();
 		for (const reaction of mine) counts.set(reaction.emoji, (counts.get(reaction.emoji) ?? 0) + 1);
 		return {

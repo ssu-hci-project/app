@@ -62,13 +62,18 @@ async function findByCode(db: Db, input: string) {
 
 export const librariesRouter = {
 	list: os.libraries.list.handler(async ({ context }) => {
-		await ensurePersonalLibrary(context.db, context.userId);
-		const rows = await context.db
-			.select({ library: libraries })
-			.from(libraryMembers)
-			.innerJoin(libraries, eq(libraries.id, libraryMembers.libraryId))
-			.where(eq(libraryMembers.userId, context.userId))
-			.orderBy(asc(libraryMembers.joinedAt));
+		const memberships = () =>
+			context.db
+				.select({ library: libraries })
+				.from(libraryMembers)
+				.innerJoin(libraries, eq(libraries.id, libraryMembers.libraryId))
+				.where(eq(libraryMembers.userId, context.userId))
+				.orderBy(asc(libraryMembers.joinedAt));
+		let rows = await memberships();
+		if (!rows.some(({ library }) => library.personal && library.ownerId === context.userId)) {
+			await ensurePersonalLibrary(context.db, context.userId);
+			rows = await memberships();
+		}
 		const list = rows.map((row) => row.library);
 		// My own personal library first.
 		list.sort(
