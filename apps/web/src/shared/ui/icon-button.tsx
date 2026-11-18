@@ -8,7 +8,7 @@ const iconButtonVariants = cva(
 		variants: {
 			variant: {
 				clear: "active:bg-neutral-weak",
-				fill: "bg-neutral-weak active:bg-[color-mix(in_oklch,var(--neutral-weak),var(--foreground)_10%)]",
+				fill: "bg-neutral-weak active:bg-neutral-pressed",
 			},
 			size: { md: "size-10", lg: "size-11" },
 		},

@@ -1,13 +1,13 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { libraryInput, personSchema } from "./common";
+import { libraryInput, personSchema, textLimits } from "./common";
 
 export const libraryNameSchema = z.object({
 	name: z
 		.string()
 		.trim()
 		.min(1, "서재 이름을 적어주세요")
-		.max(30, "서재 이름은 30자 이내로 적어주세요"),
+		.max(textLimits.libraryName, `서재 이름은 ${textLimits.libraryName}자 이내로 적어주세요`),
 });
 
 const librarySchema = z.object({

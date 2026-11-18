@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
 	BookCover,
+	bookByline,
 	chapterLabel,
 	chapterNumber,
 	findCachedBook,
@@ -21,6 +22,7 @@ import {
 	AvatarGroup,
 	BottomCta,
 	Button,
+	CardButton,
 	ChevronLeftIcon,
 	HeartIcon,
 	List,
@@ -127,7 +129,7 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 							<h1 className="mt-5 text-st3 leading-[1.35] font-bold text-strong break-keep">
 								{book.title}
 							</h1>
-							<p className="mt-1 text-t6 text-muted-foreground">{book.author || "작자 미상"}</p>
+							<p className="mt-1 text-t6 text-muted-foreground">{bookByline(book)}</p>
 							<p className="mt-1 text-t7 text-muted-foreground">
 								{book.chapterCount}장 · {readingTime(book.chars)}
 							</p>
@@ -151,14 +153,14 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 						</dl>
 						{readers.length > 0 && (
 							<section className="px-6 pt-7">
-								<h2 className="pb-3 text-t5 font-bold text-strong">함께 읽는 사람</h2>
+								<ListHeader className="px-0 pt-0 pb-3">함께 읽는 사람</ListHeader>
 								<div className="flex items-center gap-2.5">
 									<AvatarGroup>
 										{readers.slice(0, 5).map((person) => (
 											<ReaderAvatar
 												key={person.id}
 												person={person}
-												name={person.nick ?? "독자"}
+												name={personName(person, false)}
 												size="sm"
 											/>
 										))}
@@ -166,7 +168,7 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 									<span className="min-w-0 truncate text-st9 font-semibold text-sub">
 										{readers
 											.slice(0, 3)
-											.map((person) => person.nick ?? "독자")
+											.map((person) => personName(person, false))
 											.join(", ")}
 										{readers.length > 3 && ` 외 ${readers.length - 3}명`}
 									</span>
@@ -175,7 +177,7 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 						)}
 						{data.opening.length > 0 && (
 							<section className="px-6 pt-7">
-								<h2 className="pb-3 text-t5 font-bold text-strong">첫 문장</h2>
+								<ListHeader className="px-0 pt-0 pb-3">첫 문장</ListHeader>
 								<p className="line-clamp-6 font-serif text-st8 leading-7 whitespace-pre-line break-keep">
 									{data.opening.join("\n\n")}
 								</p>
@@ -183,14 +185,9 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 						)}
 						{data.recentTraces.length > 0 && (
 							<section className="flex flex-col gap-2.5 px-6 pt-7">
-								<h2 className="pb-0.5 text-t5 font-bold text-strong">최근 흔적</h2>
+								<ListHeader className="px-0 pt-0 pb-0.5">최근 흔적</ListHeader>
 								{data.recentTraces.map((trace) => (
-									<button
-										key={trace.id}
-										type="button"
-										onClick={() => read(trace)}
-										className="rounded-2xl bg-neutral-weak p-4 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-[color-mix(in_oklch,var(--neutral-weak),var(--foreground)_8%)]"
-									>
+									<CardButton key={trace.id} onClick={() => read(trace)}>
 										<span className="block truncate font-serif text-t7 text-muted-foreground">
 											“{trace.quote}”
 										</span>
@@ -207,7 +204,7 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 											/>
 											{personName(trace.author, trace.isMine)} · {timeAgo(trace.createdAt)}
 										</span>
-									</button>
+									</CardButton>
 								))}
 							</section>
 						)}

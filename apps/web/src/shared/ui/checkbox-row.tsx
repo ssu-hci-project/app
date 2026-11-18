@@ -1,7 +1,6 @@
 import { Checkbox } from "@base-ui/react/checkbox";
 import { type ReactNode, useId } from "react";
 import uncheckedIcon from "./assets/tds-checkbox-unchecked.svg";
-import { FieldContent, FieldDescription, FieldLabel, FieldTitle } from "./field";
 import { CheckIcon } from "./tds-icon";
 
 /** TDS List Row with a controlled, keyboard-accessible Circle M checkbox. */
@@ -20,23 +19,24 @@ export function CheckboxRow({
 }) {
 	const id = useId();
 	return (
-		<FieldLabel className="flex min-h-16 cursor-pointer items-center gap-3.5 rounded-xl border-0 px-0 py-3 font-normal">
+		<label htmlFor={`${id}-control`} className="flex w-full cursor-pointer items-center gap-4 py-3">
 			{leading && (
-				<span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-foreground">
+				<span className="grid size-10 shrink-0 place-items-center rounded-full bg-search-fill text-sub">
 					{leading}
 				</span>
 			)}
-			<FieldContent>
-				<FieldTitle id={id} className="text-t5 leading-[1.35] font-bold">
+			<span className="flex min-w-0 flex-1 flex-col gap-0.5">
+				<span id={id} className="text-t5 leading-[1.35] font-semibold text-strong">
 					{title}
-				</FieldTitle>
+				</span>
 				{description && (
-					<FieldDescription id={`${id}-description`} className="text-t7 leading-[1.35]">
+					<span id={`${id}-description`} className="text-t7 leading-[1.35] text-sub">
 						{description}
-					</FieldDescription>
+					</span>
 				)}
-			</FieldContent>
+			</span>
 			<Checkbox.Root
+				id={`${id}-control`}
 				checked={checked}
 				onCheckedChange={onCheckedChange}
 				aria-labelledby={id}
@@ -49,6 +49,6 @@ export function CheckboxRow({
 					<img src={uncheckedIcon} alt="" />
 				)}
 			</Checkbox.Root>
-		</FieldLabel>
+		</label>
 	);
 }

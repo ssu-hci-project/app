@@ -15,6 +15,19 @@ export const readerColors = [
 /** One reaction per person on a passage or a card. ❤️ is the default "공감". */
 export const reactionEmojis = ["❤️", "💚", "👍", "😢", "😮", "😂", "💡", "🌱"] as const;
 
+/** Text limits shared by the schemas below and the inputs that collect them. */
+export const textLimits = {
+	memo: 1000,
+	reply: 500,
+	nick: 12,
+	libraryName: 30,
+	note: 200,
+	search: 50,
+} as const;
+
+/** The edition a book has until someone confirms it. */
+export const UNKNOWN_EDITION = "판본 미확인";
+
 export const readerColorSchema = z.enum(readerColors);
 export const reactionEmojiSchema = z.enum(reactionEmojis);
 

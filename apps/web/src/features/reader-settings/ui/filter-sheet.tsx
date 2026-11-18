@@ -9,7 +9,7 @@ import {
 	LayersIcon,
 	LightbulbIcon,
 	MessageSquareTextIcon,
-	PenLineIcon,
+	PencilIcon,
 	SmileIcon,
 	UnderlineIcon,
 } from "@/shared/ui";
@@ -30,7 +30,7 @@ const rows: { key: keyof TraceFilters; icon: ReactNode; title: string; descripti
 	},
 	{
 		key: "draw",
-		icon: <PenLineIcon />,
+		icon: <PencilIcon />,
 		title: "꾸미기",
 		description: "손그림 · 메모지 · 테이프 · 스티커",
 	},
@@ -72,8 +72,8 @@ export function FilterSheet({
 							/>
 						))}
 					</div>
-					<p className="mt-3 flex items-center gap-1.5 text-t7 text-muted-foreground">
-						<LightbulbIcon className="size-4" aria-hidden="true" />
+					<p className="mt-2 flex items-center gap-1.5 text-t7 text-sub">
+						<LightbulbIcon className="size-4 shrink-0" aria-hidden="true" />
 						하나도 고르지 않으면 본문만 보여요
 					</p>
 				</BottomSheetBody>

@@ -1,4 +1,10 @@
-import { type Decoration, DRAWING_LIMIT, type Drawing, type Stroke } from "@app/contract";
+import {
+	type Decoration,
+	DRAWING_LIMIT,
+	type Drawing,
+	type Stroke,
+	textLimits,
+} from "@app/contract";
 import {
 	type ReactNode,
 	type PointerEvent as ReactPointerEvent,
@@ -297,7 +303,7 @@ export function DecorateMode({
 									// biome-ignore lint/a11y/noAutofocus: 붙인 메모지에 바로 적습니다.
 									autoFocus={!item.text}
 									value={item.text ?? ""}
-									maxLength={200}
+									maxLength={textLimits.note}
 									placeholder="메모를 적어보세요"
 									onChange={(event) =>
 										setItems((list) =>

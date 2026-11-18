@@ -1,3 +1,4 @@
+import { UNKNOWN_EDITION } from "@app/contract";
 import {
 	type AnySQLiteColumn,
 	index,
@@ -15,7 +16,7 @@ export const sessions = sqliteTable("sessions", {
 });
 
 export const books = sqliteTable("books", {
-	edition: text("edition").notNull().default("판본 미확인"),
+	edition: text("edition").notNull().default(UNKNOWN_EDITION),
 	/** Where the in-app text came from, and why it may be redistributed. */
 	sourceUrl: text("source_url"),
 	license: text("license"),

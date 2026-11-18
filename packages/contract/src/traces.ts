@@ -1,6 +1,6 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
-import { libraryInput, personSchema, reactionEmojiSchema } from "./common";
+import { libraryInput, personSchema, reactionEmojiSchema, textLimits } from "./common";
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 /** Drawing coordinates are em units from the first letter of the passage, so they follow font size. */
@@ -24,7 +24,7 @@ const decorationSchema = z.discriminatedUnion("t", [
 		w: z.number().positive().max(40),
 		c: hex,
 		r: z.number().min(-15).max(15),
-		text: z.string().trim().min(1).max(200),
+		text: z.string().trim().min(1).max(textLimits.note),
 	}),
 	z.object({
 		t: z.literal("tape"),
@@ -96,7 +96,7 @@ export const memoTextSchema = z
 	.string()
 	.trim()
 	.min(1, "생각을 적어주세요")
-	.max(1000, "1000자 이내로 적어주세요");
+	.max(textLimits.memo, `${textLimits.memo}자 이내로 적어주세요`);
 
 const traceInputSchema = z.discriminatedUnion("kind", [
 	anchor.extend({ kind: z.literal("underline") }),
@@ -111,7 +111,11 @@ const traceInputSchema = z.discriminatedUnion("kind", [
 	z.object({
 		kind: z.literal("reply"),
 		parentId: z.string(),
-		text: z.string().trim().min(1, "생각을 적어주세요").max(500, "500자 이내로 적어주세요"),
+		text: z
+			.string()
+			.trim()
+			.min(1, "생각을 적어주세요")
+			.max(textLimits.reply, `${textLimits.reply}자 이내로 적어주세요`),
 	}),
 ]);
 export type TraceInput = z.infer<typeof traceInputSchema>;

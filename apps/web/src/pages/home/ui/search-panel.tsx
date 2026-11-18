@@ -1,4 +1,5 @@
 import type { PassageHit, Trace } from "@app/contract";
+import { textLimits } from "@app/contract";
 import { useActivity, useFlow } from "@stackflow/react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
@@ -90,7 +91,7 @@ export function SearchPanel({ libraryId, onImport }: { libraryId: string; onImpo
 							setKind("all");
 						}}
 						placeholder="책 제목, 작가, 본문 속 문장"
-						maxLength={50}
+						maxLength={textLimits.search}
 						autoComplete="off"
 						enterKeyHint="search"
 					/>

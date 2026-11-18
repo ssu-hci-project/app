@@ -1,9 +1,9 @@
 import type { Book } from "@app/contract";
 import { useFlow } from "@stackflow/react";
 import type { UseQueryResult } from "@tanstack/react-query";
-import { BookCover, BookRow, chapterLabel, ProgressBar } from "@/entities/book";
+import { BookCover, BookRow, bookByline, chapterLabel, ProgressBar } from "@/entities/book";
 import { timeAgo } from "@/shared/lib";
-import { Button, LoadState } from "@/shared/ui";
+import { Button, CardButton, ListHeader, LoadState } from "@/shared/ui";
 import { ReadingCalendar } from "./reading-calendar";
 
 /** 홈: 이어 읽기 → 읽은 날 캘린더 → 함께 읽는 책 → 최근 흔적이 남은 책 → 올리기. */
@@ -39,9 +39,9 @@ export function HomeFeed({
 			<ReadingCalendar books={list} />
 			<section aria-labelledby="shelf-heading">
 				<div className="flex items-baseline justify-between px-6 pb-3">
-					<h2 id="shelf-heading" className="text-t5 font-bold text-strong">
+					<ListHeader id="shelf-heading" className="px-0 pt-0 pb-0">
 						함께 읽는 책
-					</h2>
+					</ListHeader>
 					{books.isSuccess && (
 						<span className="text-t7 text-muted-foreground">{list.length}권</span>
 					)}
@@ -60,7 +60,7 @@ export function HomeFeed({
 								{book.title}
 							</span>
 							<span className="truncate text-st10 leading-4 text-muted-foreground">
-								{book.author || "작자 미상"}
+								{bookByline(book)}
 							</span>
 						</button>
 					))}
@@ -68,9 +68,9 @@ export function HomeFeed({
 			</section>
 			{traced.length > 0 && (
 				<section aria-labelledby="traced-heading">
-					<h2 id="traced-heading" className="px-6 pb-1 text-t5 font-bold text-strong">
+					<ListHeader id="traced-heading" className="pt-0 pb-1">
 						최근 흔적이 남은 책
-					</h2>
+					</ListHeader>
 					{traced.map((book) => (
 						<BookRow
 							key={book.id}
@@ -105,11 +105,7 @@ function ContinueCard({ book, onOpen }: { book: Book; onOpen: () => void }) {
 	const progress = book.progress;
 	if (!progress) return null;
 	return (
-		<button
-			type="button"
-			onClick={onOpen}
-			className="mx-6 flex items-center gap-4 rounded-2xl bg-neutral-weak p-4 text-left outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-[color-mix(in_oklch,var(--neutral-weak),var(--foreground)_8%)]"
-		>
+		<CardButton onClick={onOpen} className="mx-6 flex items-center gap-4">
 			<BookCover book={book} size="sm" />
 			<span className="flex min-w-0 flex-1 flex-col">
 				<span className="text-st10 font-semibold text-brand">이어 읽기</span>
@@ -120,6 +116,6 @@ function ContinueCard({ book, onOpen }: { book: Book; onOpen: () => void }) {
 				</span>
 				<ProgressBar value={progress.pct} className="mt-2" />
 			</span>
-		</button>
+		</CardButton>
 	);
 }
