@@ -127,6 +127,7 @@ export {
 	CircleAlertIcon,
 	CircleCheckIcon,
 	CopyIcon,
+	DocumentIcon,
 	EllipsisIcon,
 	EllipsisVerticalIcon,
 	HeartIcon,

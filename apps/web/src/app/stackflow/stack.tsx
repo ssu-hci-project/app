@@ -75,6 +75,13 @@ export const { Stack } = stackflow({
 			loading: loading<"ReaderPage">(ActivityLoading),
 			errorHandler: errorHandler<"ReaderPage">(ActivityError),
 		}),
+		ExportPage: structuredActivityComponent<"ExportPage">({
+			content: async () => ({
+				default: content<"ExportPage">((await import("@/pages/export")).ExportPage),
+			}),
+			loading: loading<"ExportPage">(ActivityLoading),
+			errorHandler: errorHandler<"ExportPage">(ActivityError),
+		}),
 		InvitePage,
 	},
 	plugins: [
