@@ -56,6 +56,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
   겹치는 쓰기 요청을 독립 레이어로 관리합니다. 실패한 요청만 제거하고 다른 성공/대기 변경은
   유지합니다. 성공 응답은 임시 ID를 실제 ID로 바꾸며, 대기 중인 쓰기가 끝난 뒤 다시 조회합니다.
   반응·책 담기의 연속 변경은 mutation `scope`로 서버 실행 순서를 맞춥니다.
+- 책 상세는 목록·검색 캐시의 책을 `findCachedBook`으로 `placeholderData`에 넣어 위쪽부터 바로 그리고, 리더가 열 장과 흔적 목록을 미리 받습니다.
 - 책 탐색·내 서재는 `books.listPage` + `useBookPages`로 20권씩 커서 페이지네이션합니다.
   `InfiniteLoader`는 IntersectionObserver로 다음 묶음을 받고 수동 더 보기/재시도도 제공합니다.
   본문 레이아웃에 필요한 흔적은 유지하고, 흔적·같은 질문 답변 시트의 카드는 20개씩 그립니다.
