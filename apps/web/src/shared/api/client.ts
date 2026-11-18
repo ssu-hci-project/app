@@ -29,7 +29,7 @@ export const client: ContractRouterClient<Contract> = createORPCClient(link);
 
 /**
  * TanStack Query helpers for every procedure:
- * `useQuery(orpc.reading.listBooks.queryOptions())` and the corresponding
+ * `useQuery(orpc.books.list.queryOptions({ input: { libraryId } }))` and the corresponding
  * mutation options provide typed access and query keys.
  * Invalidation after mutations is global (see `query-client.ts`).
  */

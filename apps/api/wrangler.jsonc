@@ -1,10 +1,10 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"name": "hci",
+	// Other accounts get a permission error instead of a new empty Worker and D1.
+	"account_id": "a065ff0f450f7fa877ffec8bd8e380d5",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-10-01",
-	// apps/web's build output, served by this same Worker. Unknown paths fall
-	// back to index.html (SPA); /api/* always reaches the Worker first.
 	"assets": {
 		"directory": "../web/dist",
 		"not_found_handling": "single-page-application",
@@ -13,16 +13,15 @@
 	"observability": {
 		"enabled": true
 	},
-	// Gemini rejects calls from some regions ("User location is not supported"), and a Worker
-	// otherwise runs wherever the request lands. Pin it to Seoul, next to the D1 primary (ICN).
+	// Gemini rejects some regions ("User location is not supported").
 	"placement": {
 		"region": "gcp:asia-northeast3"
 	},
 	"d1_databases": [
 		{
-			// No database_id: wrangler creates the D1 database on first deploy.
 			"binding": "DB",
 			"database_name": "hci-db",
+			"database_id": "ed983e15-d12d-4652-bdec-931a063f9269",
 			"migrations_dir": "migrations"
 		}
 	]

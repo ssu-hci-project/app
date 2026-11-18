@@ -1,119 +1,148 @@
-/**
- * @file ui:bottom-sheet
- * @requires @seed-design/react@^2.0.0 || ^3.0.0
- **/
+import type { ReactNode } from "react";
+import { cn } from "@/shared/lib";
+import { Button } from "./button";
+import {
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerHeader,
+	DrawerTitle,
+} from "./drawer";
+import { XIcon } from "./tds-icon";
 
-import IconXmarkLine from "@karrotmarket/react-monochrome-icon/IconXmarkLine";
-import { Icon, BottomSheet as SeedBottomSheet, VisuallyHidden } from "@seed-design/react";
-import type * as React from "react";
-import { forwardRef } from "react";
-import { OverlayPortal, useOverlayLayerIndex } from "./overlay";
+type SheetProps = { open: boolean; onOpenChange: (open: boolean) => void; children: ReactNode };
 
-export interface BottomSheetRootProps extends SeedBottomSheet.RootProps {}
-
-/**
- * @see https://seed-design.io/react/components/bottom-sheet
- */
-export const BottomSheetRoot = (props: BottomSheetRootProps) => {
-	const { children, ...otherProps } = props;
-	return <SeedBottomSheet.Root {...otherProps}>{children}</SeedBottomSheet.Root>;
-};
-
-export interface BottomSheetTriggerProps extends SeedBottomSheet.TriggerProps {}
-
-export const BottomSheetTrigger = SeedBottomSheet.Trigger;
-
-export interface BottomSheetContentProps
-	extends Omit<SeedBottomSheet.ContentProps, "title" | "asChild"> {
-	title?: React.ReactNode;
-
-	description?: React.ReactNode;
-
-	layerIndex?: number;
-
-	/**
-	 * @default true
-	 */
-	showCloseButton?: boolean;
-
-	/**
-	 * @default false
-	 */
-	showHandle?: boolean;
+/** A bottom sheet bound to `useStepOverlay().bind(key)`. */
+export function BottomSheet({ open, onOpenChange, children }: SheetProps) {
+	return (
+		<Drawer open={open} onOpenChange={onOpenChange}>
+			{children}
+		</Drawer>
+	);
 }
 
-export const BottomSheetContent = forwardRef<HTMLDivElement, BottomSheetContentProps>(
-	(
-		{
-			children,
-			title,
-			description,
-			layerIndex,
-			showCloseButton = true,
-			showHandle = false,
-			...otherProps
-		},
-		ref,
-	) => {
-		if (
-			!title &&
-			!otherProps["aria-labelledby"] &&
-			!otherProps["aria-label"] &&
-			import.meta.env.DEV
-		) {
-			console.warn(
-				"BottomSheetContent: aria-labelledby or aria-label should be provided if title is not provided.",
-			);
-		}
-
-		const shouldRenderHeader = title || description;
-		const overlayIndex = useOverlayLayerIndex();
-
-		return (
-			<OverlayPortal>
-				<SeedBottomSheet.Positioner
-					style={{ "--layer-index": layerIndex ?? overlayIndex } as React.CSSProperties}
+export function BottomSheetContent({
+	title,
+	description,
+	children,
+	className,
+}: {
+	title: ReactNode;
+	description?: ReactNode;
+	children: ReactNode;
+	className?: string;
+}) {
+	return (
+		<DrawerContent className={className}>
+			<DrawerHeader className="relative px-6 pt-[21px] pr-16 pb-0 text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
+				<DrawerTitle className="text-t4 leading-[1.35] font-bold">{title}</DrawerTitle>
+				{description && <DrawerDescription className="break-keep">{description}</DrawerDescription>}
+				<DrawerClose
+					render={<Button variant="ghost" size="icon" className="absolute top-2 right-2 size-11" />}
+					aria-label="닫기"
 				>
-					<SeedBottomSheet.Backdrop />
-					<SeedBottomSheet.Content ref={ref} {...otherProps}>
-						{showHandle && <SeedBottomSheet.Handle />}
-						{shouldRenderHeader && (
-							<SeedBottomSheet.Header>
-								{title ? (
-									<SeedBottomSheet.Title>{title}</SeedBottomSheet.Title>
-								) : (
-									<VisuallyHidden asChild>
-										<SeedBottomSheet.Title>{otherProps["aria-label"] || ""}</SeedBottomSheet.Title>
-									</VisuallyHidden>
-								)}
-								{description && (
-									<SeedBottomSheet.Description>{description}</SeedBottomSheet.Description>
-								)}
-							</SeedBottomSheet.Header>
-						)}
-						{children}
-						{showCloseButton && (
-							// You may implement your own i18n for dismiss label
-							<SeedBottomSheet.CloseButton aria-label="닫기">
-								<Icon svg={<IconXmarkLine />} />
-							</SeedBottomSheet.CloseButton>
-						)}
-					</SeedBottomSheet.Content>
-				</SeedBottomSheet.Positioner>
-			</OverlayPortal>
-		);
-	},
-);
+					<XIcon />
+				</DrawerClose>
+			</DrawerHeader>
+			{children}
+		</DrawerContent>
+	);
+}
 
-export interface BottomSheetBodyProps extends SeedBottomSheet.BodyProps {}
+export function BottomSheetBody({
+	className,
+	children,
+	withFooter,
+}: {
+	className?: string;
+	children: ReactNode;
+	/** The sheet has a `BottomSheetFooter`, which takes care of the safe area. */
+	withFooter?: boolean;
+}) {
+	return (
+		<div
+			className={cn(
+				"min-h-0 flex-1 overflow-y-auto px-6 pt-4",
+				withFooter ? "pb-4" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	);
+}
 
-export const BottomSheetBody = SeedBottomSheet.Body;
+/** Buttons pinned under a sheet's scrolling body, e.g. [취소][남기기]. */
+export function BottomSheetFooter({
+	className,
+	children,
+}: {
+	className?: string;
+	children: ReactNode;
+}) {
+	return (
+		<div
+			className={cn(
+				"flex shrink-0 gap-2 bg-popover px-5 pt-[34px] pb-[calc(20px+env(safe-area-inset-bottom))] *:flex-1",
+				className,
+			)}
+		>
+			{children}
+		</div>
+	);
+}
 
-export interface BottomSheetFooterProps extends SeedBottomSheet.FooterProps {}
+/** A swipe-to-dismiss action list, opened from an app bar "more" button. */
+export function MenuSheet({ open, onOpenChange, children }: SheetProps) {
+	return (
+		<Drawer open={open} onOpenChange={onOpenChange} showSwipeHandle>
+			{children}
+		</Drawer>
+	);
+}
 
-export const BottomSheetFooter = SeedBottomSheet.Footer;
+export function MenuSheetContent({ title, children }: { title: ReactNode; children: ReactNode }) {
+	return (
+		<DrawerContent>
+			<DrawerHeader className="text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
+				<DrawerTitle className="text-st9 text-muted-foreground">{title}</DrawerTitle>
+			</DrawerHeader>
+			<div className="flex flex-col px-2 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+				{children}
+			</div>
+			<DrawerClose className="sr-only">닫기</DrawerClose>
+		</DrawerContent>
+	);
+}
 
-/**
- * This file is a snippet from SEED Design, helping you get started quickly with @seed-design/* packages.
- * You can extend this snippet however you want.
- */
+export function MenuSheetItem({
+	icon,
+	label,
+	description,
+	tone,
+	onClick,
+}: {
+	icon?: ReactNode;
+	label: ReactNode;
+	description?: ReactNode;
+	tone?: "critical";
+	onClick: () => void;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={cn(
+				"flex min-h-14 w-full items-center gap-3 rounded-lg px-3 py-2 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted [&_svg]:size-6 [&_svg]:shrink-0",
+				tone === "critical" && "text-destructive",
+			)}
+		>
+			{icon}
+			<span className="flex flex-col">
+				<span className="text-st8 font-medium">{label}</span>
+				{description && <span className="text-st9 text-muted-foreground">{description}</span>}
+			</span>
+		</button>
+	);
+}

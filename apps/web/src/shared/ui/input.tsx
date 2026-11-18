@@ -4,9 +4,10 @@ import { cn } from "@/shared/lib";
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
 	({ className, ...props }, ref) => (
 		<input
+			data-slot="input"
 			ref={ref}
 			className={cn(
-				"h-10 w-full rounded-md border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+				"h-[54px] w-full rounded-xl border border-input bg-muted px-4 text-t5 leading-[1.5] font-medium text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive",
 				className,
 			)}
 			{...props}

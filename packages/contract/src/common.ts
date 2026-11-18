@@ -1,0 +1,29 @@
+import { z } from "zod";
+
+/** Reader colours for names, underlines and avatars. Each has at least 4.5:1 contrast on white. */
+export const readerColors = [
+	"#285C48",
+	"#C2410C",
+	"#6D4BC3",
+	"#A23B3B",
+	"#0E7C86",
+	"#2F3E9E",
+	"#B4236B",
+	"#9A6B00",
+] as const;
+
+/** One reaction per person on a passage or a card. ❤️ is the default "공감". */
+export const reactionEmojis = ["❤️", "💚", "👍", "😢", "😮", "😂", "💡", "🌱"] as const;
+
+export const readerColorSchema = z.enum(readerColors);
+export const reactionEmojiSchema = z.enum(reactionEmojis);
+
+/** Who left something. `nick`/`color` stay null until the person sets a profile. */
+export const personSchema = z.object({
+	id: z.string(),
+	nick: z.string().nullable(),
+	color: z.string().nullable(),
+});
+export type Person = z.infer<typeof personSchema>;
+
+export const libraryInput = z.object({ libraryId: z.string().min(1) });
