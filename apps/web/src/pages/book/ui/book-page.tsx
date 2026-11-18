@@ -1,8 +1,14 @@
 import type { InferActivityParams } from "@stackflow/config";
 import { useActivity, useFlow } from "@stackflow/react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { BookCover, chapterLabel, chapterNumber, readingTime } from "@/entities/book";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+	BookCover,
+	chapterLabel,
+	chapterNumber,
+	findCachedBook,
+	readingTime,
+} from "@/entities/book";
 import { useCurrentLibrary } from "@/entities/library";
 import { personColor, personName, ReaderAvatar } from "@/entities/profile";
 import { orpc } from "@/shared/api";
@@ -22,6 +28,7 @@ import {
 	ListHeader,
 	LoadState,
 	PopOnSelect,
+	Skeleton,
 } from "@/shared/ui";
 
 export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }) {
@@ -29,12 +36,27 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 	const { isRoot } = useActivity();
 	const { library } = useCurrentLibrary();
 	const [headerMode, setHeaderMode] = useState<"top" | "scrolled" | "compact">("top");
+	const queryClient = useQueryClient();
 	const detail = useQuery({
 		...orpc.books.get.queryOptions({
 			input: { libraryId: library?.id ?? "", bookId: params.bookId },
 		}),
 		enabled: !!library,
+		placeholderData: () => {
+			const cached = findCachedBook(queryClient, params.bookId);
+			return cached && { book: cached, chapters: [], opening: [], readers: [], recentTraces: [] };
+		},
 	});
+	const libraryId = library?.id;
+	const readerCh = detail.data?.book.progress?.ch ?? 0;
+	useEffect(() => {
+		if (!libraryId) return;
+		const input = { libraryId, bookId: params.bookId };
+		queryClient.prefetchQuery(
+			orpc.books.chapter.queryOptions({ input: { ...input, ch: readerCh } }),
+		);
+		queryClient.prefetchQuery(orpc.traces.list.queryOptions({ input }));
+	}, [libraryId, params.bookId, readerCh, queryClient]);
 	const save = useMutation(
 		orpc.saved.set.mutationOptions({
 			scope: { id: `saved:${params.bookId}` },
@@ -191,6 +213,12 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 						)}
 						<section className="pt-3">
 							<ListHeader>목차</ListHeader>
+							{detail.isPlaceholderData && (
+								<div className="flex flex-col gap-4 px-6 py-3" aria-hidden="true">
+									<Skeleton className="h-5 w-3/4" />
+									<Skeleton className="h-5 w-1/2" />
+								</div>
+							)}
 							<List>
 								{data.chapters.map((chapter) => (
 									<ListButton
