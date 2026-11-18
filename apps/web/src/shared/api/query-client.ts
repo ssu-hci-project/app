@@ -1,5 +1,6 @@
 import { MutationCache, QueryClient, type QueryKey } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { orpc } from "./client";
 import { OptimisticCache } from "./optimistic-cache";
 import { optimisticPatches } from "./optimistic-mutations";
 
@@ -10,6 +11,32 @@ declare module "@tanstack/react-query" {
 }
 
 const transactions = new WeakMap<object, (success: boolean, data?: unknown) => void>();
+const bookLists = [orpc.books.list.key(), orpc.books.listPage.key()];
+const traceLists = [orpc.traces.list.key(), orpc.books.get.key(), orpc.books.search.key()];
+const mutationInvalidations: Record<string, QueryKey[]> = {
+	"traces.create": [...traceLists, ...bookLists],
+	"traces.remove": [...traceLists, ...bookLists],
+	"reactions.set": traceLists,
+	"saved.set": [...bookLists, orpc.books.get.key(), orpc.books.search.key()],
+	"books.remove": [
+		orpc.books.key(),
+		orpc.traces.list.key(),
+		orpc.reads.month.key(),
+		orpc.libraries.preview.key(),
+	],
+	"profile.save": [
+		orpc.profile.get.key(),
+		orpc.libraries.list.key(),
+		orpc.libraries.preview.key(),
+		...traceLists,
+	],
+	"libraries.create": [orpc.libraries.list.key()],
+	"libraries.join": [orpc.libraries.list.key(), orpc.libraries.preview.key()],
+	"libraries.leave": [orpc.libraries.list.key(), orpc.libraries.preview.key()],
+};
+const pendingInvalidations = new Map<string, QueryKey>();
+let invalidateAll = false;
+
 export const queryClient: QueryClient = new QueryClient({
 	// Ordinary writes refresh active queries. Frequent progress writes only refresh
 	// the shelf and calendar, never the reader queries that triggered the save.
@@ -39,11 +66,23 @@ export const queryClient: QueryClient = new QueryClient({
 		onSettled: (_data, error, _variables, _result, mutation) => {
 			const changed = transactions.has(mutation);
 			transactions.delete(mutation);
-			if (optimistic.isPending || (error && !changed)) return;
-			const keys = mutation.meta?.invalidates;
-			return keys
-				? Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })))
-				: queryClient.invalidateQueries();
+			if (!error || changed) {
+				const path = mutation.options.mutationKey?.[0];
+				const keys =
+					mutation.meta?.invalidates ??
+					(Array.isArray(path) ? mutationInvalidations[path.join(".")] : undefined);
+				if (keys) {
+					for (const key of keys) pendingInvalidations.set(JSON.stringify(key), key);
+				} else invalidateAll = true;
+			}
+			if (optimistic.isPending) return;
+			const keys = [...pendingInvalidations.values()];
+			pendingInvalidations.clear();
+			if (invalidateAll) {
+				invalidateAll = false;
+				return queryClient.invalidateQueries();
+			}
+			return Promise.all(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
 		},
 	}),
 	defaultOptions: {

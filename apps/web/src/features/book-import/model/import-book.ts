@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { create } from "zustand";
 import { useCurrentLibrary } from "@/entities/library";
-import { client } from "@/shared/api";
+import { client, orpc } from "@/shared/api";
 import { useNotice } from "@/shared/ui";
 import { chunkBook, normaliseBook } from "../lib/chunk";
 import { ImportError, importMessage } from "../lib/import-error";
@@ -77,6 +77,14 @@ export function useBookImport(onImported: (bookId: string) => void) {
 	const { libraryId } = useCurrentLibrary();
 	const notify = useNotice();
 	const mutation = useMutation({
+		meta: {
+			invalidates: [
+				orpc.books.list.key(),
+				orpc.books.listPage.key(),
+				orpc.books.search.key(),
+				orpc.libraries.preview.key(),
+			],
+		},
 		mutationFn: (file: File) => {
 			if (!libraryId) throw new ImportError("read");
 			return importFile(file, libraryId);

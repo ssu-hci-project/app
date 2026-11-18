@@ -43,7 +43,7 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 	const [dragging, setDragging] = useState(false);
 	const books = useQuery({
 		...orpc.books.list.queryOptions({ input: { libraryId: library?.id ?? "" } }),
-		enabled: !!library && tab === "home",
+		enabled: isActive && !!library && tab === "home",
 	});
 	const importer = useBookImport((bookId) => flow.push("BookPage", { bookId }));
 	const takenColors = (library?.members ?? [])

@@ -2,8 +2,8 @@ import type { Drawing, reactionEmojis, Trace } from "@app/contract";
 import type { InferActivityParams } from "@stackflow/config";
 import { useActivity, useFlow } from "@stackflow/react";
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useDebounceCallback } from "usehooks-ts";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useDebounceCallback, useLocalStorage, useTimeout } from "usehooks-ts";
 import { chapterLabel, ProgressBar } from "@/entities/book";
 import { useCurrentLibrary } from "@/entities/library";
 import { useProfile } from "@/entities/profile";
@@ -39,6 +39,8 @@ type Pending =
 	| { kind: "end" }
 	| { kind: "passage"; p: number; s: number; e: number };
 type Anchor = { trace: Trace; x: number; y: number };
+const topControlsHeight = "calc(3.5rem + env(safe-area-inset-top))";
+const bottomControlsHeight = "calc(76px + env(safe-area-inset-bottom))";
 
 export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage"> }) {
 	const flow = useFlow();
@@ -85,15 +87,16 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	const traces = useQuery({
 		...orpc.traces.list.queryOptions({ input: { libraryId, bookId } }),
 		enabled: !!libraryId,
-		refetchInterval: overlay.current === "thread" && !typing && !writes ? 15_000 : false,
+		refetchInterval:
+			isActive && overlay.current === "thread" && !typing && !writes ? 15_000 : false,
 	});
 	const chapterCount = detail.data?.chapters.length ?? 0;
 	useEffect(() => {
-		if (ch === null || ch + 1 >= chapterCount) return;
+		if (!isActive || ch === null || ch + 1 >= chapterCount) return;
 		queryClient.prefetchQuery(
 			orpc.books.chapter.queryOptions({ input: { libraryId, bookId, ch: ch + 1 } }),
 		);
-	}, [ch, chapterCount, libraryId, bookId, queryClient]);
+	}, [isActive, ch, chapterCount, libraryId, bookId, queryClient]);
 
 	const allTraces = traces.data ?? [];
 	const chapterTraces = useMemo(
@@ -137,6 +140,13 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	const step = columnWidth + GAP;
 
 	const [selection, setSelection] = useState<Passage | null>(null);
+	const [controlsVisible, setControlsVisible] = useState(false);
+	const controlsId = useId();
+	const [menuHintSeen, setMenuHintSeen] = useLocalStorage(
+		"exchange-reading:reader-menu-hint-seen",
+		false,
+	);
+	useTimeout(() => setMenuHintSeen(true), !loading && !menuHintSeen ? 5000 : null);
 	const [emojiOpen, setEmojiOpen] = useState(false);
 	const [toolbarTop, setToolbarTop] = useState<{ top: number; above: boolean } | null>(null);
 	const [decorating, setDecorating] = useState<{
@@ -201,6 +211,11 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		setSelection(null);
 		setEmojiOpen(false);
 	}, []);
+	const toggleControls = () => {
+		clearSelection();
+		if (!menuHintSeen) setMenuHintSeen(true);
+		setControlsVisible((visible) => !visible);
+	};
 	const goPage = useCallback(
 		(next: number) => {
 			if (ch === null || loading) return;
@@ -466,12 +481,46 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	// ---- render -------------------------------------------------------------------------------
 	const book = detail.data?.book;
 	const chapterInfo = detail.data?.chapters.find((entry) => entry.ch === ch);
+	const showControls = controlsVisible && !decorating;
+	const menuToggleProps = {
+		type: "button",
+		"aria-label": showControls ? "읽기 메뉴 숨기기" : "읽기 메뉴 표시",
+		"aria-expanded": showControls,
+		"aria-controls": `${controlsId}-top ${controlsId}-bottom`,
+		onClick: toggleControls,
+	} as const;
 	const takenColors = (library?.members ?? [])
 		.filter((member) => member.id !== profile.data?.id && member.color)
 		.map((member) => member.color as string);
 	return (
 		<AppScreen>
-			<header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-rule bg-card px-2 pt-[env(safe-area-inset-top)]">
+			<div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-paper" />
+			{!showControls && !decorating && (
+				<>
+					<button
+						{...menuToggleProps}
+						className="absolute inset-x-0 top-0 z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+						style={{ height: topControlsHeight }}
+					/>
+					<button
+						{...menuToggleProps}
+						tabIndex={-1}
+						className="absolute inset-x-0 bottom-0 z-10 px-4 pb-[env(safe-area-inset-bottom)] text-t7 text-muted-foreground"
+						style={{ height: bottomControlsHeight }}
+					>
+						{!loading && !menuHintSeen && <span>여백을 탭하면 읽기 메뉴가 열려요</span>}
+					</button>
+				</>
+			)}
+			<header
+				id={`${controlsId}-top`}
+				inert={!showControls}
+				style={{ height: topControlsHeight }}
+				className={cn(
+					"absolute inset-x-0 top-0 z-30 flex items-center gap-1 border-b border-rule bg-card px-2 pt-[env(safe-area-inset-top)] motion-safe:transition motion-safe:duration-200",
+					!showControls && "pointer-events-none -translate-y-full opacity-0",
+				)}
+			>
 				<AppBarIconButton
 					className="size-11"
 					aria-label="이전 화면으로"
@@ -479,10 +528,14 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 				>
 					<ChevronLeftIcon />
 				</AppBarIconButton>
-				<div className="min-w-0 flex-1 px-1">
-					<h1 className="truncate text-t5 leading-[22px] font-bold">{book?.title ?? ""}</h1>
-					<p className="truncate text-st10 leading-4 text-muted-foreground">{library?.name}</p>
-				</div>
+				<button {...menuToggleProps} className="h-11 min-w-0 flex-1 rounded-lg px-1 text-left">
+					<span className="block truncate text-t5 leading-[22px] font-bold">
+						{book?.title ?? ""}
+					</span>
+					<span className="block truncate text-st10 leading-4 text-muted-foreground">
+						{library?.name}
+					</span>
+				</button>
 				<AppBarIconButton
 					className="size-11"
 					aria-label="흔적 종류"
@@ -498,7 +551,11 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 					<ALargeSmallIcon />
 				</AppBarIconButton>
 			</header>
-			<main ref={mainRef} className="relative min-h-0 flex-1 overflow-hidden bg-paper">
+			<main
+				ref={mainRef}
+				className="relative min-h-0 flex-1 overflow-hidden"
+				style={{ marginBlockStart: topControlsHeight, marginBlockEnd: bottomControlsHeight }}
+			>
 				<div
 					ref={pagesRef}
 					className="absolute inset-0 touch-pan-y overflow-hidden"
@@ -507,6 +564,9 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 						pointer.current = { x: event.clientX, y: event.clientY };
 					}}
 					onPointerUp={onPointerUp}
+					onPointerCancel={() => {
+						pointer.current = null;
+					}}
 					onScroll={(event) => {
 						// Focus or find-in-page can scroll the clipped columns; keep pages aligned.
 						event.currentTarget.scrollLeft = 0;
@@ -579,7 +639,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 					)}
 				</div>
 				{loading && failedRequest && (
-					<div className="absolute inset-0 grid place-items-center bg-paper">
+					<div className="pointer-events-none absolute inset-0 grid place-items-center bg-paper [&_button]:pointer-events-auto">
 						<LoadState
 							pending={failedRequest.isFetching}
 							error
@@ -588,7 +648,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 					</div>
 				)}
 				{loading && !failedRequest && (
-					<div className="absolute inset-0 bg-paper px-5 pt-6">
+					<div className="pointer-events-none absolute inset-0 bg-paper px-5 pt-6">
 						<LoadingSkeleton shape="article" />
 					</div>
 				)}
@@ -612,8 +672,18 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 					/>
 				)}
 			</main>
-			<footer className="h-[calc(76px+env(safe-area-inset-bottom))] shrink-0 border-t border-rule bg-card px-3 pt-3 pb-[env(safe-area-inset-bottom)]">
-				<ProgressBar value={loading ? 0 : pct} className="mx-3" />
+			<footer
+				id={`${controlsId}-bottom`}
+				inert={!showControls}
+				style={{ height: bottomControlsHeight }}
+				className={cn(
+					"absolute inset-x-0 bottom-0 z-30 border-t border-rule bg-card px-3 pt-2 pb-[env(safe-area-inset-bottom)] motion-safe:transition motion-safe:duration-200",
+					!showControls && "pointer-events-none translate-y-full opacity-0",
+				)}
+			>
+				<button {...menuToggleProps} className="block w-full rounded-md px-3 py-1.5">
+					<ProgressBar value={loading ? 0 : pct} />
+				</button>
 				<div className="mt-1 flex items-center justify-between">
 					<AppBarIconButton
 						className="size-11"

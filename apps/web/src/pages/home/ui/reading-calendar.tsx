@@ -1,5 +1,5 @@
 import type { Book } from "@app/contract";
-import { useFlow } from "@stackflow/react";
+import { useActivity, useFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { BookRow } from "@/entities/book";
@@ -21,12 +21,14 @@ const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 /** 읽은 날 캘린더: a cover-coloured dot for each book opened that day. */
 export function ReadingCalendar({ books }: { books: Book[] }) {
 	const flow = useFlow();
+	const { isActive } = useActivity();
 	const overlay = useStepOverlay();
 	const [month, setMonth] = useState(() => dayjs().startOf("month"));
 	const [day, setDay] = useState<string>();
-	const reads = useQuery(
-		orpc.reads.month.queryOptions({ input: { month: month.format("YYYY-MM") } }),
-	);
+	const reads = useQuery({
+		...orpc.reads.month.queryOptions({ input: { month: month.format("YYYY-MM") } }),
+		enabled: isActive,
+	});
 	const byDate = new Map((reads.data ?? []).map((entry) => [entry.date, entry.books]));
 	const todayKey = today();
 	const dates = Array.from({ length: month.daysInMonth() }, (_, index) => month.date(index + 1));
