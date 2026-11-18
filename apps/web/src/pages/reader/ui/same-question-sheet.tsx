@@ -73,7 +73,7 @@ export function SameQuestionSheet({ traces }: { traces: Trace[] }) {
 					</p>
 				</BottomSheetBody>
 				<BottomSheetFooter>
-					<Button variant="secondary" size="lg" onClick={() => overlay.close()}>
+					<Button variant="weak" size="lg" onClick={() => overlay.close()}>
 						닫기
 					</Button>
 					<Button

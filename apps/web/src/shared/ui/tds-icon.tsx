@@ -8,6 +8,7 @@ import asset1 from "./assets/tds-arrow-right-mono.svg";
 import asset3 from "./assets/tds-arrow-up-mono.svg";
 import asset7 from "./assets/tds-bin-line-mono.svg";
 import asset6 from "./assets/tds-book-opened-mono.svg";
+import bookmark from "./assets/tds-bookmark-mono.svg";
 import asset16 from "./assets/tds-bulb-mono.svg";
 import question from "./assets/tds-chat-bubble-question-mono.svg";
 import asset17 from "./assets/tds-chat-bubble-text-square-mono.svg";
@@ -36,6 +37,7 @@ import asset14 from "./assets/tds-x-mono.svg";
 const assets = {
 	"icon-chat-bubble-question-mono": [{ src: question, inset: "0", original: false }],
 	"icon-pencil-mono": [{ src: pencil, inset: "0", original: false }],
+	"icon-bookmark-mono": [{ src: bookmark, inset: "0", original: false }],
 	ai: [{ src: ai, inset: "0", original: false }],
 	"icon-arrow-back-ios-center-mono": [{ src: asset0, inset: "0", original: false }],
 	"icon-arrow-right-mono": [{ src: asset1, inset: "0", original: false }],
@@ -117,7 +119,7 @@ export const ChevronLeftIcon = makeIcon("icon-arrow-left-mono");
 export const ChevronRightIcon = makeIcon("icon-arrow-right-mono");
 export const ChevronDownIcon = makeIcon("icon-arrow-down-mono");
 export const ChevronUpIcon = makeIcon("icon-arrow-up-mono");
-export const LibraryBigIcon = makeIcon("icon-book-opened-mono");
+export const LibraryBigIcon = makeIcon("icon-bookmark-mono");
 export const BookOpenIcon = makeIcon("icon-book-opened-mono");
 export const Trash2Icon = makeIcon("icon-bin-line-mono");
 export const CheckIcon = makeIcon("icon-check-mono");

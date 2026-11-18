@@ -123,7 +123,7 @@ export function LibrarySheet() {
 							</div>
 							<div className="grid grid-cols-2 gap-2">
 								<Button
-									variant="outline"
+									variant="weak"
 									size="lg"
 									onClick={async () => {
 										try {
@@ -137,7 +137,7 @@ export function LibrarySheet() {
 									<CopyIcon data-icon="inline-start" />
 									코드 복사
 								</Button>
-								<Button variant="outline" size="lg" onClick={share}>
+								<Button variant="weak" size="lg" onClick={share}>
 									<Share2Icon data-icon="inline-start" />
 									링크 보내기
 								</Button>
