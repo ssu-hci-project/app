@@ -231,6 +231,7 @@
 	}
 	html {
 		@apply font-sans;
+		scrollbar-color: var(--muted-foreground) transparent;
 	}
 }
 
@@ -304,6 +305,18 @@
 }
 .toolbar-in {
 	animation: toolbar-in 160ms ease-out;
+}
+
+@supports not (scrollbar-color: auto) {
+	::-webkit-scrollbar,
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		border-radius: 9999px;
+		background: var(--muted-foreground);
+	}
 }
 
 /* PDF 내보내기: 인쇄할 때는 앱 대신 body에 따로 그린 문서만 보여요. */

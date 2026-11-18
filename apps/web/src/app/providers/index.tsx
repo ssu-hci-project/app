@@ -5,6 +5,8 @@ import { useMediaQuery } from "usehooks-ts";
 import { queryClient } from "@/shared/api";
 import { MotionProvider, Toaster, TooltipProvider } from "@/shared/ui";
 
+const toastBottom = "calc(96px + env(safe-area-inset-bottom, 0px))";
+
 /**
  * All app-wide context providers, composed in one place.
  * Route components should never reach for a provider directly —
@@ -24,8 +26,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
 					{/* 하단 내비게이션·쪽 넘김 막대 위로 띄워요. */}
 					<Toaster
 						position="bottom-center"
-						offset={{ bottom: 96, left: 0, right: 0 }}
-						mobileOffset={{ bottom: 96, left: 0, right: 0 }}
+						offset={{ bottom: toastBottom, left: 0, right: 0 }}
+						mobileOffset={{ bottom: toastBottom, left: 0, right: 0 }}
 					/>
 				</TooltipProvider>
 				{import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
