@@ -35,6 +35,8 @@ const bookSchema = z.object({
 	lastTraceAt: z.iso.datetime().nullable(),
 	saved: z.boolean(),
 	progress: progressSchema.nullable(),
+	/** My reading groups whose shelf has this book. */
+	readIn: z.array(z.object({ id: z.string(), name: z.string() })),
 });
 export type Book = z.infer<typeof bookSchema>;
 
@@ -90,12 +92,19 @@ export const bookUploadSchema = libraryInput.extend({
 });
 
 export const booksContract = {
+	/**
+	 * `catalog`: every book readable in the library. `group`: the group's shelf. `shared`: public-domain
+	 * books only. `mine`/`saved`/`uploaded` are 내 서재: my books across every library I belong to,
+	 * with my own trace counts.
+	 */
 	listPage: oc
 		.route({ method: "GET", path: "/libraries/{libraryId}/book-pages", tags: ["books"] })
 		.errors(errors)
 		.input(
 			libraryInput.extend({
-				scope: z.enum(["catalog", "mine", "saved", "uploaded"]).default("catalog"),
+				scope: z
+					.enum(["catalog", "group", "shared", "mine", "saved", "uploaded"])
+					.default("catalog"),
 				cursor: bookCursor.nullable().default(null),
 				limit: z.number().int().min(1).max(40).default(20),
 			}),

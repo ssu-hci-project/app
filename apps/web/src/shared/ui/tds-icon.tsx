@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
 import { cn } from "@/shared/lib";
+import undo from "./assets/app-undo-mono.svg";
 import ai from "./assets/tds-ai-twinkle.svg";
 import asset0 from "./assets/tds-arrow-back-ios-center-mono.svg";
 import asset2 from "./assets/tds-arrow-down-mono.svg";
@@ -70,6 +71,8 @@ const assets = {
 	"icon-check-circle-mono": [{ src: asset23, inset: "0", original: false }],
 	"icon-exclamation-circle-mono": [{ src: asset24, inset: "0", original: false }],
 	"icon-emoji-mono": [{ src: asset25, inset: "0", original: false }],
+	/** TDS has no undo icon; drawn in the same 24px mono style. */
+	"app-undo-mono": [{ src: undo, inset: "0", original: false }],
 	home: [{ src: home, inset: "0", original: false }],
 	search: [{ src: search, inset: "0", original: false }],
 };
@@ -133,6 +136,7 @@ export const EllipsisIcon = makeIcon("icon-dots-mono");
 export const EllipsisVerticalIcon = makeIcon("icon-dots-vertical-1-mono");
 export const XIcon = makeIcon("icon-x-mono");
 export const RefreshCwIcon = makeIcon("icon-refresh-mono");
+export const UndoIcon = makeIcon("app-undo-mono");
 export const LightbulbIcon = makeIcon("icon-bulb-mono");
 export const MessageSquareTextIcon = makeIcon("icon-chat-bubble-text-square-mono");
 export const UnderlineIcon = makeIcon("icon-underline-mono");

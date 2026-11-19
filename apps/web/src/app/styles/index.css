@@ -318,29 +318,3 @@
 		background: var(--muted-foreground);
 	}
 }
-
-/* PDF 내보내기: 인쇄할 때는 앱 대신 body에 따로 그린 문서만 보여요. */
-.print-root {
-	display: none;
-}
-@media print {
-	@page {
-		size: A4;
-		margin: 18mm 16mm;
-	}
-	body > :not(.print-root) {
-		/* biome-ignore lint/complexity/noImportantStyles: 인쇄할 때 앱 화면을 확실히 숨겨야 해요 */
-		display: none !important;
-	}
-	.print-root {
-		display: block;
-		color: #1a1a1a;
-		print-color-adjust: exact;
-	}
-	.export-chapter {
-		break-before: page;
-	}
-	.export-note {
-		break-inside: avoid;
-	}
-}

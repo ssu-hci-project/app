@@ -78,6 +78,13 @@
       "when": 1794926726334,
       "tag": "0010_unify-books",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1795006356495,
+      "tag": "0011_group-books",
+      "breakpoints": true
     }
   ]
 }

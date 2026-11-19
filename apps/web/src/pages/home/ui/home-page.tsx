@@ -2,7 +2,7 @@ import type { ActivityComponentType } from "@stackflow/react";
 import { useActivity, useFlow, useStepFlow } from "@stackflow/react";
 import { useQuery } from "@tanstack/react-query";
 import { type DragEvent, useState } from "react";
-import { useCurrentLibrary } from "@/entities/library";
+import { libraryName, useCurrentLibrary } from "@/entities/library";
 import { personName, ReaderAvatar, useProfile } from "@/entities/profile";
 import { DropHint, ImportProgressOverlay, useBookImport } from "@/features/book-import";
 import { LibrarySheet } from "@/features/library-picker";
@@ -21,6 +21,7 @@ import {
 	TabBar,
 	useStepOverlay,
 } from "@/shared/ui";
+import { GroupHome } from "./group-home";
 import { HomeFeed } from "./home-feed";
 import { MyShelf } from "./my-shelf";
 import { SearchPanel } from "./search-panel";
@@ -43,7 +44,7 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 	const [dragging, setDragging] = useState(false);
 	const books = useQuery({
 		...orpc.books.list.queryOptions({ input: { libraryId: library?.id ?? "" } }),
-		enabled: isActive && !!library && tab === "home",
+		enabled: isActive && !!library?.personal && tab === "home",
 	});
 	const importer = useBookImport((bookId) => flow.push("BookPage", { bookId }));
 	const takenColors = (library?.members ?? [])
@@ -78,9 +79,9 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 							onClick={() => overlay.open("library")}
 							className="flex h-11 min-w-0 items-center gap-1 rounded-lg px-4 text-st7 font-bold text-strong outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
 						>
-							<span className="truncate">{library?.name ?? "서재"}</span>
+							<span className="truncate">{library ? libraryName(library) : "서재"}</span>
 							<ChevronDownIcon className="size-5 shrink-0" aria-hidden="true" />
-							<span className="sr-only">, 서재 바꾸기</span>
+							<span className="sr-only">, 서재나 모임 바꾸기</span>
 						</button>
 						<button
 							type="button"
@@ -102,7 +103,13 @@ export const HomePage: ActivityComponentType<"HomePage"> = ({ params }) => {
 						error={libraries.isError}
 						retry={() => libraries.refetch()}
 					/>
-					{library && tab === "home" && <HomeFeed books={books} onImport={importer.chooseFile} />}
+					{library &&
+						tab === "home" &&
+						(library.personal ? (
+							<HomeFeed books={books} onImport={importer.chooseFile} />
+						) : (
+							<GroupHome library={library} onImport={importer.chooseFile} />
+						))}
 					{library && tab === "search" && (
 						<SearchPanel libraryId={library.id} onImport={importer.chooseFile} />
 					)}

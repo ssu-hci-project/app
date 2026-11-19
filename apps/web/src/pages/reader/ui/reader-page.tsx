@@ -619,14 +619,15 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 									<div className="pointer-events-none absolute top-0 left-0 -z-10">
 										{anchors.map(({ trace, x, y }) =>
 											trace.data ? (
-												<DrawingView
-													key={trace.id}
-													data={trace.data}
-													fs={settings.size}
-													x={x}
-													y={y}
-													part="under"
-												/>
+												<div key={trace.id} data-drawing={trace.id}>
+													<DrawingView
+														data={trace.data}
+														fs={settings.size}
+														x={x}
+														y={y}
+														part="under"
+													/>
+												</div>
 											) : null,
 										)}
 									</div>
@@ -819,13 +820,40 @@ function sentenceRange(span: HTMLElement, text: string): [number, number] {
 	return [start, Math.min(end, text.length)];
 }
 
-/** The drawing trace whose note, tape or sticker is under the point, if any. */
+/** Pen strokes are thin; a tap this close (px) still counts as on the line. */
+const STROKE_TAP_WIDTH = 18;
+
+/** The drawing trace whose note, tape, sticker or pen stroke is under the point, if any. */
 function drawingAt(cols: HTMLElement | null, x: number, y: number) {
 	if (!cols) return undefined;
+	const owner = (element: Element) =>
+		element.closest<HTMLElement>("[data-drawing]")?.dataset.drawing;
 	for (const item of cols.querySelectorAll<HTMLElement>("[data-drawing] [data-hit]")) {
 		const rect = item.getBoundingClientRect();
-		if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
-			return item.closest<HTMLElement>("[data-drawing]")?.dataset.drawing;
+		if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return owner(item);
 	}
+	for (const path of cols.querySelectorAll<SVGPathElement>("[data-drawing] svg path"))
+		if (strokeHit(path, x, y)) return owner(path);
 	return undefined;
+}
+
+/** Whether a tap at (x, y) lands on a pen stroke, widened to a comfortable tap width. */
+function strokeHit(path: SVGPathElement, x: number, y: number) {
+	const svg = path.ownerSVGElement;
+	if (!svg) return false;
+	// The svg has no viewBox, so its user units are CSS pixels from its corner.
+	const rect = svg.getBoundingClientRect();
+	const reach = STROKE_TAP_WIDTH / 2;
+	const near =
+		x >= rect.left - reach &&
+		x <= rect.right + reach &&
+		y >= rect.top - reach &&
+		y <= rect.bottom + reach;
+	if (!near) return false;
+	const width = path.getAttribute("stroke-width");
+	path.setAttribute("stroke-width", String(Math.max(Number(width) || 0, STROKE_TAP_WIDTH)));
+	const hit = path.isPointInStroke(new DOMPoint(x - rect.left, y - rect.top));
+	if (width === null) path.removeAttribute("stroke-width");
+	else path.setAttribute("stroke-width", width);
+	return hit;
 }

@@ -55,6 +55,7 @@ test("reaction changes and failures update counts consistently across trace and 
 			lastTraceAt: trace.createdAt,
 			saved: false,
 			progress: null,
+			readIn: [],
 		},
 		chapters: [],
 		opening: [],

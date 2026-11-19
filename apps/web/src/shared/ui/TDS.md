@@ -88,6 +88,7 @@ Figma의 24×24 슬롯과 내부 inset을 유지하며, SVG 파일 자체의 치
 | `icon-pencil-mono` | `55068:182660` |
 | `icon-bookmark-mono` | `55068:183068` |
 | `icon-document-mono` | `55068:182839` |
+| `app-undo-mono` | TDS에 없어 같은 24px 모노 형식으로 직접 그림(꾸미기 되돌리기) |
 
 ## 앱 테마와 반응
 

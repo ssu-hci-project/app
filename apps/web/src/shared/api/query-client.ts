@@ -30,7 +30,8 @@ const mutationInvalidations: Record<string, QueryKey[]> = {
 		orpc.libraries.preview.key(),
 		...traceLists,
 	],
-	"libraries.create": [orpc.libraries.list.key()],
+	"libraries.create": [orpc.libraries.list.key(), ...bookLists],
+	"libraries.addBooks": [orpc.libraries.list.key(), orpc.libraries.preview.key(), ...bookLists],
 	"libraries.join": [orpc.libraries.list.key(), orpc.libraries.preview.key()],
 	"libraries.leave": [orpc.libraries.list.key(), orpc.libraries.preview.key()],
 };

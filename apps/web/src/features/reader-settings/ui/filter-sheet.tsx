@@ -11,6 +11,7 @@ import {
 	MessageSquareTextIcon,
 	PencilIcon,
 	SmileIcon,
+	TextButton,
 	UnderlineIcon,
 } from "@/shared/ui";
 import { someHidden, type TraceFilters, useReaderSettings } from "../model/reader-settings";
@@ -47,6 +48,10 @@ export function FilterSheet({
 }) {
 	const { filters, setFilters } = useReaderSettings();
 	const [draft, setDraft] = useState(filters);
+	const allOn = rows.every((row) => draft[row.key]);
+	const noneOn = rows.every((row) => !draft[row.key]);
+	const setAll = (on: boolean) =>
+		setDraft(Object.fromEntries(rows.map((row) => [row.key, on])) as TraceFilters);
 	return (
 		<BottomSheet
 			open={open}
@@ -60,6 +65,14 @@ export function FilterSheet({
 				description="보고 싶은 흔적만 골라 보세요. 모든 책에 적용돼요."
 			>
 				<BottomSheetBody withFooter className="pt-2">
+					<div className="flex justify-end gap-4 px-2 pb-1">
+						<TextButton size="sm" tone="primary" disabled={allOn} onClick={() => setAll(true)}>
+							모두 선택
+						</TextButton>
+						<TextButton size="sm" disabled={noneOn} onClick={() => setAll(false)}>
+							모두 선택 해제
+						</TextButton>
+					</div>
 					<div className="flex flex-col">
 						{rows.map((row) => (
 							<CheckboxRow

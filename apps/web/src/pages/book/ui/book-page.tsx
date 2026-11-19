@@ -24,7 +24,6 @@ import {
 	Button,
 	CardButton,
 	ChevronLeftIcon,
-	DocumentIcon,
 	HeartIcon,
 	List,
 	ListButton,
@@ -33,6 +32,7 @@ import {
 	PopOnSelect,
 	Skeleton,
 } from "@/shared/ui";
+import { GroupActions } from "./group-actions";
 
 export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }) {
 	const flow = useFlow();
@@ -106,14 +106,6 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 				>
 					{book?.title}
 				</span>
-				<AppBarIconButton
-					className="size-11"
-					aria-label="PDF로 내보내기"
-					disabled={!book}
-					onClick={() => flow.push("ExportPage", { bookId: params.bookId })}
-				>
-					<DocumentIcon />
-				</AppBarIconButton>
 			</AppBar>
 			<AppScreenContent
 				className="bg-background pb-[calc(112px+env(safe-area-inset-bottom))]"
@@ -160,6 +152,7 @@ export function BookPage({ params }: { params: InferActivityParams<"BookPage"> }
 								</div>
 							))}
 						</dl>
+						{library && <GroupActions library={library} book={book} />}
 						{readers.length > 0 && (
 							<section className="px-6 pt-7">
 								<ListHeader className="px-0 pt-0 pb-3">함께 읽는 사람</ListHeader>

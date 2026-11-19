@@ -7,6 +7,7 @@ import {
 	desc,
 	eq,
 	inArray,
+	isNull,
 	like,
 	lt,
 	max,
@@ -19,7 +20,9 @@ import {
 	bookChapters,
 	bookParagraphs,
 	books,
-	type libraries,
+	libraries,
+	libraryBooks,
+	libraryMembers,
 	progress,
 	reads,
 	savedBooks,
@@ -40,11 +43,14 @@ import {
 type BookRow = typeof books.$inferSelect;
 type LibraryRow = typeof libraries.$inferSelect;
 
-/** Adds chapter totals, this library's trace counts and my own state to book rows. */
+/**
+ * Adds chapter totals, trace counts and my own state to book rows. Trace counts are this library's,
+ * or — without a library (내 서재 across libraries) — my own traces everywhere.
+ */
 async function bookViews(
 	db: Db,
 	rows: BookRow[],
-	library: LibraryRow,
+	library: LibraryRow | null,
 	userId: string,
 ): Promise<Book[]> {
 	if (!rows.length) return [];
@@ -55,7 +61,7 @@ async function bookViews(
 		return views;
 	}
 	const ids = rows.map((row) => row.id);
-	const [chapters, traceStats, saved, mine] = await Promise.all([
+	const [chapters, traceStats, saved, mine, shelved] = await Promise.all([
 		db
 			.select({
 				bookId: bookChapters.bookId,
@@ -75,7 +81,7 @@ async function bookViews(
 			.from(traces)
 			.where(
 				and(
-					eq(traces.libraryId, library.id),
+					library ? eq(traces.libraryId, library.id) : eq(traces.authorId, userId),
 					inArray(traces.bookId, ids),
 					ne(traces.kind, "reply"),
 				),
@@ -89,6 +95,16 @@ async function bookViews(
 			.select()
 			.from(progress)
 			.where(and(eq(progress.userId, userId), inArray(progress.bookId, ids))),
+		db
+			.select({ bookId: libraryBooks.bookId, id: libraries.id, name: libraries.name })
+			.from(libraryBooks)
+			.innerJoin(libraries, eq(libraries.id, libraryBooks.libraryId))
+			.innerJoin(
+				libraryMembers,
+				and(eq(libraryMembers.libraryId, libraries.id), eq(libraryMembers.userId, userId)),
+			)
+			.where(inArray(libraryBooks.bookId, ids))
+			.orderBy(asc(libraryBooks.addedAt)),
 	]);
 	return rows.map((row) => {
 		const chapter = chapters.find((entry) => entry.bookId === row.id);
@@ -107,7 +123,9 @@ async function bookViews(
 			createdAt: row.createdAt,
 			chapterCount: chapter?.count ?? 0,
 			chars: Number(chapter?.chars ?? 0),
-			canRemove: !!row.libraryId && (row.addedBy === userId || library.ownerId === userId),
+			canRemove:
+				!!row.libraryId &&
+				(row.addedBy === userId || (library?.id === row.libraryId && library.ownerId === userId)),
 			traceCount: stat?.count ?? 0,
 			readerCount: stat?.readers ?? 0,
 			lastTraceAt: stat?.last ?? null,
@@ -115,6 +133,9 @@ async function bookViews(
 			progress: own
 				? { ch: own.ch, ratio: own.ratio, pct: own.pct, updatedAt: own.updatedAt }
 				: null,
+			readIn: shelved
+				.filter((entry) => entry.bookId === row.id)
+				.map(({ id, name }) => ({ id, name })),
 		};
 	});
 }
@@ -179,19 +200,39 @@ export const booksRouter = {
 		const saved = sql`exists (select 1 from saved_books sb where sb.book_id = ${books.id} and sb.user_id = ${context.userId})`;
 		const opened = sql`exists (select 1 from progress pr where pr.book_id = ${books.id} and pr.user_id = ${context.userId})`;
 		const uploaded = eq(books.addedBy, context.userId);
+		// 내 서재 spans every library I belong to; the other scopes stay inside this library.
+		const shelf = input.scope === "mine" || input.scope === "saved" || input.scope === "uploaded";
+		const anywhere = and(
+			eq(books.status, "ready"),
+			or(
+				isNull(books.libraryId),
+				inArray(
+					books.libraryId,
+					context.db
+						.select({ id: libraryMembers.libraryId })
+						.from(libraryMembers)
+						.where(eq(libraryMembers.userId, context.userId)),
+				),
+			),
+		);
+		const onGroupShelf = sql`exists (select 1 from library_books lb where lb.book_id = ${books.id} and lb.library_id = ${library.id})`;
 		const rows = await context.db
 			.select()
 			.from(books)
 			.where(
 				and(
-					visibleIn(library.id),
+					shelf ? anywhere : visibleIn(library.id),
 					input.scope === "saved"
 						? saved
 						: input.scope === "uploaded"
 							? uploaded
 							: input.scope === "mine"
 								? or(saved, opened, uploaded)
-								: undefined,
+								: input.scope === "group"
+									? onGroupShelf
+									: input.scope === "shared"
+										? isNull(books.libraryId)
+										: undefined,
 					input.cursor
 						? or(
 								lt(books.createdAt, input.cursor.createdAt),
@@ -205,7 +246,7 @@ export const booksRouter = {
 		const page = rows.slice(0, input.limit);
 		const last = page.at(-1);
 		return {
-			items: await bookViews(context.db, page, library, context.userId),
+			items: await bookViews(context.db, page, shelf ? null : library, context.userId),
 			nextCursor:
 				rows.length > input.limit && last ? { createdAt: last.createdAt, id: last.id } : null,
 		};
@@ -409,7 +450,7 @@ export const booksRouter = {
 		return { received: input.paragraphs.length };
 	}),
 	uploadFinish: os.books.uploadFinish.handler(async ({ context, input, errors }) => {
-		await requireUpload(context.db, input.bookId, context.userId, errors.NOT_FOUND);
+		const upload = await requireUpload(context.db, input.bookId, context.userId, errors.NOT_FOUND);
 		const [chapters, filled] = await Promise.all([
 			context.db
 				.select({ count: count() })
@@ -425,6 +466,24 @@ export const booksRouter = {
 		if (!chapters?.count || chapters.count !== filled?.count)
 			throw errors.BAD_REQUEST({ message: "아직 올라오지 않은 장이 있어요" });
 		await context.db.update(books).set({ status: "ready" }).where(eq(books.id, input.bookId));
+		// A book uploaded to a reading group goes straight onto its shelf.
+		if (upload.libraryId) {
+			const group = await context.db
+				.select({ personal: libraries.personal })
+				.from(libraries)
+				.where(eq(libraries.id, upload.libraryId))
+				.get();
+			if (group && !group.personal)
+				await context.db
+					.insert(libraryBooks)
+					.values({
+						libraryId: upload.libraryId,
+						bookId: upload.id,
+						addedBy: context.userId,
+						addedAt: new Date().toISOString(),
+					})
+					.onConflictDoNothing();
+		}
 		return { bookId: input.bookId };
 	}),
 	remove: os.books.remove.handler(async ({ context, input, errors }) => {
