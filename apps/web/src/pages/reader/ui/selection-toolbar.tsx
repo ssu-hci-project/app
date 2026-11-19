@@ -1,5 +1,5 @@
 import { reactionEmojis } from "@app/contract";
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { cn } from "@/shared/lib";
 import {
 	Button,
@@ -32,7 +32,7 @@ function Tool({
 			aria-pressed={active}
 			onClick={onClick}
 			className={cn(
-				"flex h-13 w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl text-st11 leading-none font-semibold outline-none focus-visible:ring-2 focus-visible:ring-background active:bg-background/15 [&_svg]:size-5",
+				"flex h-13 w-14 min-w-0 shrink flex-col items-center justify-center gap-1 rounded-xl text-st11 leading-none font-semibold outline-none focus-visible:ring-2 focus-visible:ring-background active:bg-background/15 [&_svg]:size-5",
 				active && "bg-background text-foreground active:bg-background",
 			)}
 		>
@@ -44,32 +44,39 @@ function Tool({
 
 /**
  * Floating tools for the selected passage, placed under it (or above when there is no room).
- * `top` is relative to the reading area.
+ * Placement is measured relative to the reading area.
  */
 export function SelectionToolbar({
-	top,
+	placement,
+	toolbarRef,
 	underlined,
 	traceCount,
 	emojiOpen,
-	emojiAbove,
 	onAction,
 	onEmoji,
 }: {
-	top: number;
+	placement: { top: number; above: boolean } | null;
+	toolbarRef: Ref<HTMLDivElement>;
 	underlined: boolean;
 	traceCount: number;
 	emojiOpen: boolean;
-	emojiAbove: boolean;
 	onAction: (action: ToolbarAction) => void;
 	onEmoji: (emoji: (typeof reactionEmojis)[number]) => void;
 }) {
 	return (
-		<div className="absolute inset-x-2 z-20 flex flex-col items-center" style={{ top }}>
-			{emojiOpen && emojiAbove && <EmojiRow onEmoji={onEmoji} className="mb-2" />}
+		<div
+			ref={toolbarRef}
+			className={cn(
+				"pointer-events-none absolute inset-x-2 z-20 flex flex-col items-center gap-2",
+				!placement && "invisible",
+			)}
+			style={{ top: placement?.top ?? 0, maxHeight: "calc(100% - 16px)" }}
+		>
+			{emojiOpen && placement?.above && <EmojiRow onEmoji={onEmoji} />}
 			<div
 				role="toolbar"
 				aria-label="고른 구절에 남기기"
-				className="toolbar-in flex max-w-full items-center rounded-2xl bg-toolbar p-1 text-toolbar-foreground shadow-floating"
+				className="toolbar-in pointer-events-auto flex max-w-full shrink-0 items-center rounded-2xl bg-toolbar p-1 text-toolbar-foreground shadow-floating"
 			>
 				<Tool
 					icon={<UnderlineIcon />}
@@ -97,38 +104,29 @@ export function SelectionToolbar({
 					</>
 				)}
 			</div>
-			{emojiOpen && !emojiAbove && <EmojiRow onEmoji={onEmoji} className="mt-2" />}
+			{emojiOpen && !placement?.above && <EmojiRow onEmoji={onEmoji} />}
 		</div>
 	);
 }
 
-function EmojiRow({
-	onEmoji,
-	className,
-}: {
-	onEmoji: (emoji: (typeof reactionEmojis)[number]) => void;
-	className?: string;
-}) {
+function EmojiRow({ onEmoji }: { onEmoji: (emoji: (typeof reactionEmojis)[number]) => void }) {
 	return (
-		<fieldset
-			className={cn(
-				"toolbar-in m-0 flex min-w-0 rounded-full border-0 bg-card p-1 shadow-floating",
-				className,
-			)}
-		>
+		<fieldset className="toolbar-in pointer-events-auto m-0 min-h-0 min-w-0 max-w-full overflow-y-auto rounded-2xl border-0 bg-card p-1 shadow-floating min-[376px]:rounded-full">
 			<legend className="sr-only">반응 고르기</legend>
-			{reactionEmojis.map((emoji) => (
-				<Button
-					variant="ghost"
-					size="icon"
-					key={emoji}
-					type="button"
-					onClick={() => onEmoji(emoji)}
-					className="grid size-11 place-items-center rounded-full text-t3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
-				>
-					<ReactionEmoji emoji={emoji} />
-				</Button>
-			))}
+			<div className="grid grid-cols-4 min-[376px]:grid-cols-8">
+				{reactionEmojis.map((emoji) => (
+					<Button
+						variant="ghost"
+						size="icon"
+						key={emoji}
+						type="button"
+						onClick={() => onEmoji(emoji)}
+						className="grid size-11 place-items-center rounded-full text-t3 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-muted"
+					>
+						<ReactionEmoji emoji={emoji} />
+					</Button>
+				))}
+			</div>
 		</fieldset>
 	);
 }

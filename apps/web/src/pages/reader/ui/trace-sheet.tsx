@@ -299,7 +299,10 @@ function TraceCard({
 						<SmileIcon className="size-5" />
 						반응
 					</PopoverTrigger>
-					<PopoverContent side="top" className="z-60 w-auto flex-row gap-0 rounded-full p-1">
+					<PopoverContent
+						side="top"
+						className="z-60 grid w-max grid-cols-4 gap-0 rounded-2xl p-1 min-[376px]:grid-cols-8 min-[376px]:rounded-full"
+					>
 						{reactionEmojis.map((emoji) => (
 							<button
 								key={emoji}

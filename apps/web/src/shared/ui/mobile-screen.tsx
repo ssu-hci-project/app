@@ -71,7 +71,7 @@ export function MobileScreen({
 							? "pb-[calc(168px+env(safe-area-inset-bottom))]"
 							: fab || footer || cta
 								? "pb-[calc(104px+env(safe-area-inset-bottom))]"
-								: "pb-[calc(24px+env(safe-area-inset-bottom))]",
+								: "pb-[max(24px,env(safe-area-inset-bottom))]",
 					)}
 				>
 					{children}
@@ -94,7 +94,7 @@ export function MobileScreen({
 			{footer && (
 				<div
 					ref={footerRef}
-					className="absolute inset-x-0 bottom-0 z-10 flex flex-col bg-card px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))]"
+					className="absolute inset-x-0 bottom-0 z-10 flex flex-col bg-card px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]"
 				>
 					{footer}
 				</div>

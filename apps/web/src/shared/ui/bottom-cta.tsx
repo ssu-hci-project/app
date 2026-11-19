@@ -11,7 +11,7 @@ export function BottomCta({ className, children, ...props }: ComponentProps<"div
 			{...props}
 		>
 			<div aria-hidden="true" className="h-9 bg-linear-to-b from-transparent to-background" />
-			<div className="pointer-events-auto flex gap-2 bg-background px-5 pb-[calc(20px+env(safe-area-inset-bottom))]">
+			<div className="pointer-events-auto flex gap-2 bg-background px-5 pb-[max(20px,env(safe-area-inset-bottom))]">
 				{children}
 			</div>
 		</div>
