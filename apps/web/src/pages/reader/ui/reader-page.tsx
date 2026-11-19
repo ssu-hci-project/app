@@ -600,12 +600,12 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 			</header>
 			<main
 				ref={mainRef}
-				className="relative min-h-0 flex-1 overflow-hidden"
+				className="relative min-h-0 flex-1 overflow-x-clip"
 				style={{ marginBlockStart: topControlsHeight, marginBlockEnd: bottomControlsHeight }}
 			>
 				<div
 					ref={pagesRef}
-					className="absolute inset-0 touch-pan-y overflow-hidden"
+					className="absolute inset-0 touch-pan-y overflow-x-clip"
 					style={{ paddingInline: GUTTER }}
 					onPointerDown={(event) => {
 						pointer.current = { x: event.clientX, y: event.clientY };

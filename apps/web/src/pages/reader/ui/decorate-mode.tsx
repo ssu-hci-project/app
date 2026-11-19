@@ -7,6 +7,7 @@ import {
 	textLimits,
 } from "@app/contract";
 import {
+	Fragment,
 	type ReactNode,
 	type PointerEvent as ReactPointerEvent,
 	useEffect,
@@ -338,57 +339,57 @@ export function DecorateMode({
 			>
 				{items.map((item, index) =>
 					item ? (
-						<div
-							// biome-ignore lint/suspicious/noArrayIndexKey: removed items stay as null, so indexes are stable.
-							key={index}
-							className={cn(
-								"absolute",
-								item.t === "note" &&
-									"rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight text-note-ink shadow-[1px_3px_8px_rgb(0_0_0/0.16)]",
-								item.t === "stk" && "drop-shadow-[0_2px_3px_rgb(0_0_0/0.25)] select-none",
-								!passThrough && !erasing && "pointer-events-auto cursor-grab touch-none",
-								erasing && "pointer-events-auto cursor-cell touch-none",
-							)}
-							style={decorationStyle(item, fs)}
-							onPointerDown={(event) => {
-								if ((event.target as HTMLElement).closest("textarea,button")) return;
-								event.preventDefault();
-								if (erasing) return removeItem(index);
-								drawing.current.drag = { index, from: toEm(event.clientX, event.clientY), item };
-							}}
-							data-erase-item={index}
-						>
-							{item.t === "note" && (
-								<textarea
-									aria-label="메모지 내용"
-									// biome-ignore lint/a11y/noAutofocus: 붙인 메모지에 바로 적습니다.
-									autoFocus={!item.text}
-									value={item.text ?? ""}
-									maxLength={textLimits.note}
-									placeholder="메모를 적어보세요"
-									onChange={(event) =>
-										setItems((list) =>
-											list.map((entry, at) =>
-												at === index && entry?.t === "note"
-													? { ...entry, text: event.target.value }
-													: entry,
-											),
-										)
-									}
-									className="pointer-events-auto block min-h-[3.2em] w-full resize-none bg-transparent outline-none [field-sizing:content] placeholder:text-note-ink/60"
-								/>
-							)}
-							{item.t === "stk" && item.s}
-							<button
-								type="button"
-								aria-label="이 꾸미기 지우기"
-								onClick={() => removeItem(index)}
-								className="pointer-events-auto absolute -top-3 -right-3 grid size-6 place-items-center rounded-full bg-foreground font-sans text-background before:absolute before:-inset-2.5 before:content-['']"
-								style={item.t === "tape" ? { top: "50%", marginTop: -12, right: -14 } : undefined}
+						// biome-ignore lint/suspicious/noArrayIndexKey: removed items stay as null, so indexes are stable.
+						<Fragment key={index}>
+							<div
+								className={cn(
+									"absolute",
+									item.t === "note" &&
+										"rounded-xs px-[0.6em] pt-[0.45em] pb-[0.55em] font-hand leading-tight text-note-ink shadow-[1px_3px_8px_rgb(0_0_0/0.16)]",
+									item.t === "stk" && "drop-shadow-[0_2px_3px_rgb(0_0_0/0.25)] select-none",
+									!passThrough && !erasing && "pointer-events-auto cursor-grab touch-none",
+									erasing && "pointer-events-auto cursor-cell touch-none",
+								)}
+								style={decorationStyle(item, fs)}
+								onPointerDown={(event) => {
+									if ((event.target as HTMLElement).closest("textarea,button")) return;
+									event.preventDefault();
+									if (erasing) return removeItem(index);
+									drawing.current.drag = { index, from: toEm(event.clientX, event.clientY), item };
+								}}
+								data-erase-item={index}
 							>
-								<XIcon className="size-3.5" />
-							</button>
-						</div>
+								{item.t === "note" && (
+									<textarea
+										aria-label="메모지 내용"
+										// biome-ignore lint/a11y/noAutofocus: 붙인 메모지에 바로 적습니다.
+										autoFocus={!item.text}
+										value={item.text ?? ""}
+										maxLength={textLimits.note}
+										placeholder="메모를 적어보세요"
+										onChange={(event) =>
+											setItems((list) =>
+												list.map((entry, at) =>
+													at === index && entry?.t === "note"
+														? { ...entry, text: event.target.value }
+														: entry,
+												),
+											)
+										}
+										className="pointer-events-auto block min-h-[3.2em] w-full resize-none bg-transparent outline-none [field-sizing:content] placeholder:text-note-ink/60"
+									/>
+								)}
+								{item.t === "stk" && item.s}
+								{item.t !== "tape" && (
+									<RemoveButton className="-top-3 -right-3" onClick={() => removeItem(index)} />
+								)}
+							</div>
+							{item.t === "tape" && (
+								<div className="absolute size-0" style={{ left: item.x2 * fs, top: item.y2 * fs }}>
+									<RemoveButton className="-top-3 -left-3" onClick={() => removeItem(index)} />
+								</div>
+							)}
+						</Fragment>
 					) : null,
 				)}
 			</div>
@@ -603,6 +604,23 @@ function CustomColorSwatch({
 				className="absolute inset-0 size-full cursor-pointer opacity-0"
 			/>
 		</label>
+	);
+}
+
+/** The tape's torn edge clips its children, so its button sits outside at the far end. */
+function RemoveButton({ className, onClick }: { className: string; onClick: () => void }) {
+	return (
+		<button
+			type="button"
+			aria-label="이 꾸미기 지우기"
+			onClick={onClick}
+			className={cn(
+				"pointer-events-auto absolute grid size-6 place-items-center rounded-full bg-foreground font-sans text-background before:absolute before:-inset-2.5 before:content-['']",
+				className,
+			)}
+		>
+			<XIcon className="size-3.5" />
+		</button>
 	);
 }
 
