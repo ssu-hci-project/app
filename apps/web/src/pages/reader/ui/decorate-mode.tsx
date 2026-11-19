@@ -22,7 +22,7 @@ import {
 	tapes,
 } from "@/entities/trace";
 import { cn } from "@/shared/lib";
-import { Button, UndoIcon, useNotice, XIcon } from "@/shared/ui";
+import { Button, Segmented, UndoIcon, useNotice, XIcon } from "@/shared/ui";
 
 type Mode = "pen" | "erase" | "note" | "tape" | "stk";
 type Item = Decoration & { text?: string };
@@ -402,9 +402,14 @@ export function DecorateMode({
 				aria-label="꾸미기 도구"
 				className="absolute inset-x-2 bottom-2 flex flex-col gap-2 rounded-[20px] bg-toolbar p-2.5 text-toolbar-foreground shadow-floating"
 			>
-				<fieldset className="m-0 flex min-w-0 rounded-xl border-0 bg-background/10 p-1">
-					<legend className="sr-only">꾸미기 종류</legend>
-					{(
+				<Segmented
+					label="꾸미기 종류"
+					value={mode}
+					onValueChange={(value) => {
+						setMode(value);
+						setTipVisible(true);
+					}}
+					options={(
 						[
 							["pen", "펜"],
 							["erase", "지우개"],
@@ -412,22 +417,16 @@ export function DecorateMode({
 							["tape", "테이프"],
 							["stk", "스티커"],
 						] as const
-					).map(([value, label]) => (
-						<button
-							key={value}
-							type="button"
-							aria-pressed={mode === value}
-							onClick={() => {
-								setMode(value);
-								setTipVisible(true);
-							}}
-							className="h-9 flex-1 rounded-lg text-st9 font-semibold text-background/80 aria-pressed:bg-background aria-pressed:text-foreground"
-						>
-							{label}
-						</button>
-					))}
-				</fieldset>
-				<div className="flex min-h-11 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
+					).map(([value, label]) => ({
+						value,
+						label,
+						className:
+							"h-9 px-0 text-st9 leading-normal font-semibold text-background/80 aria-pressed:text-foreground",
+					}))}
+					className="h-auto bg-background/10 p-1"
+					indicatorClassName="bg-background shadow-none"
+				/>
+				<div className="-m-1 flex min-h-11 items-center gap-1 overflow-x-auto p-1 [scrollbar-width:none]">
 					{erasing &&
 						erasers.map((size, index) => (
 							<Swatch

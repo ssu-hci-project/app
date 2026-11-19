@@ -38,6 +38,7 @@ import { TraceSheet } from "./trace-sheet";
 type Pending =
 	| { kind: "ratio"; ratio: number }
 	| { kind: "end" }
+	| { kind: "at"; p: number; s: number }
 	| { kind: "passage"; p: number; s: number; e: number };
 type Anchor = { trace: Trace; x: number; y: number };
 const topControlsHeight = "calc(3.5rem + env(safe-area-inset-top))";
@@ -111,6 +112,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 
 	// ---- pagination ---------------------------------------------------------------------------
 	const mainRef = useRef<HTMLDivElement>(null);
+	const selectionToolsRef = useRef<HTMLDivElement>(null);
 	const pagesRef = useRef<HTMLDivElement>(null);
 	const colsRef = useRef<HTMLDivElement>(null);
 	const pageTurnLayer = useRef<HTMLDivElement>(null);
@@ -120,6 +122,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	const [page, setPage] = useState(0);
 	const [anchors, setAnchors] = useState<Anchor[]>([]);
 	const [fontsReady, setFontsReady] = useState(0);
+	const readingAt = useRef<{ ch: number | null; p: number; s: number } | null>(null);
 	const position = useRef({ page: 0, pages: 1 });
 	position.current = { page, pages };
 	useLayoutEffect(() => {
@@ -166,14 +169,22 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		const cols = colsRef.current;
 		if (!cols || !columnWidth || !chapter.data || chapter.data.ch !== ch) return;
 		const count = Math.max(1, Math.round((cols.scrollWidth + GAP) / step));
-		const want = pending.current ?? {
-			kind: "ratio" as const,
-			ratio: position.current.pages > 1 ? position.current.page / position.current.pages : 0,
-		};
+		const at = readingAt.current;
+		const want: Pending =
+			pending.current ??
+			(at?.ch === ch
+				? { kind: "at", p: at.p, s: at.s }
+				: {
+						kind: "ratio",
+						ratio: position.current.pages > 1 ? position.current.page / position.current.pages : 0,
+					});
 		let next = position.current.page;
 		if (want.kind === "end") next = count - 1;
 		else if (want.kind === "ratio") next = Math.round(want.ratio * count);
-		else {
+		else if (want.kind === "at") {
+			const x = charLeft(cols, want.p, want.s);
+			if (x !== null) next = Math.floor((x + 2) / step);
+		} else {
 			const span = findSpan(cols, want.p, want.s);
 			if (span) {
 				const left =
@@ -190,8 +201,11 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 			}
 		}
 		pending.current = null;
+		const landed = Math.min(count - 1, Math.max(0, next));
+		const first = want.kind === "at" ? want : firstVisible(cols, landed, step);
+		readingAt.current = first && { ch, p: first.p, s: first.s };
 		setPages(count);
-		setPage(Math.min(count - 1, Math.max(0, next)));
+		setPage(landed);
 		setAnchors(
 			measureAnchors(
 				cols,
@@ -211,6 +225,17 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 		filters.draw,
 		fontsReady,
 	]);
+	// Remember the first character on screen so type changes and resizes reopen at the same spot.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only page turns move the reading spot.
+	useLayoutEffect(() => {
+		const cols = colsRef.current;
+		if (!cols || !step || chapter.data?.ch !== ch) return;
+		const at = readingAt.current;
+		const kept = at?.ch === ch ? charLeft(cols, at.p, at.s) : null;
+		if (kept !== null && Math.floor((kept + 2) / step) === page) return;
+		const first = firstVisible(cols, page, step);
+		readingAt.current = first && { ch, ...first };
+	}, [page]);
 
 	const clearSelection = useCallback(() => {
 		setSelection(null);
@@ -294,7 +319,8 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	// biome-ignore lint/correctness/useExhaustiveDependencies: re-place after the page moves or the emoji row opens.
 	useLayoutEffect(() => {
 		const main = mainRef.current;
-		if (!selection || !main) return setToolbarTop(null);
+		const tools = selectionToolsRef.current;
+		if (!selection || !main || !tools) return setToolbarTop(null);
 		const box = main.getBoundingClientRect();
 		let top = Number.POSITIVE_INFINITY;
 		let bottom = Number.NEGATIVE_INFINITY;
@@ -305,7 +331,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 				bottom = Math.max(bottom, rect.bottom - box.top);
 			}
 		if (!Number.isFinite(top)) return setToolbarTop(null);
-		const height = 60 + (emojiOpen ? 60 : 0);
+		const height = tools.offsetHeight;
 		const below = bottom + 10;
 		if (below + height <= box.height - 8) setToolbarTop({ top: below, above: false });
 		else
@@ -313,7 +339,7 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 				top: Math.max(8, Math.min(box.height - height - 8, top - height - 10)),
 				above: true,
 			});
-	}, [selection, page, pages, emojiOpen, size]);
+	}, [selection, page, pages, emojiOpen, size, decorating]);
 
 	const pointer = useRef<{ x: number; y: number } | null>(null);
 	const fromNativeSelection = () => {
@@ -495,6 +521,14 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 	const book = detail.data?.book;
 	const chapterInfo = detail.data?.chapters.find((entry) => entry.ch === ch);
 	const showControls = controlsVisible && !decorating;
+	// Safari paints the status bar and the floating toolbar with the page background.
+	useEffect(() => {
+		if (!isActive) return;
+		document.body.style.backgroundColor = showControls ? "var(--card)" : "var(--paper)";
+		return () => {
+			document.body.style.backgroundColor = "";
+		};
+	}, [isActive, showControls]);
 	const menuToggleProps = {
 		type: "button",
 		"aria-label": showControls ? "읽기 메뉴 숨기기" : "읽기 메뉴 표시",
@@ -665,13 +699,13 @@ export function ReaderPage({ params }: { params: InferActivityParams<"ReaderPage
 						<LoadingSkeleton shape="article" />
 					</div>
 				)}
-				{selection && toolbarTop && !decorating && (
+				{selection && !decorating && (
 					<SelectionToolbar
-						top={toolbarTop.top}
+						placement={toolbarTop}
+						toolbarRef={selectionToolsRef}
 						underlined={!!myUnderline}
 						traceCount={selectionTraces.length}
 						emojiOpen={emojiOpen}
-						emojiAbove={toolbarTop.above}
 						onAction={onAction}
 						onEmoji={onEmoji}
 					/>
@@ -797,6 +831,47 @@ function measureAnchor(cols: HTMLElement, p: number, s: number) {
 		return { x, y: rect.top - box.top };
 	}
 	return { x, y: first.top - box.top };
+}
+
+/** Left edge of character `s` of paragraph `p`, relative to the columns box. */
+function charLeft(cols: HTMLElement, p: number, s: number) {
+	const span = findSpan(cols, p, s);
+	const node = span?.firstChild;
+	if (!span || !node?.textContent) return null;
+	const offset = Math.min(s - Number(span.dataset.s), node.textContent.length - 1);
+	const range = document.createRange();
+	range.setStart(node, offset);
+	range.setEnd(node, offset + 1);
+	const rect = range.getClientRects()[0] ?? span.getBoundingClientRect();
+	return rect.left - cols.getBoundingClientRect().left;
+}
+
+/** First character drawn on column page `page`. */
+function firstVisible(cols: HTMLElement, page: number, step: number) {
+	const left = cols.getBoundingClientRect().left;
+	const pageOf = (rect: DOMRect) => Math.floor((rect.left - left + 2) / step);
+	for (const span of cols.querySelectorAll<HTMLElement>("[data-sentence]")) {
+		const rects = [...span.getClientRects()];
+		if (!rects.some((rect) => pageOf(rect) >= page)) continue;
+		const p = Number(span.dataset.p);
+		const s = Number(span.dataset.s);
+		const node = span.firstChild;
+		const length = node?.textContent?.length ?? 0;
+		if (!rects[0] || pageOf(rects[0]) >= page || !node || !length) return { p, s };
+		const range = document.createRange();
+		let low = 0;
+		let high = length - 1;
+		while (low < high) {
+			const mid = (low + high) >> 1;
+			range.setStart(node, mid);
+			range.setEnd(node, mid + 1);
+			const rect = range.getClientRects()[0];
+			if (rect && pageOf(rect) >= page) high = mid;
+			else low = mid + 1;
+		}
+		return { p, s: s + low };
+	}
+	return null;
 }
 
 function measureAnchors(cols: HTMLElement, list: Trace[]): Anchor[] {

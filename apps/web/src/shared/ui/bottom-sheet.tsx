@@ -64,7 +64,7 @@ export function BottomSheetBody({
 		<div
 			className={cn(
 				"min-h-0 flex-1 overflow-y-auto px-6 pt-4",
-				withFooter ? "pb-4" : "pb-[calc(1.5rem+env(safe-area-inset-bottom))]",
+				withFooter ? "pb-4" : "pb-[max(1.5rem,env(safe-area-inset-bottom))]",
 				className,
 			)}
 		>
@@ -84,7 +84,7 @@ export function BottomSheetFooter({
 	return (
 		<div
 			className={cn(
-				"flex shrink-0 gap-2 bg-popover px-5 pt-[34px] pb-[calc(20px+env(safe-area-inset-bottom))] *:flex-1",
+				"flex shrink-0 gap-2 bg-popover px-5 pt-[34px] pb-[max(20px,env(safe-area-inset-bottom))] *:flex-1",
 				className,
 			)}
 		>
@@ -108,7 +108,7 @@ export function MenuSheetContent({ title, children }: { title: ReactNode; childr
 			<DrawerHeader className="text-left group-data-[swipe-axis=y]/drawer-popup:text-left">
 				<DrawerTitle className="text-st9 text-muted-foreground">{title}</DrawerTitle>
 			</DrawerHeader>
-			<div className="flex flex-col px-2 pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+			<div className="flex flex-col px-2 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
 				{children}
 			</div>
 			<DrawerClose className="sr-only">닫기</DrawerClose>

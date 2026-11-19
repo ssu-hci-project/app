@@ -9,12 +9,14 @@ export function Segmented<T extends string | number>({
 	options,
 	onValueChange,
 	className,
+	indicatorClassName,
 }: {
 	label: string;
 	value: T;
 	options: { value: T; label: ReactNode; className?: string }[];
 	onValueChange: (value: T) => void;
 	className?: string;
+	indicatorClassName?: string;
 }) {
 	const selectionId = useId();
 	return (
@@ -39,7 +41,10 @@ export function Segmented<T extends string | number>({
 					{option.value === value && (
 						<m.span
 							layoutId={selectionId}
-							className="absolute inset-0 -z-10 rounded-lg bg-card shadow-[0_1px_1px_rgb(0_0_0/9%)]"
+							className={cn(
+								"absolute inset-0 -z-10 rounded-lg bg-card shadow-[0_1px_1px_rgb(0_0_0/9%)]",
+								indicatorClassName,
+							)}
 						/>
 					)}
 					{option.label}
