@@ -231,6 +231,7 @@
 	}
 	html {
 		@apply font-sans;
+		scrollbar-color: var(--muted-foreground) transparent;
 	}
 }
 
@@ -304,4 +305,16 @@
 }
 .toolbar-in {
 	animation: toolbar-in 160ms ease-out;
+}
+
+@supports not (scrollbar-color: auto) {
+	::-webkit-scrollbar,
+	::-webkit-scrollbar-track,
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		border-radius: 9999px;
+		background: var(--muted-foreground);
+	}
 }
