@@ -26,9 +26,10 @@ function AlertDialogPortal({ container, ...props }: AlertDialogPrimitive.Portal.
 function AlertDialogOverlay({ className, ...props }: AlertDialogPrimitive.Backdrop.Props) {
 	return (
 		<AlertDialogPrimitive.Backdrop
+			forceRender
 			data-slot="alert-dialog-overlay"
 			className={cn(
-				"fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
+				"fixed inset-0 isolate z-60 bg-black/30 duration-100 supports-backdrop-filter:backdrop-blur-xs data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
 				className,
 			)}
 			{...props}
@@ -50,7 +51,7 @@ function AlertDialogContent({
 				data-slot="alert-dialog-content"
 				data-size={size}
 				className={cn(
-					"group/alert-dialog-content fixed top-1/2 left-1/2 z-50 flex max-h-[640px] w-[calc(100%-64px)] max-w-80 -translate-x-1/2 -translate-y-1/2 flex-col overflow-clip rounded-[24px] bg-popover text-popover-foreground duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"group/alert-dialog-content fixed top-1/2 left-1/2 z-60 flex max-h-[640px] w-[calc(100%-64px)] max-w-80 -translate-x-1/2 -translate-y-1/2 flex-col overflow-clip rounded-[24px] bg-popover text-popover-foreground duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					className,
 				)}
 				{...props}
