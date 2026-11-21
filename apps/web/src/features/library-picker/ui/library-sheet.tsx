@@ -48,7 +48,8 @@ export function LibrarySheet() {
 			onError: () => notify("나오지 못했어요. 다시 시도해주세요.", "critical"),
 		}),
 	);
-	const group = library && !library.personal ? library : undefined;
+	// 모임도, 내 개인 서재도 초대할 수 있다. 남의 개인 서재에서는 다시 초대하지 않는다.
+	const group = library && (!library.personal || library.isOwner) ? library : undefined;
 	const share = async () => {
 		if (!group) return;
 		const result = await shareInvite(group, group.books);
@@ -101,7 +102,9 @@ export function LibrarySheet() {
 
 					{group && (
 						<section className="flex flex-col gap-3">
-							<h3 className="text-t5 font-bold text-strong">이 모임에 초대하기</h3>
+							<h3 className="text-t5 font-bold text-strong">
+								{group.personal ? "내 서재에 초대하기" : "이 모임에 초대하기"}
+							</h3>
 							<div className="flex flex-col items-center gap-1 rounded-xl bg-muted px-4 py-5">
 								<span className="text-t7 text-sub">초대 코드</span>
 								<span className="font-mono text-st2 font-bold tracking-[0.2em] text-strong">
