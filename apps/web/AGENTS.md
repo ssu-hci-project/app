@@ -53,7 +53,7 @@ Feature-Sliced Design으로 구성한 Vite + React 19 SPA입니다. 레이어와
 - 모임 만들기는 책이 먼저입니다. `GroupNewPage`(같이 읽을 책 여러 권 고르기 → `step=name`, 첫 책 제목으로 이름을
   미리 채움) → `GroupReadyPage`(초대 코드·"같이 읽자고 초대하기")입니다. 책 상세에서 "이 책으로 모임 만들기"는 이름 단계로
   바로 열고, 모임에서는 "이 모임에서 같이 읽기"로 모임 서재에 담습니다. 모임 서재에 더 담기는 `GroupBookPage`(멤버 누구나),
-  책 고르기 목록은 `features/book-picker`입니다. 개인 서재는 초대를 보여주지 않고, 초대 링크로 참여하면 책이 한 권일 때 그
+  책 고르기 목록은 `features/book-picker`입니다. 내 개인 서재도 서재 시트에서 초대할 수 있고(참여한 사람에게는 "○○의 서재"로 보이며 그 사람은 다시 초대하지 않음), 초대 링크로 참여하면 책이 한 권일 때 그
   책 상세로, 아니면 모임 홈으로 갑니다. 초대 공유는 `@/entities/library`의 `shareInvite`를 탭 핸들러에서 바로 호출합니다.
 - `/api`는 `bun run dev` 중에는 API로 프록시되고, 프로덕션에서는 같은 Worker가
   제공하므로 API base URL을 설정할 필요가 없습니다.

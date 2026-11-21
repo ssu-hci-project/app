@@ -8,8 +8,12 @@ const bookTitles = (books: GroupBook[]) => {
 	return rest.length ? `『${first.title}』 외 ${rest.length}권` : `『${first.title}』`;
 };
 
+type InviteTarget = Pick<Library, "name" | "inviteCode"> & { personal?: boolean };
+
 /** The message sent with an invite. Names the group's books when it has some. */
-function inviteMessage(library: Pick<Library, "name" | "inviteCode">, books: GroupBook[]) {
+function inviteMessage(library: InviteTarget, books: GroupBook[]) {
+	if (library.personal)
+		return `내 서재에서 같이 읽어요! 밑줄과 메모를 함께 볼 수 있어요. 초대 코드 ${library.inviteCode}`;
 	return books.length
 		? `${bookTitles(books)} 같이 읽어요! 교환독서 모임 『${library.name}』에 초대해요. 초대 코드 ${library.inviteCode}`
 		: `교환독서 모임 『${library.name}』에 초대해요. 초대 코드 ${library.inviteCode}`;
@@ -20,7 +24,7 @@ function inviteMessage(library: Pick<Library, "name" | "inviteCode">, books: Gro
  * Call it straight from a tap: browsers drop the share sheet after an awaited request.
  */
 export async function shareInvite(
-	library: Pick<Library, "name" | "inviteCode">,
+	library: InviteTarget,
 	books: GroupBook[] = [],
 ): Promise<"shared" | "copied" | "cancelled" | "failed"> {
 	const url = inviteLink(library.inviteCode);
